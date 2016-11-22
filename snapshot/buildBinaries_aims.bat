@@ -1,0 +1,2 @@
+python buildBinaries_aims.py
+pause
