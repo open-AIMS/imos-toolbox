@@ -5,25 +5,29 @@ disp('Set paths for IMOS toolbox processing and beyond, including');
 disp('AIMS imos-datatools, AIMS easyplot, and OpenEarthTools.');
 
 %pc
-%baseDIR='C:\AIMS';
+baseDIR='C:\AIMS';
 %pc-dev
-baseDIR='D:\Projects\aims-gitlab';
-% location of clones of AODN github repositories
-AODNbaseDir='D:\Projects\github\aodn';
+%baseDIR='D:\Projects\aims-gitlab';
 %hpc
 %baseDIR='/export/share/ocean/AIMS';
 
+% location of clones of AODN github repositories, namely imos-user-code-library
+AODNbaseDir='C:\AIMS';
+
 % path to OpenEarthTools folder
-OETdir=fullfile(baseDIR,'aims-matlab','OpenEarthTools');
+OETdir=fullfile(baseDIR,'matlab','OpenEarthTools');
+
 % path to AIMS imos-datatools, needed for getAllFiles etc
 IDTdir=fullfile(baseDIR,'imos-datatools');
+
 % path to AIMS Easyplot
 EPdir=fullfile(baseDIR,'easyplot');
+
 % path to IMOS user code library
 IUCLdir=fullfile(AODNbaseDir,'imos-user-code-library','MATLAB_R2011');
 
 % path to AIMS matlab (to find aims_proc and friends)
-AMdir=fullfile(baseDIR,'aims-matlab');
+AMdir=fullfile(baseDIR,'matlab');
 
 %
 defaultPath = '';
