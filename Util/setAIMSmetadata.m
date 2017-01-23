@@ -113,9 +113,11 @@ switch metadataField
         % institution_references
     case 'institution_references'
         if identifySite(site,{'SCR'})
-            metadataStr = 'http://data.aims.gov.au, http://www.schmidtocean.org, http://www.imos.org.au/emii.html';
+            metadataStr = 'http://data.aims.gov.au, http://www.schmidtocean.org, http://www.imos.org.au/aodn.html';
+		elseif identifySite(site,{'ITF','PIL', 'KIM', 'NIN', 'GBR', 'NRS'})
+			metadataStr = 'http://www.aims.gov.au/imosmoorings/, http://www.imos.org.au/aodn.html';
         else
-            metadataStr = 'http://www.aims.gov.au/imosmoorings/, http://www.imos.org.au/emii.html';
+            metadataStr = 'http://data.aims.gov.au';
         end
         return
         
@@ -202,9 +204,7 @@ switch metadataField
             metadataStr = '+10';
         elseif identifySite(site,{'ITF','NRSDAR'})
             metadataStr = '+9.5';
-        elseif identifySite(site,{'PIL', 'KIM', 'NIN'})
-            metadataStr = '+8';
-        elseif identifySite(site,{'SCR'})
+        elseif identifySite(site,{'PIL', 'KIM', 'NIN', 'SCR', 'TAN'})
             metadataStr = '+8';
         else
             metadataStr = '+10';
