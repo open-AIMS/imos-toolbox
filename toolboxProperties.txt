@@ -18,7 +18,7 @@ toolbox.ddb.password =
 
 % toolbox execution mode. Values can be 'timeSeries' and 'profile'. 
 % If no value is set then default mode is 'timeSeries'
-toolbox.mode = timeSeries
+toolbox.mode = profile
 
 % directory which contains netcdf templates
 % (defaults to ./NetCDF/template/)
@@ -65,20 +65,20 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % default values for start dialog
-startDialog.dataDir.timeSeries = D:\Projects\Tantabiddi\data\034_20170104_Trip6631\Data\TAN100-1606
-startDialog.dataDir.profile = 
-startDialog.fieldTrip.timeSeries = 006631
-startDialog.fieldTrip.profile = 
+startDialog.dataDir.timeSeries = D:\Projects\_sbyrnes
+startDialog.dataDir.profile = D:\Projects\_sbyrnes
+startDialog.fieldTrip.timeSeries = 006435
+startDialog.fieldTrip.profile = 006435
 startDialog.lowDate.timeSeries = 0
-startDialog.lowDate.profile = 
+startDialog.lowDate.profile = 0
 startDialog.highDate.timeSeries = 796006.9802
-startDialog.highDate.profile = 
+startDialog.highDate.profile = 736722.152
 
 % default directory for manual data import
 importManager.manualDir = 
 
 % default directory for file export
-exportDialog.defaultDir = D:\Projects\Tantabiddi\ProcessedData\034_20170104_Trip6631
+exportDialog.defaultDir = D:\Projects\_sbyrnes
 
 % prompt user to select parser if an appropriate one 
 % cannot be found (if false, the data is not imported)
