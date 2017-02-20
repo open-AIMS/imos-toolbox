@@ -18,8 +18,10 @@ function metadataStr = setAIMSmetadata(site,metadataField)
 % ITF : Indonesian Through Flow (shallow) mooring array
 % PIL : Pilbara mooring array
 % KIM : Kimberley mooring array
-% NIN : Ningaloo Reef Tantabiddi moorings
+% NIN : Ningaloo Reef Tantabiddi 50m mooring (IMOS)
+% TAN : Ningaloo Reef Tantabiddi 100m  mooring (AIMS)
 % SCR : RV Falkor cruise FK150410 (AIMS 6204) at Scott Reef and surrounds
+% CAM : Camden Sound moorings CAM050/CAM100 Aug-2014 – Jul-2015
 %
 
 %%
@@ -28,6 +30,10 @@ switch metadataField
     case 'project'
         if identifySite(site,{'SCR'})
             metadataStr = 'Timor Sea Reef Connections';
+        elseif identifySite(site,{'CAM'})
+            % current AODN ingest isn't quite setup for not IMOS data yet. Being looked at.
+            %metadataStr = 'AIMS';
+            metadataStr = 'Integrated Marine Observing System (IMOS)';
         else
             metadataStr = 'Integrated Marine Observing System (IMOS)';
         end
@@ -39,6 +45,10 @@ switch metadataField
             metadataStr = 'ANMN-NRS';
         elseif identifySite(site,{'SCR'})
             metadataStr = 'AIMS';
+        elseif identifySite(site,{'CAM'})
+            % current AODN ingest isn't quite setup for not IMOS data yet. Being looked at.
+            %metadataStr = 'AIMS';
+            metadataStr = 'ANMN-QLD';
         else
             metadataStr = 'ANMN-QLD';
         end
@@ -48,7 +58,7 @@ switch metadataField
     case 'abstract'
         if identifySite(site,{'SCR'})
             metadataStr = ['About halfway between Northwestern Australia ',...
-                'and Indonesia lie some of the planet�s most remote and ',...
+                'and Indonesia lie some of the planets most remote and ',...
                 'healthy coral reefs, with biodiversity in places rivaling ',...
                 'that of the much better known Great Barrier Reef. Yet the ',...
                 'physical connections between these reefs, the factors ',...
@@ -87,6 +97,8 @@ switch metadataField
             metadataStr = 'AIMS, WAIMOS';
         elseif identifySite(site,{'NRSDAR'})
             metadataStr = 'IMOS';
+        elseif identifySite(site,{'CAM'})
+            metadataStr = 'AIMS';
         elseif identifySite(site,{'SCR'})
             metadataStr = 'AIMS, UWA';
         else
@@ -102,6 +114,8 @@ switch metadataField
             metadataStr = 'c.steinberg@aims.gov.au';
         elseif identifySite(site,{'NRSDAR'})
             metadataStr = 'c.steinberg@aims.gov.au';
+        elseif identifySite(site,{'CAM'})
+            metadataStr = 'c.steinberg@aims.gov.au';
         elseif identifySite(site,{'SCR'})
             metadataStr = 'adc@aims.gov.au, greg.ivey@uwa.edu.au';
         else
@@ -114,8 +128,10 @@ switch metadataField
     case 'institution_references'
         if identifySite(site,{'SCR'})
             metadataStr = 'http://data.aims.gov.au, http://www.schmidtocean.org, http://www.imos.org.au/aodn.html';
-		elseif identifySite(site,{'ITF','PIL', 'KIM', 'NIN', 'GBR', 'NRS'})
-			metadataStr = 'http://www.aims.gov.au/imosmoorings/, http://www.imos.org.au/aodn.html';
+        elseif identifySite(site,{'ITF','PIL', 'KIM', 'NIN', 'GBR', 'NRS'})
+            metadataStr = 'http://www.aims.gov.au/imosmoorings/, http://www.imos.org.au/aodn.html';
+        elseif identifySite(site,{'CAM'})
+            metadataStr = 'http://www.aims.gov.au/imosmoorings/, http://www.imos.org.au/aodn.html';
         else
             metadataStr = 'http://data.aims.gov.au';
         end
@@ -124,11 +140,11 @@ switch metadataField
         % acknowledgement, imosToolbox from v2.5 onwards
     case 'acknowledgement'
         defaultStr = ['Any users of IMOS data are required to clearly acknowledge the source ',...
-				'of the material derived from IMOS in the format: "Data was sourced from the ',...
-				'Integrated Marine Observing System (IMOS) - IMOS is a national collaborative ',...
-				'research infrastructure, supported by the Australian Government." If relevant, ',...
-				'also credit other organisations involved in collection of this particular datastream ',...
-				'(as listed in ''credit'' in the metadata record).'];
+            'of the material derived from IMOS in the format: "Data was sourced from the ',...
+            'Integrated Marine Observing System (IMOS) - IMOS is a national collaborative ',...
+            'research infrastructure, supported by the Australian Government." If relevant, ',...
+            'also credit other organisations involved in collection of this particular datastream ',...
+            '(as listed in ''credit'' in the metadata record).'];
         if identifySite(site,{'GBR','NRSYON'})
             metadataStr = [defaultStr,...
                 ' The support of the Department of Employment Economic ',...
@@ -143,11 +159,16 @@ switch metadataField
         elseif identifySite(site,{'NRSDAR'})
             metadataStr = [defaultStr,...
                 ' The support of the Darwin Port Corporation is also acknowledged."'];
+        elseif identifySite(site,{'CAM'})
+            metadataStr = [defaultStr,...
+                ' The collection of this data was funded by AIMS and IMOS and delivered ',...
+                'through the Queensland and Northern Australia Mooring sub-facility of the ',...
+                'Australian National Mooring Network operated by the Australian Institute of Marine Science. "'];
         elseif identifySite(site,{'SCR'})
             metadataStr = ['Any users of AIMS data are required to clearly acknowledge the source of the ',...
-				'material in this format: "Data was sourced from the ',...
+                'material in this format: "Data was sourced from the ',...
                 'Australian Institute of Marine Science (AIMS). ',...
-				'The support of the University of Western Australia (UWA), the ',...
+                'The support of the University of Western Australia (UWA), the ',...
                 'Australian Research Council and the Schmidt ',...
                 'Ocean Institute (SOI) is also acknowledged.'];
         else
@@ -204,7 +225,7 @@ switch metadataField
             metadataStr = '+10';
         elseif identifySite(site,{'ITF','NRSDAR'})
             metadataStr = '+9.5';
-        elseif identifySite(site,{'PIL', 'KIM', 'NIN', 'SCR', 'TAN'})
+        elseif identifySite(site,{'PIL', 'KIM', 'NIN', 'SCR', 'TAN', 'CAM'})
             metadataStr = '+8';
         else
             metadataStr = '+10';
