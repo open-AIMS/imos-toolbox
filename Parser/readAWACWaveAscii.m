@@ -154,6 +154,7 @@ waveData = [];
 [path, name] = fileparts(filename);
 
 summaryFile    = fullfile(path, [name '.hdr']);
+summaryFileWhr    = fullfile(path, [name '.whr']);
 headerFile     = fullfile(path, [name '.whd']);
 waveFile       = fullfile(path, [name '.wap']);
 dirFreqFile    = fullfile(path, [name '.wdr']);
@@ -240,15 +241,32 @@ try
     waveData.MeanPressure           = nan(nTime, 1);
     waveData.UnidirectivityIndex    = nan(nTime, 1);
     
-    waveData.SpectraType(iWave)            = num2str(wave(:,7));
-    waveData.SignificantHeight(iWave)      = wave(:,8);
-    waveData.PeakPeriod(iWave)             = wave(:,14);
-    waveData.MeanZeroCrossingPeriod(iWave) = wave(:,15);
-    waveData.PeakDirection(iWave)          = wave(:,19);
-    waveData.DirectionalSpread(iWave)      = wave(:,20);
-    waveData.MeanDirection(iWave)          = wave(:,21);
-    waveData.UnidirectivityIndex(iWave)    = wave(:,22);
-    waveData.MeanPressure(iWave)           = wave(:,23);
+    if exist(summaryFileWhr, 'file')
+        WHRsummaryFileID = fopen(summaryFileWhr);
+        summaryWhr = textscan(WHRsummaryFileID, '%s', 'Delimiter', '');
+        waveData.summaryWhr = summaryWhr{1};
+        fclose(WHRsummaryFileID);
+    end
+    
+    iWapStr = find(~cellfun(@isempty, strfind(waveData.summaryWhr, [name '.wap'])));
+    iCol = find(~cellfun(@isempty, strfind(waveData.summaryWhr(iWapStr+1:end), 'Spectrum type')));
+    waveData.SpectraType(iWave)            = num2str(wave(:,iCol));
+    iCol = find(~cellfun(@isempty, strfind(waveData.summaryWhr(iWapStr+1:end), 'Significant height')));
+    waveData.SignificantHeight(iWave)      = wave(:,iCol);
+    iCol = find(~cellfun(@isempty, strfind(waveData.summaryWhr(iWapStr+1:end), 'Peak period')));
+    waveData.PeakPeriod(iWave)             = wave(:,iCol);
+    iCol = find(~cellfun(@isempty, strfind(waveData.summaryWhr(iWapStr+1:end), 'Mean zerocrossing period')));
+    waveData.MeanZeroCrossingPeriod(iWave) = wave(:,iCol);
+    iCol = find(~cellfun(@isempty, strfind(waveData.summaryWhr(iWapStr+1:end), 'Peak direction')));
+    waveData.PeakDirection(iWave)          = wave(:,iCol);
+    iCol = find(~cellfun(@isempty, strfind(waveData.summaryWhr(iWapStr+1:end), 'Directional spread')));
+    waveData.DirectionalSpread(iWave)      = wave(:,iCol);
+    iCol = find(~cellfun(@isempty, strfind(waveData.summaryWhr(iWapStr+1:end), 'Mean direction')));
+    waveData.MeanDirection(iWave)          = wave(:,iCol);
+    iCol = find(~cellfun(@isempty, strfind(waveData.summaryWhr(iWapStr+1:end), 'Unidirectivity index')));
+    waveData.UnidirectivityIndex(iWave)    = wave(:,iCol);
+    iCol = find(~cellfun(@isempty, strfind(waveData.summaryWhr(iWapStr+1:end), 'Mean Pressure')));
+    waveData.MeanPressure(iWave)           = wave(:,iCol);
     clear wave;
     
     % let's have a look at the different frequency given in each file

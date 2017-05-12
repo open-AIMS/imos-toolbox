@@ -64,9 +64,29 @@ user     = structures.Id0;
 if isfield(structures, 'Id42')
     % this is a HR profiler velocity data
     profilerType = 'Id42';
+	if ~strfind(hardware.instrumentType,'HR')
+	warning('HR PROFILER instrumentType does not match Id42 sector type data');
+	end
 else
     % this is a plain profiler velocity data
     profilerType = 'Id33';
+	if strfind(hardware.instrumentType,'HR')
+	warning('AQUADOPP PROFILER instrumentType does not match Id33 sector type data');
+	end
+	
+end
+
+% example, power level settings
+value = bin2dec([num2str(bitget(user.TimCtrlReg,7:-1:6))]);
+switch value
+    case 0
+        user.TimCtrlReg_PowerLevel_ = 'HIGH';
+    case 1
+        user.TimCtrlReg_PowerLevel_ = 'HIGH-';
+    case 2
+        user.TimCtrlReg_PowerLevel_ = 'LOW+';
+    case 3
+        user.TimCtrlReg_PowerLevel_ = 'LOW';
 end
 
 velocityProcessed = false;
@@ -101,6 +121,21 @@ blankDist  = blankDist        * 0.0229 * cos(25 * pi / 180) - cellSize;
 distance = (blankDist:  ...
            cellSize: ...
            blankDist + (ncells-1) * cellSize)';
+
+% Would VECTOR and VECTRINO be handled by this parser?
+% https://github.com/pjrusello/Nortek-Binary-Ready-Utilities/blob/master/NortekDataStructure.py
+velocityScaling = 1;
+if any(strcmp({'HR_PROFILER' 'VECTOR' 'VECTRINO'}, hardware.instrumentType))
+    if bitget(user.Mode,5) == 1
+        velocityScaling = 0.1;
+    end
+end
+if strfind(hardware.instrumentType, 'HR_PROFILER')
+    sampleRate_ = double(512 / user.T5);
+end
+
+% Q: is VECTOR sampling rate calculated as per HR_PROFILER?
+% for Vector AvgInterval = 512/Sampling Rate
 
 % Note this is actually the distance between the ADCP's transducers and the
 % middle of each cell
@@ -163,18 +198,18 @@ pitch        = pitch        / 10.0;
 roll         = roll         / 10.0;
 pressure     = pressure     / 1000.0;
 temperature  = temperature  / 100.0;
-velocity1    = velocity1    / 1000.0;
-velocity2    = velocity2    / 1000.0;
-velocity3    = velocity3    / 1000.0;
+velocity1    = velocity1 * velocityScaling / 1000.0;
+velocity2    = velocity2 * velocityScaling / 1000.0;
+velocity3    = velocity3 * velocityScaling / 1000.0;
 
 if velocityProcessed
     % velocity has been processed
     % velocities  / 1000.0 (mm/s     -> m/s) assuming earth coordinates
     % 20*log10(sig2noise)  (counts   -> dB)
     % direction   / 100.0  (0.01 deg  -> deg)
-    velocity1     = velocity1Proc / 1000.0; % we update the velocity
-    velocity2     = velocity2Proc / 1000.0;
-    velocity3     = velocity3Proc / 1000.0;
+    velocity1     = velocity1Proc * velocityScaling / 1000.0; % we update the velocity
+    velocity2     = velocity2Proc * velocityScaling / 1000.0;
+    velocity3     = velocity3Proc * velocityScaling / 1000.0;
     sig2noise1(sig2noise1==0) = NaN;
     sig2noise2(sig2noise2==0) = NaN;
     sig2noise3(sig2noise3==0) = NaN;
@@ -190,7 +225,7 @@ if velocityProcessed
 end
 
 sample_data = struct;
-    
+
 sample_data.toolbox_input_file              = filename;
 sample_data.meta.featureType                = ''; % strictly this dataset cannot be described as timeSeriesProfile since it also includes timeSeries data like TEMP
 sample_data.meta.head                       = head;
@@ -198,7 +233,11 @@ sample_data.meta.hardware                   = hardware;
 sample_data.meta.user                       = user;
 sample_data.meta.binSize                    = cellSize;
 sample_data.meta.instrument_make            = 'Nortek';
-sample_data.meta.instrument_model           = 'Aquadopp Profiler';
+if strfind(hardware.instrumentType,'HR')
+    sample_data.meta.instrument_model           = 'HR Aquadopp Profiler';
+else
+    sample_data.meta.instrument_model           = 'Aquadopp Profiler';
+end
 sample_data.meta.instrument_serial_no       = hardware.SerialNo;
 sample_data.meta.instrument_firmware        = hardware.FWversion;
 sample_data.meta.instrument_sample_interval = median(diff(time*24*3600));
@@ -207,7 +246,7 @@ sample_data.meta.beam_angle                 = 25;   % http://www.hydro-internati
 sample_data.meta.beam_to_xyz_transform      = head.TransformationMatrix;
 
 % add dimensions with their data mapped
-adcpOrientations = bin2dec(status(:, end));
+adcpOrientations = bitget(status,1,'uint8');
 adcpOrientation = mode(adcpOrientations); % hopefully the most frequent value reflects the orientation when deployed
 height = distance;
 if adcpOrientation == 1
