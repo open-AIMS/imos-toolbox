@@ -1,7 +1,9 @@
 % filename or ODBC DSN of MS-ACCESS deployment database
 % ex. : /home/ggalibert/OceanDB.mdb or imos-ddb
 %toolbox.ddb = "C:\OceanDB\OceanDB2016.mdb"
-toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
+%toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
+toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
+%toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
 
 % or full connection details to other kind of deployment database :
 % class name of JDBC database driver
@@ -18,7 +20,7 @@ toolbox.ddb.password =
 
 % toolbox execution mode. Values can be 'timeSeries' and 'profile'. 
 % If no value is set then default mode is 'timeSeries'
-toolbox.mode = profile
+toolbox.mode = timeSeries
 
 % directory which contains netcdf templates
 % (defaults to ./NetCDF/template/)
@@ -65,20 +67,20 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % default values for start dialog
-startDialog.dataDir.timeSeries = D:\Projects\_sbyrnes
-startDialog.dataDir.profile = D:\Projects\_sbyrnes
-startDialog.fieldTrip.timeSeries = 006435
-startDialog.fieldTrip.profile = 006435
+startDialog.dataDir.timeSeries = D:\Projects\IMOS\CAM\20150725_Trip6231\Data
+startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
+startDialog.fieldTrip.timeSeries = 006231
+startDialog.fieldTrip.profile = 006690
 startDialog.lowDate.timeSeries = 0
 startDialog.lowDate.profile = 0
 startDialog.highDate.timeSeries = 796006.9802
-startDialog.highDate.profile = 736722.152
+startDialog.highDate.profile = 737060
 
 % default directory for manual data import
 importManager.manualDir = 
 
 % default directory for file export
-exportDialog.defaultDir = D:\Projects\_sbyrnes
+exportDialog.defaultDir = D:\Projects\IMOS\CAM\ProcessedData\20150725_Trip6231\v2.5.26
 
 % prompt user to select parser if an appropriate one 
 % cannot be found (if false, the data is not imported)

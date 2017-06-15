@@ -6,4 +6,3 @@
 % If a variable is not listed in this file, offset/scale values of 0.0/1.0 
 % are used.
 %
-

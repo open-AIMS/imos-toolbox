@@ -21,7 +21,8 @@ function metadataStr = setAIMSmetadata(site,metadataField)
 % NIN : Ningaloo Reef Tantabiddi 50m mooring (IMOS)
 % TAN : Ningaloo Reef Tantabiddi 100m  mooring (AIMS)
 % SCR : RV Falkor cruise FK150410 (AIMS 6204) at Scott Reef and surrounds
-% CAM : Camden Sound moorings CAM050/CAM100 Aug-2014 – Jul-2015
+% CAM : Camden Sound moorings CAM050/CAM100 Aug-2014 -- Jul-2015
+% TAN100 : Jul-2010 onwards
 %
 
 %%
@@ -30,7 +31,7 @@ switch metadataField
     case 'project'
         if identifySite(site,{'SCR'})
             metadataStr = 'Timor Sea Reef Connections';
-        elseif identifySite(site,{'CAM'})
+        elseif identifySite(site,{'CAM', 'TAN'})
             % current AODN ingest isn't quite setup for not IMOS data yet. Being looked at.
             %metadataStr = 'AIMS';
             metadataStr = 'Integrated Marine Observing System (IMOS)';
@@ -45,7 +46,7 @@ switch metadataField
             metadataStr = 'ANMN-NRS';
         elseif identifySite(site,{'SCR'})
             metadataStr = 'AIMS';
-        elseif identifySite(site,{'CAM'})
+        elseif identifySite(site,{'CAM', 'TAN'})
             % current AODN ingest isn't quite setup for not IMOS data yet. Being looked at.
             %metadataStr = 'AIMS';
             metadataStr = 'ANMN-QLD';
@@ -97,7 +98,7 @@ switch metadataField
             metadataStr = 'AIMS, WAIMOS';
         elseif identifySite(site,{'NRSDAR'})
             metadataStr = 'IMOS';
-        elseif identifySite(site,{'CAM'})
+        elseif identifySite(site,{'CAM', 'TAN'})
             metadataStr = 'AIMS';
         elseif identifySite(site,{'SCR'})
             metadataStr = 'AIMS, UWA';
@@ -114,7 +115,7 @@ switch metadataField
             metadataStr = 'c.steinberg@aims.gov.au';
         elseif identifySite(site,{'NRSDAR'})
             metadataStr = 'c.steinberg@aims.gov.au';
-        elseif identifySite(site,{'CAM'})
+        elseif identifySite(site,{'CAM', 'TAN'})
             metadataStr = 'c.steinberg@aims.gov.au';
         elseif identifySite(site,{'SCR'})
             metadataStr = 'adc@aims.gov.au, greg.ivey@uwa.edu.au';
@@ -130,7 +131,7 @@ switch metadataField
             metadataStr = 'http://data.aims.gov.au, http://www.schmidtocean.org, http://www.imos.org.au/aodn.html';
         elseif identifySite(site,{'ITF','PIL', 'KIM', 'NIN', 'GBR', 'NRS'})
             metadataStr = 'http://www.aims.gov.au/imosmoorings/, http://www.imos.org.au/aodn.html';
-        elseif identifySite(site,{'CAM'})
+        elseif identifySite(site,{'CAM', 'TAN'})
             metadataStr = 'http://www.aims.gov.au/imosmoorings/, http://www.imos.org.au/aodn.html';
         else
             metadataStr = 'http://data.aims.gov.au';
@@ -159,7 +160,7 @@ switch metadataField
         elseif identifySite(site,{'NRSDAR'})
             metadataStr = [defaultStr,...
                 ' The support of the Darwin Port Corporation is also acknowledged."'];
-        elseif identifySite(site,{'CAM'})
+        elseif identifySite(site,{'CAM', 'TAN'})
             metadataStr = [defaultStr,...
                 ' The collection of this data was funded by AIMS and IMOS and delivered ',...
                 'through the Queensland and Northern Australia Mooring sub-facility of the ',...

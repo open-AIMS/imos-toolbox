@@ -195,8 +195,8 @@ for i=1:lenMooring
     clear sample_data;
     qc_data  = autoQCManager(qc_data, true);
     
-    [~, targetFolder] = fileparts(exportDir);
-    fprintf('%s', ['Writing ' distinctMooring{i} ' to folder ' targetFolder ' : '])
+    [~, targetFolder, ext] = fileparts(exportDir);
+    fprintf('%s', ['Writing ' distinctMooring{i} ' to folder ' [targetFolder ext] ' : '])
 
     exportManager({raw_data}, {'raw'}, 'netcdf', true);
     clear raw_data; % important, otherwise memory leak leads to crash

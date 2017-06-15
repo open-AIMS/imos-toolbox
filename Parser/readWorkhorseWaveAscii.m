@@ -217,12 +217,19 @@ specType = {'D', 'P', 'S', 'V'};
 for s = 1:length(specType)
     specName = [specType{s} 'spec'];
     nSpecTime = numel(waveData.(specName).time);
-    if nSpecTime < nTimes
+    if nSpecTime ~= nTimes
+        if nSpecTime < nTimes
         % spectra time shorter than LOG9.txt wave data times
-        % typically missing the last record, but to cover all possibilities 
-        % copy data from spectra times to matched LOG9 time.
+        % typically missing the last record
         disp(['Fixing short ' specName ' time.']);
         [~, loc]=ismember(waveData.(specName).time, waveData.param.time);
+        else
+        % spectra time longer than LOG9.txt wave data times
+        disp(['Fixing long ' specName ' time.']);
+        [~, loc]=ismember(waveData.param.time, waveData.(specName).time);
+        end
+        % copy data from spectra times to matched LOG9 time.
+        
         % index locations for real numbers with tolerance
         %[~, loc]=ismember(waveData.(specName).time, waveData.param.time, 'tol',1e-4);
         oldData = waveData.(specName).data;
@@ -230,16 +237,14 @@ for s = 1:length(specType)
         waveData.(specName).time = waveData.param.time;
         waveData.(specName).data = NaN([nTimes sizeOldData(2:end)]);
         newdataLoc = repmat(loc, [1 sizeOldData(2:end)]);
+        if nSpecTime < nTimes
         waveData.(specName).data(newdataLoc) = oldData;
+        else
+        waveData.(specName).data = oldData(newdataLoc);            
+        end
         clear('oldData');
         clear('oldTime');
         clear('newdataLoc');
-    elseif nSpecTime > nTimes
-        % spectra time longer than LOG9.txt wave data times
-        % never had this happen, but for completeness warn user. If this
-        % happens then will need to decide what to do.
-        disp(['Fixing long ' specName ' time.']);
-        warning([[specType{s} 'spec'] ' time is greater than LOG9.txt time.']);
     end
 end
 
