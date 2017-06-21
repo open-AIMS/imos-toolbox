@@ -11,10 +11,10 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 
 public class CryptCodecOpener implements JackcessOpenerInterface {
 	public Database open(File fl,String pwd) throws IOException {
-		DatabaseBuilder dbd =new DatabaseBuilder(fl);
+		DatabaseBuilder dbd = new DatabaseBuilder(fl);
 		dbd.setAutoSync(true);
 		dbd.setCodecProvider(new CryptCodecProvider(pwd));
-		dbd.setReadOnly(true);
+		dbd.setReadOnly(false);
 		return dbd.open();
 
 	}
