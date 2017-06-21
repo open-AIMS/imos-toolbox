@@ -1,4 +1,4 @@
-function imosToolbox(auto, varargin)
+function outputStr = imosToolbox(auto, varargin)
 %IMOSTOOLBOX Starts the IMOS toolbox.
 %
 % This function is the entry point for the IMOS toolbox.
@@ -48,7 +48,13 @@ function imosToolbox(auto, varargin)
 % POSSIBILITY OF SUCH DAMAGE.
 %
 
+% Set current toolbox version
+toolboxVersion = ['2.5.27 - ' computer];
+
 if nargin == 0, auto = 'manual'; end
+if nargin ==1 && strcmpi(auto,'version')
+    outputStr = toolboxVersion;
+end
 
 path = '';
 if ~isdeployed
@@ -73,11 +79,7 @@ for j = 1 : length(jars)
     javaaddpath(jars{j});
 end
 
-% Set current toolbox version
-toolboxVersion = ['2.5.27 - ' computer];
-
 switch auto  
   case 'auto',    autoIMOSToolbox(toolboxVersion, varargin{:});
-  case 'version', disp(toolboxVersion);
   otherwise,      flowManager(toolboxVersion);
 end

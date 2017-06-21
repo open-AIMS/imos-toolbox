@@ -5,17 +5,17 @@ disp('Set paths for IMOS toolbox processing and beyond, including');
 disp('AIMS imos-datatools, AIMS easyplot, and OpenEarthTools.');
 
 %pc
-baseDIR='C:\AIMS';
+%baseDIR='C:\AIMS';
 %pc-dev
-%baseDIR='D:\Projects\aims-gitlab';
+baseDIR='D:\Projects\aims-gitlab';
 %hpc
 %baseDIR='/export/share/ocean/AIMS';
 
 % location of clones of AODN github repositories, namely imos-user-code-library
-AODNbaseDir='C:\AIMS';
+AODNbaseDir='D:\AIMS';
 
 % path to OpenEarthTools folder
-OETdir=fullfile(baseDIR,'matlab','OpenEarthTools');
+OETdir=fullfile(baseDIR,'aims-matlab','OpenEarthTools');
 
 % path to AIMS imos-datatools, needed for getAllFiles etc
 IDTdir=fullfile(baseDIR,'imos-datatools');
@@ -27,7 +27,7 @@ EPdir=fullfile(baseDIR,'easyplot');
 IUCLdir=fullfile(AODNbaseDir,'imos-user-code-library','MATLAB_R2011');
 
 % path to AIMS matlab (to find aims_proc and friends)
-AMdir=fullfile(baseDIR,'matlab');
+AMdir=fullfile(baseDIR,'aims-matlab');
 
 %
 defaultPath = '';
@@ -92,7 +92,7 @@ reAddPaths(EPdir,'AIMS easyplot',true);
 % aims_proc has aims_vpca etc
 reAddPaths(fullfile(AMdir,'aims_proc'),'AIMS aims_proc',true);
 % nan safe routines used by aims_vpca
-reAddPaths(fullfile(AMdir,'NaN-2.8.1'),'AIMS NaN toolbox',true);
+reAddPaths(fullfile(AMdir,'NaN-3.0'),'AIMS NaN toolbox',true);
 % IGRF
 reAddPaths(fullfile(AMdir,'igrf'),'IGRF toolbox',true);
 
