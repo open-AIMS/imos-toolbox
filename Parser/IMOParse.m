@@ -49,7 +49,8 @@ function sample_data = IMOParse( filename, mode )
 % <$IMNTU,0031,30032017,115136.803,1997,1957,0.149,179.0,29.8125*7D>
 %
 % IMO-MS8
-% Sensor Type, Serial Number, Date, Time, Counts, PAR, Tilt, Int Temp
+% NOTE: ONLY engineering/cal output MS8EN (output mode 1/cal), not MS8RW
+% Sensor Type, Serial Number, Date, Time, (ch irradiance) x 8, Tilt, Int Temp
 % PAR units: mW/cm^2
 % example
 % <$MS8EN,0026,27/03/2017,14:13:55.000,0.141,0.126,0.310,0.173,-0.019,0.048,0.030,0.063,86.8,27.625>
