@@ -20,11 +20,11 @@ function sample_data = IMOParse( filename, mode )
 %
 % Code based on SBE37SMParse.m
 %
-% Each data record starts with a Port Identifier. These Ports correspond 
+% Each data record starts with a Port Identifier. These Ports correspond
 % to the Port numbering on the bulkhead connectors, with the exception
-% of Port 0, which is reserved for the DL3’s additional internal sensor 
-% suite. Each data record contains the date (DD/MM/YYYY), time 
-% (HH:MM:SS:mil) and the external sensor’s data record encapsulated 
+% of Port 0, which is reserved for the DL3’s additional internal sensor
+% suite. Each data record contains the date (DD/MM/YYYY), time
+% (HH:MM:SS:mil) and the external sensor’s data record encapsulated
 % by ‘< >’ characters.
 %
 % The DL3 (Port 0) data format is as follows:
@@ -54,8 +54,8 @@ function sample_data = IMOParse( filename, mode )
 % example
 % <$MS8EN,0026,27/03/2017,14:13:55.000,0.141,0.126,0.310,0.173,-0.019,0.048,0.030,0.063,86.8,27.625>
 %
-% The checksum field consists of a '*' and two hex digits representing 
-% an 8 bit exclusive OR of all characters between, but not including, 
+% The checksum field consists of a '*' and two hex digits representing
+% an 8 bit exclusive OR of all characters between, but not including,
 % the '$' and '*'.
 %
 % The sensor only .log format will only contain sensor data (without <>)
@@ -246,19 +246,22 @@ if strfind(line, '$IMNTU')
     formatStr = ['$' instStr];
     sensorVariableNames = {'DATE', 'TIME', 'COUNTS_DARK', 'COUNTS_NTU', 'TURB', 'TILT', 'LED_TEMP'};
     sensorVariableUnits = {'1', '1', 'count', 'count', '1', 'degree', 'degrees_Celsius'};
+    sensorVariableComments = {'', '', '', '', '', '', ''};
     header.instrument_model = 'IMNTU';
 elseif strfind(line, '$MS8EN')
     instStr = 'MS8EN';
     formatStr = ['$' instStr];
-    sensorVariableNames = {'DATE', 'TIME', 'COUNTS_PAR', 'PAR', 'TILT', 'INTERNAL_TEMP'};
-    sensorVariableUnits = {'1', '1', 'count', 'uW cm-2', 'degree', 'degrees_Celsius'};
+    sensorVariableNames = {'DATE', 'TIME', 'CH1', 'CH2', 'CH3', 'CH4', 'CH5', 'CH6', 'CH7', 'CH8','TILT', 'INTERNAL_TEMP'};
+    sensorVariableUnits = {'1', '1', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'degree', 'degrees_Celsius'};
+    sensorVariableComments = {'', '', '', '', '', '', '' ,  '', '', '', '', ''};
     header.instrument_model = 'MS8EN';
 elseif strfind(line, 'IMO-DL3')
     instStr = 'IMO-DL3';
     formatStr = instStr;
     %Device Id, Serial Number, Vin Counts, Pressure Counts, Temp Counts, Vin (V), Depth (m), Temperature (C)
-    sensorVariableNames = {'DATE', 'TIME', 'VIN_COUNTS', 'PRES_COUNTS', 'TEMP_COUNTS', 'VIN', 'DEPTH', 'TEMP'};
+    sensorVariableNames = {'DATE', 'TIME', 'COUNTS_VIN', 'COUNTS_PRES', 'COUNTS_TEMP', 'VIN', 'DEPTH', 'TEMP'};
     sensorVariableUnits = {'1', '1', 'count', 'count', 'count', 'V', 'm', 'degrees_Celsius'};
+    sensorVariableComments = {'', '', '', '', '', '', '', ''};
     header.instrument_model = 'DL3';
 else
     error('Uknown IMO sensor');
@@ -305,29 +308,76 @@ switch instStr
         for i=3:7
             vName = char(sensorVariableNames{i});
             vUnit = char(sensorVariableUnits{i});
+            vComment = char(sensorVariableComments{i});
             data.(vName) = str2double(splitData(:,i));
-            comment.(vName) = '';
+            comment.(vName) = vComment;
             units.(vName) = vUnit;
         end
         
     case 'MS8EN'
-        for i=3:6
+        for i=3:12
             vName = char(sensorVariableNames{i});
             vUnit = char(sensorVariableUnits{i});
+            vComment = char(sensorVariableComments{i});
             data.(vName) = str2double(splitData(:,i));
-            comment.(vName) = '';
+            comment.(vName) = vComment;
             units.(vName) = vUnit;
         end
+        % derive PAR from MS8EN sampled wavelengths using method from
+        % Wojciech Klonowski @ Insitu Marine Optics
+        lambda = [425, 455, 485, 515, 555, 615, 660, 695];
+        nChannels = 8;
+        % new spacing between 400 - 700 nm.
+        newLambda = 400:1:700;
+        nNewChannels = size(newLambda,2);
+        nSamples = size(data.CH1,1);
+        avo=6.022140857e+17; % Avogadro's constant * 1e6
+        
+        % Convert MS8EN data to W/m^2/nm
+        tmpData = [data.CH1 data.CH2 data.CH3 data.CH4 data.CH5 data.CH6 data.CH7 data.CH8] / 100;
+
+        % IMO: convert to photons per second by dividing by h*c / lambda. 
+        % factor 1e-9 converts nm to m.
+        h=6.626070040e-34; %plancks constant
+        c=2.99792458e+08; %3.00e+08;
+        tmpData = tmpData ./ ((h*c) ./ (lambda*1e-9));
+        % IMO: convert to microMoles per second by dividing by 
+        % Avogadro's constant * 1e6
+        tmpData = tmpData / avo;
+        
+        % IMO: interpolate multispectral micromolespersec to high res 1nm
+        % %IDL% micromolespersec_ipol=interpol(micromolespersec,lambda,new_lambda)
+        newData=nan([nSamples, nNewChannels]);
+        for i = 1:nSamples
+            newData(i,:) = interp1(lambda, tmpData(i, :), newLambda, 'linear', 'extrap');
+        end
+        
+        % IMO: now calculate the integral of micromolespersec_ipol. I would
+        % think MATLAB has some sort of INT_TABULATED or Simpson or 
+        % Trapezoidal functions.
+        % %IDL% PAR=int_tabulated(new_lambda,micromolespersec_ipol)
+        PAR = nan([nSamples, 1]);
+        for i = 1:nSamples
+            PAR(i) = trapz(newLambda, newData(i,:));
+        end
+        
+        vName = 'PAR';
+        vUnit = 'umole m-2 s-1';
+        vComment = 'For a typical solar spectrum the MS8 derived PAR has an RMS error of 0.015%';
+        data.(vName) = PAR;
+        comment.(vName) = vComment;
+        units.(vName) = vUnit;
         
     case 'IMO-DL3'
         for i=3:8
             vName = char(sensorVariableNames{i});
             vUnit = char(sensorVariableUnits{i});
+            vComment = char(sensorVariableComments{i});
             data.(vName) = str2double(splitData(:,i));
-            comment.(vName) = '';
+            comment.(vName) = vComment;
             units.(vName) = vUnit;
         end
 end
-        
+
 end
 
