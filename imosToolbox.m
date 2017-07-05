@@ -1,4 +1,4 @@
-function outputStr = imosToolbox(auto, varargin)
+function imosToolbox(auto, varargin)
 %IMOSTOOLBOX Starts the IMOS toolbox.
 %
 % This function is the entry point for the IMOS toolbox.
@@ -48,14 +48,7 @@ function outputStr = imosToolbox(auto, varargin)
 % POSSIBILITY OF SUCH DAMAGE.
 %
 
-% Set current toolbox version
-toolboxVersion = ['2.5.27 - ' computer];
-
 if nargin == 0, auto = 'manual'; end
-if nargin == 1 && strcmpi(auto, 'version')
-    outputStr = toolboxVersion;
-    return;
-end
 
 path = '';
 if ~isdeployed
@@ -65,11 +58,8 @@ if ~isdeployed
     % path)
     searchPath = textscan(genpath(path), '%s', 'Delimiter', pathsep);
     searchPath = searchPath{1};
-    %iPathToRemove = ~cellfun(@isempty, strfind(searchPath, [filesep '.']));
-    %searchPath(iPathToRemove) = [];
-    regPatterns = ['(\.git|snapshot|' ['\' filesep '\.'] ')' ];
-    iPathToRemove = cellfun(@isempty, regexp(searchPath, regPatterns, 'match', 'once'));
-    searchPath = searchPath(iPathToRemove);
+    iPathToRemove = ~cellfun(@isempty, strfind(searchPath, [filesep '.']));
+    searchPath(iPathToRemove) = [];
     searchPath = cellfun(@(x)([x pathsep]), searchPath, 'UniformOutput', false);
     searchPath = [searchPath{:}];
     addpath(searchPath);
@@ -83,7 +73,11 @@ for j = 1 : length(jars)
     javaaddpath(jars{j});
 end
 
+% Set current toolbox version
+toolboxVersion = ['2.5.27 - ' computer];
+
 switch auto  
   case 'auto',    autoIMOSToolbox(toolboxVersion, varargin{:});
+  case 'version', disp(toolboxVersion);
   otherwise,      flowManager(toolboxVersion);
 end

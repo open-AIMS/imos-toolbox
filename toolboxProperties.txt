@@ -2,20 +2,17 @@
 % ex. : /home/ggalibert/OceanDB.mdb or imos-ddb
 %toolbox.ddb = "C:\OceanDB\OceanDB2016.mdb"
 %toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
-%toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
+toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
 %toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
-toolbox.ddb =
 
 % or full connection details to other kind of deployment database :
 % class name of JDBC database driver
 % ex. : net.ucanaccess.jdbc.UcanaccessDriver
-%toolbox.ddb.driver = net.ucanaccess.jdbc.UcanaccessDriver
-toolbox.ddb.driver =
+toolbox.ddb.driver = 
 
 % database connection string, must include user and password if required by the database
 % ex. : "jdbc:ucanaccess:///home/ggalibert/OceanDB.mdb;jackcessOpener=org.imos.ddb.CryptCodecOpener"
-%toolbox.ddb.connection = "jdbc:ucanaccess://c:/OceanDB/OceanDB2016.mdb;jackcessOpener=org.imos.ddb.CryptCodecOpenerRW;memory=false"
-toolbox.ddb.connection =
+toolbox.ddb.connection = 
 
 % user's login and password to database
 toolbox.ddb.user = 
