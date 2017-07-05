@@ -78,6 +78,7 @@ varChecked = cell(1, nmqc);
 
 for i=1:nmqc
     idVar   = getVar(sample_data.variables, mqc(i).nameVar);
+    if idVar ==0, continue; end
     dataIdx = mqc(i).iData;
     flag    = mqc(i).flag;
     comment = mqc(i).comment;

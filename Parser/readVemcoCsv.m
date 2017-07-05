@@ -50,25 +50,25 @@ narginchk(2,2);
 data = struct;
 comment = struct;
 
-columns = procHeader.columns;
-% assume date and time would always be the first and second column
-iDate=1;
-iTime=2;
-iDateTimeCol=[iDate iTime];
-iProcCol=setdiff((1:length(columns)),iDateTimeCol);
-
-% I don't know how to handle seperate date/time column in loop nicely
-% so pull out datetime and set here, and process the other columns in the
-% loop.
-data.TIME = datenum(strcat(dataLines{iDate},'T',dataLines{iTime}),'yyyy-mm-ddTHH:MM:SS');
+% Can have combined or comma separated date/time header e.g.
+% 'Date(yyyy-mm-dd),Time(hh:mm:ss),Temperature (°C)'
+% or
+% 'Date(yyyy-mm-dd) Time(hh:mm:ss),Temperature (°C)'
+if procHeader.iDate == procHeader.iTime
+    % combined date time
+    data.TIME = datenum(dataLines{procHeader.iDate},'yyyy-mm-dd HH:MM:SS');
+else
+    % comman separated date time
+    data.TIME = datenum(strcat(dataLines{procHeader.iDate},'T',dataLines{procHeader.iTime}),'yyyy-mm-ddTHH:MM:SS');
+end
 comment.TIME = 'TIME';
 
-for kk = 1:length(iProcCol)
-    iCol=iProcCol(kk);
+for kk = 1:length(procHeader.iData)
+    iCol=procHeader.iData(kk);
     
     d = dataLines{iCol};
     
-    [n, d, c] = convertData(genvarname(columns{iCol}), d);
+    [n, d, c] = convertData(genvarname(procHeader.columns{iCol}), d);
     
     if isempty(n) || isempty(d), continue; end
     
@@ -79,7 +79,6 @@ for kk = 1:length(iProcCol)
     count = 0;
     nn = n;
     while isfield(data, nn)
-        
         count = count + 1;
         nn = [n '_' num2str(count)];
     end
