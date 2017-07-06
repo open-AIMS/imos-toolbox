@@ -272,12 +272,13 @@ try
     waveData.fullSpectrum = nan(nTime, nDirFreq, nDir);
     
     % we should have nTime samples so :
-    nFreqFullSpectrum = length(pwrFreqDir(2:end,:)) / nTime;
+    nFreqFullSpectrum = round(length(pwrFreqDir(2:end,:)) / nTime);
     
     % rearrange full power spectrum matrix so dimensions
     % are ordered: time, frequency, direction
     start = 2;
     for i=1:nTime
+        if (start > size(pwrFreqDir,1)), continue; end;
         waveData.fullSpectrum(i, :, :) = pwrFreqDir(start:start+nFreqFullSpectrum-1,:);
         start = start+nFreqFullSpectrum;
     end
