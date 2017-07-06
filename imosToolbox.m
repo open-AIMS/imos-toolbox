@@ -1,4 +1,4 @@
-function outputStr = imosToolbox(auto, varargin)
+function imosToolbox(auto, varargin)
 %IMOSTOOLBOX Starts the IMOS toolbox.
 %
 % This function is the entry point for the IMOS toolbox.
@@ -49,11 +49,11 @@ function outputStr = imosToolbox(auto, varargin)
 %
 
 % Set current toolbox version
-toolboxVersion = ['2.5.27 - ' computer];
+toolboxVersion = ['2.5.28 - ' computer];
 
 if nargin == 0, auto = 'manual'; end
 if nargin == 1 && strcmpi(auto, 'version')
-    outputStr = toolboxVersion;
+    display(toolboxVersion);
     return;
 end
 

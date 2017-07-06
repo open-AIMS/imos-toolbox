@@ -107,8 +107,6 @@ if exist(pFile, 'file')
         else
             if isfield(p.(routine), param)
                 value = p.(routine).(param);
-            else
-                error([param ' is not a parameter of ' routine]);
             end
         end
     end
