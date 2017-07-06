@@ -1,4 +1,4 @@
-function flagStr = imosToolbox(auto, varargin)
+function imosToolbox(auto, varargin)
 %IMOSTOOLBOX Starts the IMOS toolbox.
 %
 % This function is the entry point for the IMOS toolbox.
@@ -49,7 +49,7 @@ function flagStr = imosToolbox(auto, varargin)
 %
 
 % Set current toolbox version
-toolboxVersion = ['2.5.27 - ' computer];
+toolboxVersion = ['2.5.28 - ' computer];
 
 if nargin == 0, auto = 'manual'; end
 if nargin == 1 && strcmp(auto, 'version')
@@ -65,8 +65,9 @@ if ~isdeployed
     % path)
     searchPath = textscan(genpath(path), '%s', 'Delimiter', pathsep);
     searchPath = searchPath{1};
-    iPathToRemove = ~cellfun(@isempty, strfind(searchPath, [filesep '.']));
-    searchPath(iPathToRemove) = [];
+    regPatterns = ['(\.git|snapshot|' ['\' filesep '\.'] ')' ];
+    iPathToRemove = cellfun(@isempty, regexp(searchPath, regPatterns, 'match', 'once'));
+    searchPath = searchPath(iPathToRemove);
     searchPath = cellfun(@(x)([x pathsep]), searchPath, 'UniformOutput', false);
     searchPath = [searchPath{:}];
     addpath(searchPath);
