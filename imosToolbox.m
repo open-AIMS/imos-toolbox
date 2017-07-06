@@ -57,6 +57,11 @@ if nargin == 1 && strcmp(auto, 'version')
     return
 end
 
+if strcmpi(auto, 'version')
+    disp(toolboxVersion);
+    return;
+end
+
 path = '';
 if ~isdeployed
     [path, ~, ~] = fileparts(which('imosToolbox.m'));
