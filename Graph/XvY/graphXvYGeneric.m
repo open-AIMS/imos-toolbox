@@ -59,7 +59,9 @@ set(ax, 'Tag', 'axis1D');
 % for global/regional range display
 mWh = findobj('Tag', 'mainWindow');
 climatologyRange = get(mWh, 'UserData');
+
 iSample = find(arrayfun(@(x) strcmp(x.dataSet, sample_data.toolbox_input_file), climatologyRange));
+
 if ~isempty(climatologyRange)
     if isfield(climatologyRange, ['rangeMin' sample_data.variables{vars(1)}.name])
         xLim = get(ax, 'XLim');
