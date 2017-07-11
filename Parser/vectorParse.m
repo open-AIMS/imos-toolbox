@@ -178,7 +178,7 @@ iBadBurst = [false; abs(dId18Time - user.MeasInterval) > 1];
 Id17Time  = [structures.Id17(:).Time]';
 dId17Time = diff(Id17Time)*(24*60*60);
 
-timeBurstStart=Id18Time+(2+1/(4*user.sampleRate))/(24*60*60);
+timeBurstStart=Id18Time+(2+1/user.sampleRate)/(24*60*60);
 
 % create time array for Id16 based on ensemble counter
 Id16Count = [structures.Id16(:).Count]';
