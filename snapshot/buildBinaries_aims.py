@@ -44,12 +44,12 @@ shutil.rmtree('%s/snapshot' % exportDir)
 #
 # build DDB interface
 #
-#print('\n--building DDB interface')
-#compiled = os.system('cd %s/Java && ant install' % exportDir)
+print('\n--building DDB interface')
+compiled = os.system('cd %s/Java && ant install' % exportDir)
 
-#if compiled is not 0:
-#  print('\n--DDB interface compilation failed - cleaning')
-#  os.system('cd %s/Java && ant clean' % exportDir)
+if compiled is not 0:
+  print('\n--DDB interface compilation failed - cleaning')
+  os.system('cd %s/Java && ant clean' % exportDir)
 
 #
 # create snapshot
