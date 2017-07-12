@@ -49,11 +49,12 @@ function imosToolbox(auto, varargin)
 %
 
 % Set current toolbox version
-toolboxVersion = ['2.5.28 - ' computer];
+toolboxVersion = ['2.5.29 - ' computer];
 
 if nargin == 0, auto = 'manual'; end
-if nargin == 1 && strcmpi(auto, 'version')
-    display(toolboxVersion);
+
+if strcmpi(auto, 'version')
+    disp(toolboxVersion);
     return;
 end
 
@@ -65,11 +66,8 @@ if ~isdeployed
     % path)
     searchPath = textscan(genpath(path), '%s', 'Delimiter', pathsep);
     searchPath = searchPath{1};
-    %iPathToRemove = ~cellfun(@isempty, strfind(searchPath, [filesep '.']));
-    %searchPath(iPathToRemove) = [];
-    regPatterns = ['(\.git|snapshot|' ['\' filesep '\.'] ')' ];
-    iPathToRemove = cellfun(@isempty, regexp(searchPath, regPatterns, 'match', 'once'));
-    searchPath = searchPath(iPathToRemove);
+    iPathToRemove = ~cellfun(@isempty, strfind(searchPath, [filesep '.']));
+    searchPath(iPathToRemove) = [];
     searchPath = cellfun(@(x)([x pathsep]), searchPath, 'UniformOutput', false);
     searchPath = [searchPath{:}];
     addpath(searchPath);

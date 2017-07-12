@@ -1,7 +1,7 @@
 % what
 S, project                      = Integrated Marine Observing System (IMOS)
 S, Conventions                  = CF-1.6,IMOS-1.4
-S, standard_name_vocabulary     = NetCDF Climate and Forecast (CF) Metadata Convention Standard Name Table 27
+S, standard_name_vocabulary     = NetCDF Climate and Forecast (CF) Metadata Convention Standard Name Table 45
 S, title                        = [ddb Site Sites Description]
 S, institution                  = [mat setAIMSmetadata('[ddb Site]','institution')]
 D, date_created                 = [mat now_utc]
@@ -23,6 +23,7 @@ S, metadata                     =
 S, sensorML                     = 
 S, instrument_serial_number     = [mat updateIfEmpty('[ddb InstrumentID Instruments SerialNumber]', sample_data.meta.instrument_serial_no)]
 N, instrument_sample_interval   = [mat sample_data.meta.instrument_sample_interval]
+N, instrument_average_interval  = [mat sample_data.meta.instrument_average_interval]
 N, instrument_beam_angle        = [mat sample_data.meta.beam_angle]
 N, instrument_burst_interval    = [mat sample_data.meta.instrument_burst_interval]
 N, instrument_burst_duration    = [mat sample_data.meta.instrument_burst_duration]
