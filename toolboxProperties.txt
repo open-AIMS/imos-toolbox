@@ -1,9 +1,9 @@
 % filename or ODBC DSN of MS-ACCESS deployment database
 % ex. : /home/ggalibert/OceanDB.mdb or imos-ddb
-%toolbox.ddb = "C:\OceanDB\OceanDB2016.mdb"
+toolbox.ddb = "C:\OceanDB\OceanDB2016.mdb"
 %toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
 %toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
-toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
+%toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
 %toolbox.ddb =
 
 % or full connection details to other kind of deployment database :
@@ -70,15 +70,9 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % default values for start dialog
-<<<<<<< Updated upstream
-startDialog.dataDir.timeSeries = /export/ocean/sspagnol/Projects/_darwin/Projects/2828/FieldData/SimonS/TPOD1-1704
+startDialog.dataDir.timeSeries = C:\Projects\20170614_ITF15Trip6759\Data\ITFJBG-1702
 startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
-startDialog.fieldTrip.timeSeries = 006754
-=======
-startDialog.dataDir.timeSeries = /export/ocean/sspagnol/Projects/_darwin/Projects/2828/FieldData/SimonS/TPOD1-1704
-startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
-startDialog.fieldTrip.timeSeries = 006754
->>>>>>> Stashed changes
+startDialog.fieldTrip.timeSeries = 006759
 startDialog.fieldTrip.profile = 006690
 startDialog.lowDate.timeSeries = 0
 startDialog.lowDate.profile = 0
@@ -89,11 +83,7 @@ startDialog.highDate.profile = 737060
 importManager.manualDir = 
 
 % default directory for file export
-<<<<<<< Updated upstream
 exportDialog.defaultDir = D:\Projects\IMOS\CAM\ProcessedData\20150725_Trip6231\v2.5.26
-=======
-exportDialog.defaultDir = /export/ocean/sspagnol/Projects/_darwin/Projects/2828/FieldData/SimonS/ProcessedData
->>>>>>> Stashed changes
 
 % prompt user to select parser if an appropriate one 
 % cannot be found (if false, the data is not imported)
