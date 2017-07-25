@@ -1,10 +1,10 @@
 % filename or ODBC DSN of MS-ACCESS deployment database
 % ex. : /home/ggalibert/OceanDB.mdb or imos-ddb
-%toolbox.ddb = "C:\OceanDB\OceanDB2016.mdb"
+toolbox.ddb = "C:\OceanDB\OceanDB2016.mdb"
 %toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
 %toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
 %toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
-toolbox.ddb =
+%toolbox.ddb =
 
 % or full connection details to other kind of deployment database :
 % class name of JDBC database driver
@@ -70,9 +70,9 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % default values for start dialog
-startDialog.dataDir.timeSeries = D:\Projects\IMOS\CAM\20150725_Trip6231\Data
+startDialog.dataDir.timeSeries = C:\Projects\20170614_ITF15Trip6759\Data\ITFJBG-1702
 startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
-startDialog.fieldTrip.timeSeries = 006231
+startDialog.fieldTrip.timeSeries = 006759
 startDialog.fieldTrip.profile = 006690
 startDialog.lowDate.timeSeries = 0
 startDialog.lowDate.profile = 0
