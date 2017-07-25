@@ -23,7 +23,7 @@ project = 'imos-toolbox'
 version    = 'AIMS-2.5'
 
 #url        = 'https://github.com/aodn/%s.git' % project
-url = 'file:///D:/Projects/aims-gitlab/%s/.git' % project
+url = 'file:///C:/Projects/aims-gitlab/%s/.git' % project
 exportDir  = 'export'
 
 compilerLog = '.\%s\log.txt' % exportDir
@@ -55,9 +55,9 @@ if compiled is not 0:
 # create snapshot
 #
 print('\n--building Matlab binaries')
-matlabExe='\"C:/Program Files/MATLAB/R2016b/bin\matlab.exe\"'
+matlabExe='\"C:/Program Files/MATLAB/R2017a/bin\matlab.exe\"'
 matlabOpts = '-nodisplay -wait -logfile "%s"' % compilerLog
-matlabCmd = 'addpath(\'Util\'); addpath(\'ScreenCapture\'); try, imosCompile(\'%s\'); exit(); catch e, disp(e.message); end;' % version
+matlabCmd = 'addpath(\'Util\'); try, imosCompile(\'%s\'); exit(); catch e, disp(e.message); end;' % version
 #os.system('cd %s && matlab %s -r "%s"' % (exportDir, matlabOpts, matlabCmd))
 os.system('cd %s && %s %s -r "%s"' % (exportDir, matlabExe, matlabOpts, matlabCmd))
 
