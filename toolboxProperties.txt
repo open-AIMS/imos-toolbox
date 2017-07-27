@@ -70,7 +70,7 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % default values for start dialog
-startDialog.dataDir.timeSeries = C:\Projects\20170614_ITF15Trip6759\Data\ITFJBG-1702
+startDialog.dataDir.timeSeries = C:\Projects\20170614_ITF15Trip6759\Data\NRSDAR-1702-SUB
 startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
 startDialog.fieldTrip.timeSeries = 006759
 startDialog.fieldTrip.profile = 006690
@@ -83,7 +83,7 @@ startDialog.highDate.profile = 737060
 importManager.manualDir = 
 
 % default directory for file export
-exportDialog.defaultDir = D:\Projects\IMOS\CAM\ProcessedData\20150725_Trip6231\v2.5.26
+exportDialog.defaultDir = C:\Projects\test_export
 
 % prompt user to select parser if an appropriate one 
 % cannot be found (if false, the data is not imported)
