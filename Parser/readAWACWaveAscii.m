@@ -76,23 +76,6 @@ function waveData = readAWACWaveAscii( filename )
 %     30   Current direction (wave cell)    (degrees)
 %     31   Error Code
 %
-% OR%
-%      1   Month                            (1-12)
-%      2   Day                              (1-31)
-%      3   Year
-%      4   Hour                             (0-23)
-%      5   Minute                           (0-59)
-%      6   Second                           (0-59)
-%      7   Significant height (Hs)          (m)
-%      8   Mean zerocrossing period (Tm02)  (s)
-%      9   Peak period (Tp)                 (s)
-%     10   Peak direction (DirTp)           (deg)
-%     11   Directional spread (Spr1)        (deg)
-%     12   Mean direction (Mdir)            (deg)
-%     13   Mean Pressure                    (m)
-%     14   Unidirectivity index
-%     15   Error Code
-%
 % Assumed file layout for power spectra data file (.was):
 %
 %       Frequency Vector                 (Hz)
@@ -274,8 +257,8 @@ try
         waveData.PeakDirection(iWave)          = wave(:,10);
         waveData.DirectionalSpread(iWave)      = wave(:,11);
         waveData.MeanDirection(iWave)          = wave(:,12);
-        waveData.UnidirectivityIndex(iWave)    = wave(:,14);
         waveData.MeanPressure(iWave)           = wave(:,13);
+        waveData.UnidirectivityIndex(iWave)    = wave(:,14);
     end
     clear wave;
     
