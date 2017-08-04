@@ -240,15 +240,26 @@ try
     waveData.MeanPressure           = nan(nTime, 1);
     waveData.UnidirectivityIndex    = nan(nTime, 1);
     
-    waveData.SpectraType(iWave)            = wave(:,7);
-    waveData.SignificantHeight(iWave)      = wave(:,8);
-    waveData.PeakPeriod(iWave)             = wave(:,14);
-    waveData.MeanZeroCrossingPeriod(iWave) = wave(:,15);
-    waveData.PeakDirection(iWave)          = wave(:,19);
-    waveData.DirectionalSpread(iWave)      = wave(:,20);
-    waveData.MeanDirection(iWave)          = wave(:,21);
-    waveData.UnidirectivityIndex(iWave)    = wave(:,22);
-    waveData.MeanPressure(iWave)           = wave(:,23);
+    if size(wave,1) == 31
+        waveData.SpectraType(iWave)            = wave(:,7);
+        waveData.SignificantHeight(iWave)      = wave(:,8);
+        waveData.PeakPeriod(iWave)             = wave(:,14);
+        waveData.MeanZeroCrossingPeriod(iWave) = wave(:,15);
+        waveData.PeakDirection(iWave)          = wave(:,19);
+        waveData.DirectionalSpread(iWave)      = wave(:,20);
+        waveData.MeanDirection(iWave)          = wave(:,21);
+        waveData.UnidirectivityIndex(iWave)    = wave(:,22);
+        waveData.MeanPressure(iWave)           = wave(:,23);
+    else
+        waveData.SignificantHeight(iWave)      = wave(:,7);
+        waveData.PeakPeriod(iWave)             = wave(:,9);
+        waveData.MeanZeroCrossingPeriod(iWave) = wave(:,8);
+        waveData.PeakDirection(iWave)          = wave(:,10);
+        waveData.DirectionalSpread(iWave)      = wave(:,11);
+        waveData.MeanDirection(iWave)          = wave(:,12);
+        waveData.MeanPressure(iWave)           = wave(:,13);
+        waveData.UnidirectivityIndex(iWave)    = wave(:,14);
+    end
     clear wave;
     
     % let's have a look at the different frequency given in each file
