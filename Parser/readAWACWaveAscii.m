@@ -257,7 +257,7 @@ try
     waveData.MeanPressure           = nan(nTime, 1);
     waveData.UnidirectivityIndex    = nan(nTime, 1);
     
-    if size(wave,1) == 31
+    if size(wave,2) == 31
         waveData.SpectraType(iWave)            = wave(:,7);
         waveData.SignificantHeight(iWave)      = wave(:,8);
         waveData.PeakPeriod(iWave)             = wave(:,14);
@@ -274,8 +274,8 @@ try
         waveData.PeakDirection(iWave)          = wave(:,10);
         waveData.DirectionalSpread(iWave)      = wave(:,11);
         waveData.MeanDirection(iWave)          = wave(:,12);
-        waveData.UnidirectivityIndex(iWave)    = wave(:,14);
         waveData.MeanPressure(iWave)           = wave(:,13);
+        waveData.UnidirectivityIndex(iWave)    = wave(:,14);
     end
     clear wave;
     
