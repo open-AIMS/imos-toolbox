@@ -23,7 +23,7 @@ project = 'imos-toolbox'
 version    = 'AIMS-2.5'
 
 #url        = 'https://github.com/aodn/%s.git' % project
-url = 'file:///C:/Projects/aims-gitlab/%s/.git' % project
+url = 'file:///D:/Projects/aims-gitlab/%s/.git' % project
 exportDir  = 'export'
 
 compilerLog = '.\%s\log.txt' % exportDir
