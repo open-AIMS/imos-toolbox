@@ -437,10 +437,10 @@ optodeExpr   = 'OPTODE = (yes|no)';
 voltCalExpr  = 'volt (\d): offset = (\S+), slope = (\S+)';
 otherExpr    = '^\*\s*([^\s=]+)\s*=\s*([^\s=]+)\s*$';
 firmExpr     = '<FirmwareVersion>(\S+)</FirmwareVersion>';
-firmExpr2     = '^\*\s*FirmwareVersion:\s*(\S+)'; %SBE39plus
+firmExpr2    = '^\*\s*FirmwareVersion:\s*(\S+)'; %SBE39plus
 sensorId     = '<Sensor id=''(.*\S+.*)''>';
 sensorType   = '<[tT]ype>(.*\S+.*)</[tT]ype>';
-serialExpr = '^\*\s*SerialNumber:\s*(\S+)'; %SBE39plus
+serialExpr   = '^\*\s*SerialNumber:\s*(\S+)'; %SBE39plus
 
 exprs = {...
     headerExpr   headerExpr2    headerExpr3    scanExpr     ...
@@ -466,18 +466,22 @@ for k = 1:length(headerLines)
                 
                 % header
                 case 1
-                    header.instrument_model     = tkns{1}{1};
+                    if ~isfield(header, 'instrument_model')
+                        header.instrument_model = tkns{1}{1};
+                    end
                     header.instrument_firmware  = tkns{1}{2};
                     header.instrument_serial_no = tkns{1}{3};
                     
                 % header2
                 case 2
-                    header.instrument_model     = tkns{1}{1};
+                    if ~isfield(header, 'instrument_model')
+                        header.instrument_model = tkns{1}{1};
+                    end
                     header.instrument_serial_no = tkns{1}{2};
                     
                 % header3
                 case 3
-                    header.instrument_model     = strrep(tkns{1}{1},' ','');
+                    header.instrument_model     = strrep(tkns{1}{1}, ' ', '');
                     
                 % scan
                 case 4
