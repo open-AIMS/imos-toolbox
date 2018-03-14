@@ -282,8 +282,8 @@ end
 if saveToFile
     % look for difference with nominal depth in the first quarter
     % of the deployment
-    timeStart = min(min(timeVar)) + 1;
-    timeQuarter = timeStart + (max(max(timeVar)) - timeStart)/4;
+    timeStart = min(min(timeVar(timeVar~=0))) + 1;
+    timeQuarter = timeStart + (max(max(timeVar(timeVar~=0))) - timeStart)/4;
     yLim = get(hAxPress, 'YLim');
     x = [timeStart, timeQuarter, timeQuarter, timeStart, timeStart];
     y = [yLim(1),    yLim(1),     yLim(2),     yLim(2),    yLim(1)];
