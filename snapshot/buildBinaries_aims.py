@@ -20,10 +20,10 @@ lt = time.localtime()
 
 project = 'imos-toolbox'
 
-version    = 'AIMS-2.5'
+version    = 'AIMS-2.5.37'
 
 #url        = 'https://github.com/aodn/%s.git' % project
-url = 'file:///D:/Projects/aims-gitlab/%s/.git' % project
+url = 'file:///C:/Projects/aims-gitlab/%s/.git' % project
 exportDir  = 'export'
 
 compilerLog = '.\%s\log.txt' % exportDir
@@ -45,17 +45,17 @@ shutil.rmtree('%s/snapshot' % exportDir)
 # build DDB interface
 #
 print('\n--building DDB interface')
-compiled = os.system('cd %s/Java && ant install' % exportDir)
+compiled = os.system('cd %s/Java && C:/opt/apache-ant-1.10.2/bin/ant.bat install' % exportDir)
 
 if compiled is not 0:
   print('\n--DDB interface compilation failed - cleaning')
-  os.system('cd %s/Java && ant clean' % exportDir)
+  os.system('cd %s/Java && C:/opt/apache-ant-1.10.2/bin/ant.bat clean' % exportDir)
 
 #
 # create snapshot
 #
 print('\n--building Matlab binaries')
-matlabExe='\"C:/Program Files/MATLAB/R2016b/bin\matlab.exe\"'
+matlabExe='\"C:/Program Files/MATLAB/R2017b/bin\matlab.exe\"'
 matlabOpts = '-nodisplay -wait -logfile "%s"' % compilerLog
 matlabCmd = 'addpath(\'Util\'); try, imosCompile(\'%s\'); exit(); catch e, disp(e.message); end;' % version
 #os.system('cd %s && matlab %s -r "%s"' % (exportDir, matlabOpts, matlabCmd))
