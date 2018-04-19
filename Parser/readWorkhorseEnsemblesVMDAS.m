@@ -850,6 +850,7 @@ sect.utcSeconds_s =  indexData(data, idx+6, idx+9, 'uint32', cpuEndianness)'; % 
 sect.clockOffset =  indexData(data, idx+10, idx+13, 'int32', cpuEndianness)'; % UTC time of first fix, seconds since midnight
 
 cfac=180/2^31;
+cfac2 = 180/2^15;
 % first latitude position received after the previous ADCP ping
 sect.slatitude = indexData(data, idx+14, idx+17, 'int32', cpuEndianness)' * cfac;
 % This is the first longitude position received after the previous ADCP ping.
@@ -864,11 +865,11 @@ sect.elatitude = indexData(data, idx+26, idx+29, 'int32', cpuEndianness)' * cfac
 % current ADCP ping
 sect.elatitude = indexData(data, idx+30, idx+33, 'int32', cpuEndianness)' * cfac;
 
-sect.avgSpeed = indexData(data, idx+34, idx+35, 'int16', cpuEndianness)';
-sect.avgTrackTrue = indexData(data, idx+36, idx+37, 'int16', cpuEndianness)' * cfac;
-sect.avgTrackMagnetic = indexData(data, idx+38, idx+39, 'int16', cpuEndianness)' * cfac;
-sect.speedMadeGood = indexData(data, idx+40, idx+41, 'int16', cpuEndianness)';
-sect.directionMadeGood = indexData(data, idx+42, idx+43, 'int16', cpuEndianness)' * cfac;
+sect.avgSpeed = indexData(data, idx+34, idx+35, 'int16', cpuEndianness)'; % mm/sec
+sect.avgTrackTrue = indexData(data, idx+36, idx+37, 'int16', cpuEndianness)' * cfac2;
+sect.avgTrackMagnetic = indexData(data, idx+38, idx+39, 'int16', cpuEndianness)' * cfac2;
+sect.speedMadeGood = indexData(data, idx+40, idx+41, 'int16', cpuEndianness)'; % mm/sec
+sect.directionMadeGood = indexData(data, idx+42, idx+43, 'int16', cpuEndianness)' * cfac2;
 
 % bytes 45:46 (idx+44:idx+45) reserved for TRDI use.
 
