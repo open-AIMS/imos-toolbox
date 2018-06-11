@@ -207,6 +207,10 @@ function sample_data = netcdfParse( filename, mode )
       sample_data.meta.instrument_serial_no = sample_data.instrument_serial_no;
   end
   
+  if isfield(sample_data, 'instrument_serial_number')
+      sample_data.meta.instrument_serial_no = sample_data.instrument_serial_number;
+  end
+  
   if isfield(sample_data, 'instrument_beam_angle')
       sample_data.meta.beam_angle = sample_data.instrument_beam_angle;
   end
