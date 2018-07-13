@@ -20,7 +20,7 @@ lt = time.localtime()
 
 project = 'imos-toolbox'
 
-version    = 'AIMS-2.5'
+version    = 'AIMS-2.5.39'
 
 #url        = 'https://github.com/aodn/%s.git' % project
 url = 'file:///D:/Projects/aims-gitlab/%s/.git' % project
@@ -45,11 +45,11 @@ shutil.rmtree('%s/snapshot' % exportDir)
 # build DDB interface
 #
 print('\n--building DDB interface')
-compiled = os.system('cd %s/Java && C:/opt/apache-ant-1.10.3/bin/ant.bat install' % exportDir)
+compiled = os.system('cd %s/Java && C:/opt/apache-ant-1.10.4/bin/ant.bat install' % exportDir)
 
 if compiled is not 0:
   print('\n--DDB interface compilation failed - cleaning')
-  os.system('cd %s/Java && C:/opt/apache-ant-1.10.3/bin/ant.bat clean' % exportDir)
+  os.system('cd %s/Java && C:/opt/apache-ant-1.10.4/bin/ant.bat clean' % exportDir)
 
 #
 # create snapshot
