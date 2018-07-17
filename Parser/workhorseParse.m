@@ -311,7 +311,8 @@ narginchk(1, 2);
   
   % add dimensions with their data mapped
   adcpOrientations = str2num(fixed.systemConfiguration(:, 1)); % str2num is actually more relevant than str2double here
-  adcpOrientation = mode(adcpOrientations); % hopefully the most frequent value reflects the orientation when deployed
+  %adcpOrientation = mode(adcpOrientations); % hopefully the most frequent value reflects the orientation when deployed
+  adcpOrientation = mode(adcpOrientations( (abs(pitch)<25) & (abs(roll)<25) ));
   height = distance;
   if adcpOrientation == 0
       % case of a downward looking ADCP -> negative values
