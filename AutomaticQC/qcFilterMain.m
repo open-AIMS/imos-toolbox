@@ -121,7 +121,15 @@ function sam = qcFilterMain(sam, filterName, auto, rawFlag, goodFlag, probGoodFl
                     
                     flagIdxI = fsam.(type{m}){k}.flags == uFlags(i);
                     canBeFlagIdx = initFlags < uFlags(i);
-                    flagIdxI = canBeFlagIdx & flagIdxI;
+                    try
+                        flagIdxI = canBeFlagIdx & flagIdxI;
+                    catch
+                        disp('Issue applying mqc for');
+                        disp(['Variable: ' sam.(type{m}){k}.name]);
+                        disp(['Flag: ' flagString]);
+                        disp(['Instrument: ' sam.meta.instrument_model]);
+                        disp(['File: ' sam.toolbox_input_file]);
+                    end
                     nFlag = sum(sum(flagIdxI));
                 
                     if nFlag == 0
