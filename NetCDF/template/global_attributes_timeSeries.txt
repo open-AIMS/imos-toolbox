@@ -41,8 +41,8 @@ N, geospatial_lat_min           = [ddb Site Sites Latitude]
 N, geospatial_lat_max           = [ddb Site Sites Latitude]
 N, geospatial_lon_min           = [ddb Site Sites Longitude]
 N, geospatial_lon_max           = [ddb Site Sites Longitude]
-N, instrument_nominal_height= [ddb InstrumentDepth]
-N, instrument_nominal_depth = [mat abs([ddb Site Sites Depth]-[ddb InstrumentDepth])]
+N, instrument_nominal_height = [mat calculateNominalHeight([ddb Site Sites Depth], [ddb InstrumentDepth], '[ddb DepthTxt]')]
+N, instrument_nominal_depth = [mat calculateNominalDepth([ddb Site Sites Depth], [ddb InstrumentDepth], '[ddb DepthTxt]')]
 N, site_nominal_depth      	= 
 N, site_depth_at_deployment = [ddb Site Sites Depth]
 
