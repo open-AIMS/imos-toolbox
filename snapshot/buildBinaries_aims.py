@@ -20,7 +20,7 @@ lt = time.localtime()
 
 project = 'imos-toolbox'
 
-version    = 'AIMS-2.5.39'
+version    = 'AIMS-2.5'
 
 #url        = 'https://github.com/aodn/%s.git' % project
 url = 'file:///D:/Projects/aims-gitlab/%s/.git' % project
