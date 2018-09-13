@@ -110,7 +110,7 @@ try
     frewind(fid);
     if strcmpi(line, 'In-situ Marine Optics')
         % most likely a .TXT format DL3 file
-        [procHeader, data, comment] = readIMOdl3(fid);
+        [procHeader, data, comment] = readIMODL3(fid);
     elseif strcmp(line(1), '$') || strfind(line, 'IMO-DL3')
         % most likely a .log format MS8/NTU/PAR file
         [procHeader, data, units, comment] = readIMOsensor(fid);
