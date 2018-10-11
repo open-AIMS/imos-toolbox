@@ -183,8 +183,8 @@ timeBurstStart=Id18Time+(2+1/user.sampleRate)/(24*60*60);
 % create time array for Id16 based on ensemble counter
 Id16Count = [structures.Id16(:).Count]';
 iBurstStart = find(Id16Count==0);
-iBurstNumber = floor(iBurstStart/40)+1;
-burstNumber = reshape(repmat(iBurstNumber, [1,40])', [], 1);
+iBurstNumber = floor(iBurstStart/samplesPerBurst_)+1;
+burstNumber = reshape(repmat(iBurstNumber, [1,samplesPerBurst_])', [], 1);
 Id16Time = arrayfun(@(x) timeBurstStart(burstNumber(x))+(Id16Count(x)/user.sampleRate)/(24*60*60), 1:numel(burstNumber));
 Id16Time = Id16Time(:);
 
