@@ -115,7 +115,9 @@ for k=1:lenVarNames
         
         if iVar > 0
             if initiateFigure
-                fileName = genIMOSFileName(sample_data{i}, 'png');
+                fileName = genIMOSFileName(sample_data{i}, '.png');
+                visible = 'on';
+                if saveToFile, visible = 'off'; end
                 visible = 'on';
                 if saveToFile, visible = 'off'; end
                 hFigCastVar = figure(...

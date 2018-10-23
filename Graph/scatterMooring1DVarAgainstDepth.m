@@ -182,7 +182,9 @@ if any(isPlottable)
         
         if isPlottable(i)
             if initiateFigure
-                fileName = genIMOSFileName(sample_data{iSort(i)}, 'png');
+                fileName = genIMOSFileName(sample_data{iSort(i)}, '.png');
+                visible = 'on';
+                if saveToFile, visible = 'off'; end
                 visible = 'on';
                 if saveToFile, visible = 'off'; end
                 hFigMooringVar = figure(...

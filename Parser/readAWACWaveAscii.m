@@ -200,16 +200,11 @@ try
         fclose(waveSummaryFileID);
     end
 
-    %header     = importdata(headerFile);
-    %wave       = importdata(waveFile);
-    %dirFreq    = importdata(dirFreqFile);
-    %pwrFreq    = importdata(pwrFreqFile);
-    %pwrFreqDir = importdata(pwrFreqDirFile);
-    header     = dlmread(headerFile);
-    wave       = dlmread(waveFile);
-    dirFreq    = dlmread(dirFreqFile);
-    pwrFreq    = dlmread(pwrFreqFile);
-    pwrFreqDir = dlmread(pwrFreqDirFile);
+    header     = importdata(headerFile);
+    wave       = importdata(waveFile);
+    dirFreq    = importdata(dirFreqFile);
+    pwrFreq    = importdata(pwrFreqFile);
+    pwrFreqDir = importdata(pwrFreqDirFile);
     
     % need to check if during waves processing has had compass/directional
     % offset applied

@@ -623,11 +623,9 @@ set(hHelpWiki, 'callBack', @openWikiPage);
             end
         end
         
-		if lenSampleData > 1
-			iParamsToGetRid = (paramsCount == 1);
-			paramsName(iParamsToGetRid) = [];
-        end
-		
+        iParamsToGetRid = (paramsCount == 1);
+        paramsName(iParamsToGetRid) = [];
+        
         % we get rid of DEPTH parameter, if necessary user should use the
         % Depth specific plot
         iDEPTH = strcmpi(paramsName, 'DEPTH');
