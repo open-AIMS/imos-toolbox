@@ -108,6 +108,9 @@ for k = 1:length(sample_data)
 
   if isempty(lat) || isempty(lon), continue; end % cancelled by user
 
+  % restrict presRel to valid range for gsw_SA_from_SP
+  presRel((presRel < -1.5) | (presRel > 12000)) = NaN;
+
   SA = gsw_SA_from_SP(psal, presRel, lon, lat);
   potTemp = gsw_pt0_from_t(SA, temp, presRel);
 
