@@ -123,9 +123,9 @@ if isfield(waveData, 'SpectraType')
         'WPTE',               1,       waveData.MeanOneTenthPeriod; ...     % Mean 1/10 Period (T10) (s). This is the mean period associated with the 1/10 largest waves (H10) in a record, where the period is calculated from the zero-crossing technique. The value is reported in seconds.
         'WMPP',               1,       waveData.MaximumPeriod; ...          % Maximum Period (Tmax) (s). This is the mean period associated with the largest wave (Hmax) in a record, where the period is calculated from the zero-crossing technique. The value is reported in seconds.
         'WPPE',               1,       waveData.PeakPeriod; ...             % Peak period (Tp) (s). This is the period of the waves corresponding to the peak frequency for the wave spectrum. The value is reported in seconds.
-        ['WPDI' magExt],      1,       waveData.PeakDirection; ...          % Peak direction (DirTp) (deg). This is the direction of the wave corresponding to the peak period. The direction is reported as “from” and is reported in degrees.
+        ['WPDI' magExt],      1,       waveData.PeakDirection; ...          % Peak direction (DirTp) (deg). This is the direction of the wave corresponding to the peak period. The direction is reported as “from�? and is reported in degrees.
         ['SSDS' magExt],      1,       waveData.DirectionalSpread; ...      % Directional spread (SprTp) (deg). The directional spread is a measure of the directional variance. The estimate is calculated for the peak frequency. The value is reported in degrees.
-        ['VDIR' magExt],      1,       waveData.MeanDirection; ...          % Mean direction (Mdir) (deg). This value is a weighted average of all the directions in the wave spectrum. It is weighted according to the energy at each frequency. The direction is reported as “from” and is reported in degrees.
+        ['VDIR' magExt],      1,       waveData.MeanDirection; ...          % Mean direction (Mdir) (deg). This value is a weighted average of all the directions in the wave spectrum. It is weighted according to the energy at each frequency. The direction is reported as “from�? and is reported in degrees.
         'TEMP',               1,       waveData.Temperature; ...
         'PRES_REL',           1,       waveData.MeanPressure; ...           % Mean Pressure (dbar).
         'VOLT',               1,       waveData.Battery; ...
@@ -146,9 +146,9 @@ else
         'WSSH',               1,       waveData.SignificantHeight; ...      % Significant height (Hm0) (m). This is the classic estimate sometimes referred to as Hs. It is calculated from the energy spectrum, Hmo = 4sqrt(sum(M0)).
         'WPMH',               1,       waveData.MeanZeroCrossingPeriod; ... % Mean zerocrossing period (Tz) (s). This is the mean period calculated from the zero-crossing technique. It is calculated as the mean of all the periods in the wave burst. The value is reported in seconds.
         'WPPE',               1,       waveData.PeakPeriod; ...             % Peak period (Tp) (s). This is the period of the waves corresponding to the peak frequency for the wave spectrum. The value is reported in seconds.
-        ['WPDI' magExt],      1,       waveData.PeakDirection; ...          % Peak direction (DirTp) (deg). This is the direction of the wave corresponding to the peak period. The direction is reported as “from” and is reported in degrees.
+        ['WPDI' magExt],      1,       waveData.PeakDirection; ...          % Peak direction (DirTp) (deg). This is the direction of the wave corresponding to the peak period. The direction is reported as “from�? and is reported in degrees.
         ['SSDS' magExt],      1,       waveData.DirectionalSpread; ...      % Directional spread (SprTp) (deg). The directional spread is a measure of the directional variance. The estimate is calculated for the peak frequency. The value is reported in degrees.
-        ['VDIR' magExt],      1,       waveData.MeanDirection; ...          % Mean direction (Mdir) (deg). This value is a weighted average of all the directions in the wave spectrum. It is weighted according to the energy at each frequency. The direction is reported as “from” and is reported in degrees.
+        ['VDIR' magExt],      1,       waveData.MeanDirection; ...          % Mean direction (Mdir) (deg). This value is a weighted average of all the directions in the wave spectrum. It is weighted according to the energy at each frequency. The direction is reported as “from�? and is reported in degrees.
         'TEMP',               1,       waveData.Temperature; ...
         'PRES_REL',           1,       waveData.MeanPressure; ...           % Mean Pressure (dbar).
         'VOLT',               1,       waveData.Battery; ...
@@ -178,8 +178,8 @@ for i=1:nVars
     sample_data{2}.variables{i}.data         = sample_data{2}.variables{i}.typeCastFunc(vars{i, 3});
 
     if any(strcmpi(vars{i, 1}, {'SSWD', 'WPDI', 'SSDS', 'VDIR', 'HEADING', 'SSWV'}))
-        sample_data.variables{i}.compass_correction_applied = magDec;
-        sample_data.variables{i}.comment = magBiasComment;
+        sample_data{2}.variables{i}.compass_correction_applied = magDec;
+        sample_data{2}.variables{i}.comment = magBiasComment;
     end
 end
 clear vars;
