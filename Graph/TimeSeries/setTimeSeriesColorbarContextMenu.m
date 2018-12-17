@@ -1,11 +1,12 @@
-function hMenu = setTimeSerieColorbarContextMenu(ax, var)
-%SETTIMESERIECOLORBARCONTEXTMENU returns a context menu for colorbar 
-% specific to variables.
+function hMenu = setTimeSeriesColorbarContextMenu(ax, var)
+%SETTIMESERIESCOLORBARCONTEXTMENU sets a colorbar uicontextmenu and returns its handle 
+% specific to an axes and a variable.
 %
 % This function is used for defining the colorbar context menus of each
 % axis 2D displayed.
 %
 % Inputs:
+%   ax          - The handle of the targeted axes.
 %   var         - The variable structure from sample_data.variables{k} if 
 %               it is the k_th variable.
 %
@@ -34,6 +35,7 @@ function hMenu = setTimeSerieColorbarContextMenu(ax, var)
 %
 narginchk(2, 2);
 
+if ~ishandle(ax),  error('ax must be a graphic object handle'); end
 if ~isstruct(var), error('var must be a struct'); end
 
 hMenu = [];
@@ -59,7 +61,7 @@ switch upper(var.name(1:4))
         hMenu = uicontextmenu;
         
         % Define callbacks for context menu items that change linestyle
-        hcb11 = 'colormap(ax, r_b)';
+        hcb11 = 'colormap(r_b)';
         hcb13 = 'colormapeditor';
         
         % Define the context menu items and install their callbacks
@@ -80,7 +82,7 @@ switch upper(var.name(1:4))
         hMenu = uicontextmenu;
         
         % Define callbacks for context menu items that change linestyle
-        hcb11 = 'colormap(ax, rkbwr)';
+        hcb11 = 'colormap(rkbwr)';
         hcb13 = 'colormapeditor';
         
         % Define the context menu items and install their callbacks
@@ -100,8 +102,8 @@ switch upper(var.name(1:4))
         hMenu = uicontextmenu;
         
         % Define callbacks for context menu items that change linestyle
-        hcb11 = 'colormap(ax, parula)';
-        hcb12 = 'colormap(ax, jet)';
+        hcb11 = 'colormap(parula)';
+        hcb12 = 'colormap(jet)';
         hcb13 = 'colormapeditor';
         
         % Define the context menu items and install their callbacks
@@ -122,8 +124,8 @@ switch upper(var.name(1:4))
         hMenu = uicontextmenu;
         
         % Define callbacks for context menu items that change linestyle
-        hcb11 = 'colormap(ax, parula)';
-        hcb12 = 'colormap(ax, jet)';
+        hcb11 = 'colormap(parula)';
+        hcb12 = 'colormap(jet)';
         hcb13 = 'colormapeditor';
         
         % Define the context menu items and install their callbacks
@@ -149,9 +151,9 @@ switch upper(var.name(1:4))
         hMenu = uicontextmenu;
         
         % Define callbacks for context menu items that change linestyle
-        hcb11 = 'load(''jet_w.mat'', ''-mat'', ''jet_w''); colormap(ax, jet_w)';
-        hcb12 = 'colormap(ax, parula)';
-        hcb13 = 'colormap(ax, jet)';
+        hcb11 = 'load(''jet_w.mat'', ''-mat'', ''jet_w''); colormap(jet_w)';
+        hcb12 = 'colormap(parula)';
+        hcb13 = 'colormap(jet)';
         hcb14 = 'colormapeditor';
         
         % Define the context menu items and install their callbacks
@@ -176,9 +178,9 @@ switch upper(var.name(1:4))
         hMenu = uicontextmenu;
         
         % Define callbacks for context menu items that change linestyle
-        hcb11 = 'colormap(ax, parula)';
-        hcb12 = 'colormap(ax, jet)';
-        hcb13 = 'colormap(ax, r_b)';
+        hcb11 = 'colormap(parula)';
+        hcb12 = 'colormap(jet)';
+        hcb13 = 'colormap(r_b)';
         hcb14 = 'colormapeditor';
         
         % Define the context menu items and install their callbacks

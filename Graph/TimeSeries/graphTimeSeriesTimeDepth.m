@@ -88,7 +88,7 @@ end
 set(ax, 'Position', posWithoutCb);
 
 % Attach the context menu to colorbar
-hMenu = setTimeSerieColorbarContextMenu(ax, var);
+hMenu = setTimeSeriesColorbarContextMenu(ax, var);
 set(cb, 'uicontextmenu', hMenu);
 
 % Let's redefine properties after pcolor to make sure grid lines appear
@@ -101,7 +101,7 @@ set(ax, 'XTick',        xTickProp.ticks, ...
         'Layer',        'top', ...
         'Tag',          'axis2D');
 
-if all(all(colormap == rkbwr))
+if all(all(colormap(ax) == rkbwr))
     set(cb, 'YLim', [0 360], 'YTick', [0 90 180 270 360]);
 end
     
