@@ -77,8 +77,17 @@ catch e
     rethrow(e);
 end
 
+%
+iEtx = strcmpi(samples{1}, 'etx');
+if any(iEtx)
+    for i=1:nColumns
+        samples{i}(iEtx) = [];
+    end
+    samplesDiag{1}(iEtx) = [];
+end
+
 % get rid of any line which non expected extra column contains data
-iExtraColumn = ~strcmpi(samplesDiag{1}, '');
+iExtraColumn = strcmpi(samplesDiag{1}, '');
 if any(iExtraColumn)
     for i=1:nColumns
         samples{i}(iExtraColumn) = [];
