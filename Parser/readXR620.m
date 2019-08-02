@@ -465,7 +465,12 @@ function header = readHeader(fid)
       switch m
           % instrument information
           case 1
-              header.model    = tkns{1}{1};
+              modelstring = matlab.lang.makeValidName(tkns{1}{1}, 'ReplacementStyle','hex');
+              % known model string unicode replacements
+              modelstring = regexprep(modelstring, '0xB3$', '3'); % subscripted 3
+              modelstring = regexprep(modelstring, '^TR0x2D', 'TR-'); % 'TR-'
+              modelstring = regexprep(modelstring, '^TDR0x2D', 'TDR-'); % 'TDR-'
+              header.model = modelstring;
           case 2
               header.firmware = tkns{1}{1};
           case 3
