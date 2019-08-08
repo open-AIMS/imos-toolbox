@@ -238,7 +238,7 @@ function sample_data = readXR620( filename, mode )
                   case {'Temp', 'temp02', 'temp12'}, name = 'TEMP';
                       
                       %Pressure (dBar)
-                  case {'Pres', 'pres20', 'pres21'}, name = 'PRES';
+                  case {'Pres', 'pres20', 'pres21', 'pres26'}, name = 'PRES';
                       
                       %Relative Pressure (dBar)
                   case {'pres08'}, name = 'PRES_REL';
@@ -351,7 +351,10 @@ function sample_data = readXR620( filename, mode )
                   case {'Temp', 'temp02', 'temp12'}, name = 'TEMP';
                       
                       %Pressure (dBar)
-                  case {'Pres', 'pres08'}, name = 'PRES';
+                  case {'Pres', 'pres20', 'pres21', 'pres26'}, name = 'PRES';
+                      
+                      %Relative Pressure (dBar)
+                  case {'pres08'}, name = 'PRES_REL';
                       
                       %Fluorometry-chlorophyl (ug/l) = (mg.m-3)
                   case 'FlC'
@@ -465,9 +468,9 @@ function header = readHeader(fid)
       switch m
           % instrument information
           case 1
-              modelstring = matlab.lang.makeValidName(tkns{1}{1}, 'ReplacementStyle','hex');
+              modelstring = matlab.lang.makeValidName(char(unicode2native(tkns{1}{1}, 'US-ASCII')), 'ReplacementStyle','hex');
               % known model string unicode replacements
-              modelstring = regexprep(modelstring, '0xB3$', '3'); % subscripted 3
+              modelstring = regexprep(modelstring, '0x1A$', '3'); % subscripted 3
               modelstring = regexprep(modelstring, '^TR0x2D', 'TR-'); % 'TR-'
               modelstring = regexprep(modelstring, '^TDR0x2D', 'TDR-'); % 'TDR-'
               header.model = modelstring;
