@@ -48,7 +48,6 @@ shutil.rmtree('%s/snapshot' % exportDir)
 # build DDB interface
 #
 print('\n--building DDB interface')
-#compiled = os.system('cd %s/Java && %s install' % exportDir % antExe)
 compiled = os.system('cd %s/Java && %s install' % (exportDir, antExe))
 
 if compiled is not 0:
