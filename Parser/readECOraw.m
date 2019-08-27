@@ -87,12 +87,13 @@ if any(iEtx)
 end
 
 % get rid of any line which non expected extra column contains data
-iExtraColumn = strcmpi(samplesDiag{1}, '');
-if any(iExtraColumn)
-    for i=1:nColumns
-        samples{i}(iExtraColumn) = [];
-    end
-end
+% SBS: this is not working correctly for all cases of ECO devices
+% iExtraColumn = ~strcmpi(samplesDiag{1}, '');
+% if any(iExtraColumn)
+%     for i=1:nColumns
+%         samples{i}(iExtraColumn) = [];
+%     end
+% end
 clear samplesDiag;
 
 % get rid of any line which expected last column doesn't contain data
