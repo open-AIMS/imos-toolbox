@@ -77,6 +77,7 @@ catch e
     rethrow(e);
 end
 
+<<<<<<< HEAD
 %
 iEtx = strcmpi(samples{1}, 'etx');
 if any(iEtx)
@@ -94,6 +95,15 @@ end
 %         samples{i}(iExtraColumn) = [];
 %     end
 % end
+=======
+% get rid of any line which non expected extra column contains data
+iExtraColumn = ~strcmpi(samplesDiag{1}, '');
+if any(iExtraColumn)
+    for i=1:nColumns
+        samples{i}(iExtraColumn) = [];
+    end
+end
+>>>>>>> 2.6
 clear samplesDiag;
 
 % get rid of any line which expected last column doesn't contain data
@@ -207,11 +217,17 @@ if nBurst > 1
     durationBurst = zeros(nBurst, 1);
     for i=1:nBurst
         timeBurst = time(iBurst(i):iBurst(i+1)-1);
+<<<<<<< HEAD
         if numel(timeBurst)>1 % deals with the case of a file with a single sample in a single burst
             sampleIntervalInBurst(i) = median(diff(timeBurst*24*3600));
             firstTimeBurst(i) = timeBurst(1);
             durationBurst(i) = (timeBurst(end) - timeBurst(1))*24*3600 + sampleIntervalInBurst(i);
         end
+=======
+        sampleIntervalInBurst(i) = median(diff(timeBurst*24*3600));
+        firstTimeBurst(i) = timeBurst(1);
+        durationBurst(i) = (timeBurst(end) - timeBurst(1))*24*3600 + sampleIntervalInBurst(i);
+>>>>>>> 2.6
     end
     
     iNaNBurst = isnan(sampleIntervalInBurst); % it is possible that only one sample is output for a burst

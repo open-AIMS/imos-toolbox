@@ -1,4 +1,4 @@
-function imosCompile(branchName)
+function imosCompile(toolboxRoot,stagingRoot);
 %IMOSCOMPILE builds standalone binaries.
 %
 % This function uses the Matlab Compiler to compile the toolbox code.
@@ -44,9 +44,17 @@ function imosCompile(branchName)
 
 % assume we are running from snapshot/export (see
 % snapshot/buildBinaries.py)
-exportRoot    = pwd;
-toolboxRoot   = [exportRoot filesep '..' filesep '..'];
-stagingRoot   = [exportRoot filesep '..' filesep 'staging'];
+if nargin < 1,
+  exportRoot    = pwd;
+  toolboxRoot   = fullpath(exportRoot,'..','..');
+  stagingRoot   = fullpath(exportRoot,'..','staging');
+elseif nargin == 1,
+  exportRoot = toolboxRoot;
+  stagingRoot = fullpath(toolboxRoot,'dist');
+else,
+  exportRoot = toolboxRoot;
+end
+
 
 if ~isempty(dir(stagingRoot)),   error([stagingRoot   ' already exists']); end
 
@@ -78,8 +86,7 @@ elseif strcmpi(myComputer, 'GLNXA64')
 end
 
 outputName = ['imosToolbox_' architecture];
-% outputName can't have hyphen etc
-branchOutputName = ['imosToolbox_' architecture '_' branchName];
+
 cflags{end+1} = ['-o ''' outputName ''''];  % specify output name
 cflags{end+1} = ['-d ''' stagingRoot '''']; % specified directory for output
 cflags{end+1} =  '-v';                      % verbose
@@ -111,12 +118,12 @@ eval(['mcc ' cflags]);
 
 % copy the compiled application over to the working project directory
 if any(strcmpi(myComputer, {'PCWIN', 'PCWIN64'}))
-    if ~copyfile(fullfile(stagingRoot, [outputName '.exe']), fullfile(toolboxRoot, [branchOutputName '.exe']))
-        error(['could not copy ' branchOutputName '.exe to working project area']);
+    if ~copyfile([stagingRoot filesep outputName '.exe'], toolboxRoot)
+        error(['could not copy ' outputName '.exe to working project area']);
     end
 elseif strcmpi(myComputer, 'GLNXA64')
-    if ~copyfile(fullfile(stagingRoot, outputName), fullfile(toolboxRoot, [branchOutputName '.bin']))
-        error(['could not copy ' branchOutputName '.bin to working project area']);
+    if ~copyfile([stagingRoot filesep outputName], [toolboxRoot filesep outputName '.bin'])
+        error(['could not copy ' outputName '.bin to working project area']);
     end
 %     if ~copyfile([stagingRoot filesep 'run_' outputName '.sh'], [toolboxRoot filesep outputName '.sh'])
 %         error(['could not copy ' linuxOutputNameRad '.sh to working project area']);
@@ -127,6 +134,5 @@ end
 if ~copyfile([exportRoot filesep 'Java' filesep 'ddb.jar'], [toolboxRoot filesep 'Java'])
     error('could not copy ddb.exe to working project area');
 end
-
 % clean up
 rmdir(stagingRoot,   's');
