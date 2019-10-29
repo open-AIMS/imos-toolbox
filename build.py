@@ -43,7 +43,7 @@ def run(x: str):
 
 def create_java_call_sig_compile(root_path: str) -> str:
     java_path = os.path.join(root_path, 'Java','')
-    return f"cd {java_path};ant install;cd {root_path}"
+    return f"cd {java_path} && ant install && cd {root_path}"
 
 
 def git_info(root_path: str) -> dict:
@@ -204,6 +204,7 @@ if __name__ == '__main__':
     java_call = create_java_call_sig_compile(root_path)
     mcc_call = create_mcc_call_sig(mcc, root_path, dist_path, mfiles, matfiles,
                                    temp_output_name)
+    
 
     print("Current repo information:")
     print(repo_info)
@@ -211,9 +212,9 @@ if __name__ == '__main__':
     java_status = run(java_call)
     if not java_status:
         raise Exception(f"{java_call} failed")
-    print(f"Calling {mcc_call}...")
     mcc_status = run(mcc_call)
     if not mcc_status:
+        print(len(mcc_call))
         raise Exception(f"{mcc_call} failed")
     print(f"Updating binary at {root_path}....")
     move(os.path.join(dist_path, temp_output_name),
