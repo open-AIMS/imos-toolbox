@@ -92,8 +92,8 @@ dataSourceID    = 127;      % hexadecimal '7F'
 
 % ensemble is indicated by header and data source IDs in the data field;
 % idx will indicate the start of a possible ensemble
-idh = data(1:end-1) == headerID;
-ids = data(2:end) == dataSourceID;
+idh = data(1:end-3) == headerID;
+ids = data(2:end-2) == dataSourceID;
 idx = find(idh & ids);
 clear idh ids;
 
