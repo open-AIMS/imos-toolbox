@@ -53,10 +53,10 @@ catch e
 end
 
 %check times
-tinfo = TimeSamplingInfo(data.TIME.values);
+tinfo = timeSamplingInfo(data.TIME.values);
 if tinfo.repeated_samples,
    data.TIME.values = fixRepeatedTimesJFE(data.TIME.values);
-   tinfo = TimeSamplingInfo(data.TIME.values);
+   tinfo = timeSamplingInfo(data.TIME.values);
    if ~tinfo.unique_sampling,
       msg = sprintf('Uncorrectable time sampling detected in %s',filename);
       warning(msg);
@@ -167,13 +167,8 @@ function data = readData(rawTextData)
               
           case 'Chl-a[ug/l]'
               data.CPHL.values = vertcat(values{:,i});
-              data.CPHL.comment = ['Artificial chlorophyll data '...
-                  'computed from bio-optical sensor raw counts measurements. The '...
-                  'fluorometre is equipped with a 470nm peak wavelength LED to irradiate and a '...
-                  'photodetector paired with an optical filter which measures everything '...
-                  'that fluoresces in the region of 650nm to 1000nm. '...
-                  'Originally expressed in ug/l, 1l = 0.001m3 was assumed.'];
-              
+              data.CPHL.comment = getCPHLcomment('unknown','470nm','650nm to 1000nm');
+                           
           case {'Turb. -M[FTU]', 'Turb.-M[FTU]'}
               data.TURBF.values = vertcat(values{:,i});
               data.TURBF.comment = ['Turbidity data '...
