@@ -284,7 +284,9 @@ function sample_data = readXR620( filename, mode )
                       
                       % Oxyguard dissolved O2 concentration (ml/l)
                   case 'dO2C', name = 'DOX';
-
+                      
+                      % PAR (uMol/m2/s)
+                  case 'par_02', name = 'PAR';
               end
               
               if ~isempty(name)
@@ -393,9 +395,13 @@ function sample_data = readXR620( filename, mode )
                       % Oxyguard dissolved O2 (%)
                   case 'D_O2', name = 'DOXS';
                       
-                      % Oxyguard dissolved O2 concentration (ml/l)
+                      % Oxyguard dissolved O2 concentration (uMol/m2/s)
                   case 'dO2C', name = 'DOX';
+                      
+                      % PAR (umol/m2/s)
+                  case 'par_02', name = 'PAR';
 
+                      
               end
               
               if ~isempty(name)
