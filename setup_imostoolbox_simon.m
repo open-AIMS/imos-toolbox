@@ -115,7 +115,7 @@ reAddPaths(EPdir,'AIMS easyplot',true);
 %reAddPaths(fullfile(AMdir,'aims_proc'),'AIMS aims_proc',true);
 % nan safe routines used by aims_vpca
 % but from R2018b all (?) stats routines nansafe
-reAddPaths(fullfile(AMdir,'NaN-3.4'),'AIMS NaN toolbox',false);
+reAddPaths(fullfile(AMdir,'NaN-3.4.5'),'AIMS NaN toolbox',false);
 % IGRF
 %reAddPaths(fullfile(AMdir,'igrf'),'IGRF toolbox',true);
 
