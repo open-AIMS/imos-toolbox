@@ -137,9 +137,9 @@ function sample_data = readWQMdat( filename, mode )
   % This array contains the column headers which must be in the input file.
   %
   required = upper({
-    'SN',       'WQM-SN'
-    'MMDDYY',   'MM/DD/YY'
-    'HHMMSS',   'HH:MM:SS'
+    'SN',     'SN',     'WQM-SN',   'WQM-SN',   'WQM-SN'
+    'MMDDYY', 'DDMMYY', 'MM/DD/YY', 'DD/MM/YY', 'YYYMMDD'
+    'HHMMSS', 'HHMMSS', 'HH:MM:SS', 'HH:MM:SS', 'HHMMSS'
   });
 
   % open file, get header and use it to generate a 
@@ -152,7 +152,7 @@ function sample_data = readWQMdat( filename, mode )
     fid = fopen(filename, 'rt');
     if fid == -1, error(['couldn''t open ' filename 'for reading']); end
 
-    [fields, format, jThere] = getFormat(fid, required, params);
+    [fields, format, timeFormat] = getFormat(fid, required, params);
 
     % read in the data
     samples = textscan(fid, format);
@@ -176,12 +176,6 @@ function sample_data = readWQMdat( filename, mode )
   
   % convert and save the time data
   time = cellstr(samples{2});
-  switch jThere
-      case 2
-          timeFormat = 'mm/dd/yy HH:MM:SS';
-      otherwise
-          timeFormat = 'mmddyy HHMMSS';
-  end
   time = datenum(time, timeFormat);
   
   % Let's find each start of bursts
@@ -279,7 +273,7 @@ function sample_data = readWQMdat( filename, mode )
 
 end
 
-function [fields, format, jThere] = getFormat(fid, required, params)
+function [fields, format, timeFmt] = getFormat(fid, required, params)
 %GETFORMAT Figures out the format pattern to give to textscan, based on the 
 % list of fields that are present in the file header (tokens contained in 
 % the first line of the file).
@@ -291,27 +285,34 @@ function [fields, format, jThere] = getFormat(fid, required, params)
 % The list of required fields are listed in the required variable which is 
 % defined in the main function above.
 %
+iThere = false([size(required,1), 1]);
 isThere = false;
+i = 0;
 % looking for the last line of the header (since 2012/12 new host WQM software introduces a header)
 while ~isThere && ~feof(fid)
     % read in header
     fields = fgetl(fid);
     if isempty(fields), continue; end
+    i = i + 1;
     fields = textscan(fields, '%s');
     fields = fields{1};
     
     % test that required fields are present
-    iThere = false(size(required, 1), 1);
-    jThere = 1;
-    for j=1:size(required, 2)
-        if sum(ismember(required(:,j), upper(fields))) > sum(iThere)
-            iThere = ismember(required(:,j), upper(fields));
-            jThere = j;
-        end
-        if all(iThere)
-            isThere = true;
-            break;
-        end
+    [Lia, Locb] = ismember(upper(required), upper(fields));
+    iThere = sum(Lia, 2) > 0;
+    isThere = sum(iThere) == 3;
+    if isThere
+        [isel, ind] = max( Locb'~=0, [], 1 );
+        timeFmt = [lower(required{2,ind(2)}) ' ' required{3,ind(3)}];
+        nChar = length(timeFmt);
+        break;
+    end
+    
+    % highly likely that if you haven't found header line in first 1000
+    % lines of a dat file it isn't there
+    if i == 1000
+       iThere = false([size(required,1), 1]);
+       break;
     end
 end
 
@@ -321,9 +322,9 @@ if ~isThere
     iThere = find(~iThere);
     for i=1:length(iThere)
         if i==1
-            requiredStr = ['"' required{iThere(i), jThere} '"'];
+            requiredStr = ['"' strjoin(unique(required(iThere(i), :)), ', or ') '"'];
         else
-            requiredStr = [requiredStr ', "' required{iThere(i), jThere} '"'];
+            requiredStr = [requiredStr ', "' strjoin(required(iThere(i), :), ', or ') '"'];
             finalPartStr = ' fields are missing from WQM file - these fields are required';
         end
     end
@@ -344,21 +345,9 @@ end
 % serial and time/date
 % try to take into account files with State variable included
 if strcmpi('State', fields{2})
-    switch jThere
-        case 2
-            nChar = 17;
-        otherwise
-            nChar = 13;
-    end
     format = [format '%s 6 %' num2str(nChar) 'c'];
     fields(2)=[];
 else
-    switch jThere
-        case 2
-            nChar = 17;
-        otherwise
-            nChar = 13;
-    end
     format = [format '%s%' num2str(nChar) 'c'];
 end
 
