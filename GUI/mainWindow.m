@@ -101,6 +101,10 @@ fig = figure(...
     'NumberTitle', 'off',...
     'Tag',         'mainWindow');
 
+%
+set(groot,'defaultFigureCreateFcn',@(fig,~)addToolbarExplorationButtons(fig))
+%set(groot,'defaultAxesCreateFcn',@(ax,~)set(ax.Toolbar,'Visible','off'))
+
 % sample data selection menu
 sampleMenu = uicontrol(...
     'Style',  'popupmenu',...
@@ -255,7 +259,9 @@ zoominb     = findobj(buttons, 'TooltipString', 'Zoom In');
 zoomoutb    = findobj(buttons, 'TooltipString', 'Zoom Out');
 panb        = findobj(buttons, 'TooltipString', 'Pan');
 datacursorb = findobj(buttons, 'TooltipString', 'Data Cursor');
-
+if isempty(datacursorb)
+    datacursorb = findobj(buttons, 'TooltipString', 'Data Tips');
+end
 buttons(buttons == tb)            = [];
 buttons(buttons == savefigb)      = [];
 if verLessThan('matlab', '9.5')
@@ -311,6 +317,17 @@ else
     img = double(img)/double(intmax(class(img)));
     img(repmat(alpha==0,[1 1 3])) = NaN;
     hPan.CData = img;
+
+            %'OnCallback', 'datacursormode(''on'')', ...
+    datacursorb = uitoggletool(tb, ...
+        'TooltipString',  'Data Tips',...
+        'HandleVisibility', 'off', ...
+        'OnCallback', @datacursorbOnCallback, ...
+        'OffCallback', 'datacursormode(''off'')');
+    [img,map,alpha] = imread(fullfile(matlab_toolbox_root(),'matlab','icons','tool_data_cursor.png'));
+    img = double(img)/double(intmax(class(img)));
+    img(repmat(alpha==0,[1 1 3])) = NaN;
+    datacursorb.CData = img;
 end
 
 %set uimenu
@@ -1182,10 +1199,18 @@ set(hHelpWiki, 'callBack', @openWikiPage);
     end
 
     function onZoomOut(source, ev)
-            z = zoom;
-            z.Enable = 'on';
-            z.Direction = 'out';
+        z = zoom;
+        z.Enable = 'on';
+        z.Direction = 'out';
     end
+
+    function datacursorbOnCallback(source, ev)
+        dcm_obj = datacursormode(source.Parent.Parent);
+        set(dcm_obj, 'Enable', 'on');
+        set(dcm_obj, 'Interpreter', 'none');
+    end
+
+
 %%
     function matlabtoolboxroot = matlab_toolbox_root()
        if exist(fullfile(matlabroot,'mcr','toolbox'))
