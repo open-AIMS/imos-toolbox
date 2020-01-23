@@ -8,3 +8,4 @@ data
 dist
 data/*
 dist/*
+setup_imostoolbox_*.m
