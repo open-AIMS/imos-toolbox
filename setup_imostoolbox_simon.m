@@ -1,5 +1,6 @@
 function setup_imostoolbox_aims(setupType, varargin)
 %%
+if ~isdeployed
 disp('Set paths for IMOS toolbox processing and beyond, including');
 disp('AIMS imos-datatools, AIMS easyplot, and OpenEarthTools.');
 
@@ -135,6 +136,9 @@ reAddPaths(fullfile(AMdir,'NaN-3.4.5'),'AIMS NaN toolbox',false);
 %    ex.throw;
 %end
 %warning on;
+
+end
+
 end
 
 %%
