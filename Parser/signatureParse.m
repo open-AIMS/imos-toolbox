@@ -621,13 +621,15 @@ for i=1:nDataset
     % we look for the second burst (less likely to be chopped) 
     % and we hope it is valid
     dt = [0; diffTimeInSec];
-    iBurst = find(dt >= Ms(2) - 1/100, 2, 'first');
-    if length(iBurst) == 2
-        sample_data{i}.meta.instrument_burst_interval = round((data.(acquisitionMode{i}).Time(iBurst(2)) - ...
-            data.(acquisitionMode{i}).Time(iBurst(1)))*24*3600 * 100)/100;
-        
-        sample_data{i}.meta.instrument_burst_duration = round((data.(acquisitionMode{i}).Time(iBurst(2)-1) - ...
-            data.(acquisitionMode{i}).Time(iBurst(1)))*24*3600 * 100)/100;
+    if length(Ms) > 1
+        iBurst = find(dt >= Ms(2) - 1/100, 2, 'first');
+        if length(iBurst) == 2
+            sample_data{i}.meta.instrument_burst_interval = round((data.(acquisitionMode{i}).Time(iBurst(2)) - ...
+                data.(acquisitionMode{i}).Time(iBurst(1)))*24*3600 * 100)/100;
+            
+            sample_data{i}.meta.instrument_burst_duration = round((data.(acquisitionMode{i}).Time(iBurst(2)-1) - ...
+                data.(acquisitionMode{i}).Time(iBurst(1)))*24*3600 * 100)/100;
+        end
     end
     
     switch sample_data{i}.meta.instrument_model
