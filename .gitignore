@@ -8,3 +8,5 @@ data
 dist
 data/*
 dist/*
+/Geomag/sample_out_IGRF12.txt
+/Geomag/sample_coords.txt
