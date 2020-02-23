@@ -1,6 +1,7 @@
 
 function setup_imostoolbox_aims(varargin)
 %%
+if ~isdeployed
 disp('Set paths for IMOS toolbox processing and beyond, including');
 disp('AIMS imos-datatools, AIMS easyplot, and OpenEarthTools.');
 
@@ -112,6 +113,9 @@ reAddPaths(fullfile(AMdir,'igrf'),'IGRF toolbox',true);
 %    ex.throw;
 %end
 %warning on;
+
+end
+
 end
 
 %%

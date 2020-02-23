@@ -70,9 +70,9 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % last selected values for start dialog
-startDialog.dataDir.timeSeries = D:\Projects\IMOS\Processed\ITF\ITFJBG\ITFJBG-1807\Data
+startDialog.dataDir.timeSeries = D:\Projects\_gbrinkman\WAVES-WHALF000
 startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
-startDialog.fieldTrip.timeSeries = 007085
+startDialog.fieldTrip.timeSeries = 007327
 startDialog.fieldTrip.profile = 006690
 startDialog.lowDate.timeSeries = 0
 startDialog.lowDate.profile = 0
@@ -83,7 +83,7 @@ startDialog.highDate.profile = 737060
 importManager.manualDir = 
 
 % last selected directory for file export
-exportDialog.defaultDir = 
+exportDialog.defaultDir = D:\Projects\_gbrinkman\processedData
 
 % prompt user to select parser if an appropriate one 
 % cannot be found (if false, the data is not imported)

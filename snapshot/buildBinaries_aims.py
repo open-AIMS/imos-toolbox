@@ -20,14 +20,14 @@ lt = time.localtime()
 
 project = 'imos-toolbox'
 
-version    = 'AIMS-2.5.42'
+version    = 'AIMS-2.6.5'
 
 #url        = 'https://github.com/aodn/%s.git' % project
 url = 'file:///D:/Projects/aims-gitlab/%s/.git' % project
 exportDir  = 'export'
 
-antExe = 'D:/opt/apache-ant-1.10.5//bin/ant.bat'
-os.environ["ANT_HOME"] = 'D:/opt/apache-ant-1.10.5'
+antExe = 'D:/opt/apache-ant-1.10.6//bin/ant.bat'
+os.environ["ANT_HOME"] = 'D:/opt/apache-ant-1.10.6'
 
 compilerLog = '.\%s\log.txt' % exportDir
 
@@ -58,7 +58,7 @@ if compiled is not 0:
 # create snapshot
 #
 print('\n--building Matlab binaries')
-matlabExe='\"C:/Program Files/MATLAB/R2017b/bin\matlab.exe\"'
+matlabExe='\"C:/Program Files/MATLAB/R2018b/bin\matlab.exe\"'
 matlabOpts = '-nodisplay -wait -logfile "%s"' % compilerLog
 matlabCmd = 'addpath(\'Util\'); try, imosCompile(\'%s\'); exit(); catch e, disp(e.message); end;' % version
 #os.system('cd %s && matlab %s -r "%s"' % (exportDir, matlabOpts, matlabCmd))

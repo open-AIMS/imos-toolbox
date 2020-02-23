@@ -8,5 +8,6 @@ data
 dist
 data/*
 dist/*
+setup_imostoolbox_*.m
 /Geomag/sample_out_IGRF12.txt
 /Geomag/sample_coords.txt
