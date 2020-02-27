@@ -3,7 +3,7 @@
 %toolbox.ddb = "C:\OceanDB\OceanDB2016.mdb"
 toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
 %toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
-toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
+%toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
 %toolbox.ddb =
 
 % or full connection details to other kind of deployment database :
@@ -59,7 +59,7 @@ preprocessManager.preprocessDefaultChain.timeSeries = depthPP salinityPP oxygenP
 preprocessManager.preprocessDefaultChain.profile = depthPP salinityPP oxygenPP
 
 % last selected set of preprocessing routines
-preprocessManager.preprocessChain.timeSeries = depthPP pressureRelPP salinityPP oxygenPP magneticDeclinationPP absiDecibelBasicPP adcpNortekVelocityEnu2BeamPP adcpBinMappingPP adcpNortekVelocityBeam2EnuPP magneticDeclinationPP velocityMagDirPP
+preprocessManager.preprocessChain.timeSeries = depthPP salinityPP oxygenPP absiDecibelBasicPP adcpNortekVelocityEnu2BeamPP adcpBinMappingPP adcpNortekVelocityBeam2EnuPP magneticDeclinationPP velocityMagDirPP
 preprocessManager.preprocessChain.profile = depthPP salinityPP oxygenPP
 
 % file status dialog formatting styles
@@ -70,9 +70,9 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % last selected values for start dialog
-startDialog.dataDir.timeSeries = D:\Projects\_gbrinkman\WAVES-WHALF000
+startDialog.dataDir.timeSeries = \\pearl\imos\Processed\QIMOS\GBROTE\GBROTE-0810\Data
 startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
-startDialog.fieldTrip.timeSeries = 007327
+startDialog.fieldTrip.timeSeries = 004845
 startDialog.fieldTrip.profile = 006690
 startDialog.lowDate.timeSeries = 0
 startDialog.lowDate.profile = 0
@@ -83,7 +83,7 @@ startDialog.highDate.profile = 737060
 importManager.manualDir = 
 
 % last selected directory for file export
-exportDialog.defaultDir = D:\Projects\_gbrinkman\processedData
+exportDialog.defaultDir = d:\
 
 % prompt user to select parser if an appropriate one 
 % cannot be found (if false, the data is not imported)

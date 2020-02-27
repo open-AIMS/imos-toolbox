@@ -155,7 +155,7 @@ disp('  Adding new paths');
 if atBeginning
     addpath(gp,'-begin');
 else
-    addpath(gp);
+    addpath(gp,'-end');
 end
 
 end
