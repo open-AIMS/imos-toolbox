@@ -170,7 +170,7 @@ end
 
 % user have specified a site name
 if ~isempty(siteName)
-    iSites = strcmp({deps.Site}, siteName);
+    iSites = strncmp({deps.Site}, siteName, length(siteName));
     deps = deps(iSites);
     sits = sits(iSites);
 end
