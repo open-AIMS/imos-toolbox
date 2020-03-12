@@ -1,4 +1,4 @@
-function autoIMOSToolbox(toolboxVersion, fieldTrip, dataDir, ppChain, qcChain, exportDir)
+function autoIMOSToolbox(toolboxVersion, fieldTrip, dataDir, ppChain, qcChain, exportDir, siteName)
 %AUTOIMOSTOOLBOX Executes the toolbox automatically.
 %
 % All inputs are optional.
@@ -51,7 +51,11 @@ function autoIMOSToolbox(toolboxVersion, fieldTrip, dataDir, ppChain, qcChain, e
 % along with this program.
 % If not, see <https://www.gnu.org/licenses/gpl-3.0.en.html>.
 %
-narginchk(1, 6);
+narginchk(1, 7);
+
+if ~exist('siteName','var')
+    siteName = '';
+end
 
 % get the toolbox execution mode.
 mode = readProperty('toolbox.mode');
@@ -82,13 +86,13 @@ end
 
 % validate and save pp chain
 if nargin > 3
-    if ischar(ppChain)
-        try
-            [~] = evalc(['ppChain = ' ppChain]);
-        catch e
-            error('ppChain must be a cell array of strings');
-        end
-    end
+%     if ischar(ppChain)
+%         try
+%             [~] = evalc(['ppChain = ' ppChain]);
+%         catch e
+%             error('ppChain must be a cell array of strings');
+%         end
+%     end
     
     if ~iscellstr(ppChain)
         error('ppChain must be a cell array of strings');
@@ -106,13 +110,13 @@ end
 
 % validate and save qc chain
 if nargin > 4
-    if ischar(qcChain)
-        try
-            [~] = evalc(['qcChain = ' qcChain]);
-        catch e
-            error('qcChain must be a cell array of strings');
-        end
-    end
+%     if ischar(qcChain)
+%         try
+%             [~] = evalc(['qcChain = ' qcChain]);
+%         catch e
+%             error('qcChain must be a cell array of strings');
+%         end
+%     end
     
     if ~iscellstr(qcChain)
         error('qcChain must be a cell array of strings');
@@ -141,6 +145,11 @@ else
     end
 end
 
+% check siteName
+if nargin > 6
+    if ~ischar(siteName),       error('siteName must be a string');    end
+end
+
 % import, pre-processing, QC and export
 % moorings by moorings for the current field trip.
 [~, sourceFolder] = fileparts(dataDir);
@@ -157,6 +166,13 @@ end
 if isempty(deps)
     fprintf('%s\n', ['Warning : ' 'No entry found in ' mode ' table.']);
     return;
+end
+
+% user have specified a site name
+if ~isempty(siteName)
+    iSites = strncmp({deps.Site}, siteName, length(siteName));
+    deps = deps(iSites);
+    sits = sits(iSites);
 end
 
 moorings = {deps.Site}';

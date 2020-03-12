@@ -584,17 +584,24 @@ function data = readData(fid, header)
       data.(cols{k}) = samples{k}; 
   end
   
+  timeOffset = datenum('00:00:00', 'HH:MM:SS');
   if length(data.Date{1}) == 8 
-      data.time = datenum(data.Date, 'yy/mm/dd') + datenum(data.Time, 'HH:MM:SS.FFF') - datenum('00:00:00', 'HH:MM:SS');
+      data.time = datenum(data.Date, 'yy/mm/dd') + datenum(data.Time, 'HH:MM:SS.FFF') - timeOffset;
   else
+      nDash = strfind(data.Date{1}, '-');
       if isempty(strfind(data.Date{1}, '-'))
-          data.time = datenum(data.Date, 'yyyy/mmm/dd') + datenum(data.Time, 'HH:MM:SS.FFF') - datenum('00:00:00', 'HH:MM:SS');
+          data.time = datenum(data.Date, 'yyyy/mmm/dd') + datenum(data.Time, 'HH:MM:SS.FFF') - timeOffset;
       else
           % Ruskin version number <= 1.12 date format 'dd-mmm-yyyy'
           % Ruskin version number 1.13 date format 'yyyy-mm-dd'
           % can either do some simple date format test or see if datenum
           % can figure it out
-          data.time = datenum(data.Date) + datenum(data.Time, 'HH:MM:SS.FFF') - datenum('00:00:00', 'HH:MM:SS');
+          if nDash(1) == 5
+              fmt = 'yyyy-mm-dd';
+          else
+              fmt = 'dd-mmm-yyyy';
+          end
+          data.time = datenum(data.Date, fmt) + datenum(data.Time, 'HH:MM:SS.FFF') - timeOffset;
       end
   end
   

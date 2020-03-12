@@ -93,7 +93,7 @@ reAddPaths(EPdir,'AIMS easyplot',true);
 % aims_proc has aims_vpca etc
 reAddPaths(fullfile(AMdir,'aims_proc'),'AIMS aims_proc',true);
 % nan safe routines used by aims_vpca
-reAddPaths(fullfile(AMdir,'NaN-2.8.1'),'AIMS NaN toolbox',true);
+reAddPaths(fullfile(AMdir,'NaN-3.4.5'),'AIMS NaN toolbox',false);
 % IGRF
 reAddPaths(fullfile(AMdir,'igrf'),'IGRF toolbox',true);
 
@@ -129,7 +129,7 @@ disp('  Adding new paths');
 if atBeginning
     addpath(gp,'-begin');
 else
-    addpath(gp);
+    addpath(gp,'-end');
 end
 
 end

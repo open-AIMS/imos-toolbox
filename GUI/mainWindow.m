@@ -308,15 +308,15 @@ else
     img(repmat(alpha==0,[1 1 3])) = NaN;
     zoomoutb.CData = img;
     
-    hPan = uitoggletool(tb, ...
+    panb = uitoggletool(tb, ...
         'TooltipString',  'Pan (Ctrl+a)',...
         'HandleVisibility', 'off', ...
-        'OnCallback', 'pan(''on'')', ...
+        'OnCallback', @onPan, ...
         'OffCallback', 'pan(''off'')');
     [img,map,alpha] = imread(fullfile(matlab_toolbox_root(),'matlab','icons','tool_hand.png'));
     img = double(img)/double(intmax(class(img)));
     img(repmat(alpha==0,[1 1 3])) = NaN;
-    hPan.CData = img;
+    panb.CData = img;
 
             %'OnCallback', 'datacursormode(''on'')', ...
     datacursorb = uitoggletool(tb, ...
@@ -1192,19 +1192,35 @@ set(hHelpWiki, 'callBack', @openWikiPage);
     end
 
 %%
+    function onPan(source, ev)
+        zoomoutb.State = 'off';
+        zoominb.State = 'off';
+        datacursorb.State = 'off';
+        pan(fig, 'on');
+    end
+
     function onZoomIn(source, ev)
-            z = zoom;
-            z.Enable = 'on';
-            z.Direction = 'in';
+        zoomoutb.State = 'off';
+        panb.State = 'off';
+        datacursorb.State = 'off';
+        z = zoom;
+        z.Enable = 'on';
+        z.Direction = 'in';
     end
 
     function onZoomOut(source, ev)
+        zoominb.State = 'off';
+        panb.State = 'off';
+        datacursorb.State = 'off';
         z = zoom;
         z.Enable = 'on';
         z.Direction = 'out';
     end
 
     function datacursorbOnCallback(source, ev)
+        zoominb.State = 'off';
+        zoomoutb.State = 'off';
+        panb.State = 'off';
         dcm_obj = datacursormode(source.Parent.Parent);
         set(dcm_obj, 'Enable', 'on');
         set(dcm_obj, 'Interpreter', 'none');
