@@ -168,15 +168,13 @@ if isempty(deps)
     return;
 end
 
-% user have specified a site name
+moorings = {deps.Site}';
+% user has specified a site name
+iSites = true(size(deps));
 if ~isempty(siteName)
     iSites = strncmp({deps.Site}, siteName, length(siteName));
-    deps = deps(iSites);
-    sits = sits(iSites);
 end
-
-moorings = {deps.Site}';
-distinctMooring = unique(moorings);
+distinctMooring = unique({deps(iSites).Site}');    
 lenMooring = length(distinctMooring);
 
 for i=1:lenMooring
