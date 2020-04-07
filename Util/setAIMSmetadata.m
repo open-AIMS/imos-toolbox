@@ -220,9 +220,9 @@ switch metadataField
     case 'local_time_zone'
         if identifySite(site,{'GBR','NRSYON'})
             metadataStr = '+10';
-        elseif identifySite(site,{'ITF','NRSDAR'})
+        elseif identifySite(site,{'ITF','NRSDAR','NWSLYN'})
             metadataStr = '+9.5';
-        elseif identifySite(site,{'PIL', 'KIM', 'NIN', 'SCR', 'TAN', 'CAM'})
+        elseif identifySite(site,{'PIL', 'KIM', 'NIN', 'SCR', 'TAN', 'CAM','NWSBRW','NWSROW','NWSBAR'})
             metadataStr = '+8';
         else
             metadataStr = '+10';
