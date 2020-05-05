@@ -1,8 +1,8 @@
 % filename or ODBC DSN of MS-ACCESS deployment database
 % ex. : /home/ggalibert/OceanDB.mdb or imos-ddb
 %toolbox.ddb = "C:\OceanDB\OceanDB2016.mdb"
-toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
-%toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
+%toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
+toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
 %toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
 %toolbox.ddb =
 
@@ -47,7 +47,7 @@ autoQCManager.autoQCDefaultChain.timeSeries = imosImpossibleDateQC imosImpossibl
 autoQCManager.autoQCDefaultChain.profile = imosImpossibleDateQC imosImpossibleLocationSetQC imosInOutWaterQC imosGlobalRangeQC imosImpossibleDepthQC imosSalinityFromPTQC imosHistoricalManualSetQC
 
 % last selected set of auto QC routines
-autoQCManager.autoQCChain.timeSeries = imosImpossibleDateQC imosImpossibleLocationSetQC imosInOutWaterQC imosGlobalRangeQC imosSalinityFromPTQC imosSideLobeVelocitySetQC imosTiltVelocitySetQC imosHorizontalVelocitySetQC imosVerticalVelocityQC imosCorrMagVelocitySetQC imosHistoricalManualSetQC aimsTeledyneRDITempQC
+autoQCManager.autoQCChain.timeSeries = imosImpossibleDateQC imosInOutWaterQC imosGlobalRangeQC imosSalinityFromPTQC imosSideLobeVelocitySetQC imosTiltVelocitySetQC imosHorizontalVelocitySetQC imosVerticalVelocityQC imosCorrMagVelocitySetQC imosHistoricalManualSetQC aimsTeledyneRDITempQC
 autoQCManager.autoQCChain.profile = imosImpossibleDateQC imosImpossibleLocationSetQC imosInOutWaterQC imosGlobalRangeQC imosImpossibleDepthQC imosSalinityFromPTQC imosHistoricalManualSetQC
 
 % prompt for preprocessing (if false, 
@@ -70,9 +70,9 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % last selected values for start dialog
-startDialog.dataDir.timeSeries = \\pearl\imos\Processed\QIMOS\GBROTE\GBROTE-0810\Data
+startDialog.dataDir.timeSeries = C:\Projects\_csteinberg\GBRMAG\Processed\20170528_GM39Trip6664\GBRMAG-1611\Data
 startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
-startDialog.fieldTrip.timeSeries = 004845
+startDialog.fieldTrip.timeSeries = 006664
 startDialog.fieldTrip.profile = 006690
 startDialog.lowDate.timeSeries = 0
 startDialog.lowDate.profile = 0
@@ -83,7 +83,7 @@ startDialog.highDate.profile = 737060
 importManager.manualDir = 
 
 % last selected directory for file export
-exportDialog.defaultDir = d:\
+exportDialog.defaultDir = C:\Projects\_csteinberg\GBRMAG\Processed\20170528_GM39Trip6664\GBRMAG-1611\Processed
 
 % prompt user to select parser if an appropriate one 
 % cannot be found (if false, the data is not imported)

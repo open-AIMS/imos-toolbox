@@ -19,16 +19,23 @@ end
 
 switch setupType
     case 'pc'
-        baseDIR='D:\AIMS';
-        AODNbaseDir='D:\AIMS';
+        baseDIR='c:\AIMS';
+        AODNbaseDir='c:\AIMS';
         AMdir=fullfile(baseDIR,'matlab');
         OETdir=fullfile(AMdir,'OpenEarthTools');
         
     case 'pc-dev'
-        baseDIR='D:\Projects\aims-gitlab';
-        AODNbaseDir='D:\Projects\github\aodn';
+        baseDIR='c:\Projects\aims-gitlab';
         AMdir=fullfile(baseDIR,'aims-matlab');
-        OETdir=fullfile(baseDIR,'aims-matlab','OpenEarthTools');
+        
+        AMdir=fullfile('c:\AIMS','matlab');
+        
+        %AODNbaseDir='c:\Projects\github\aodn';
+        %AODNbaseDir='c:\Projects\aims-gitlab';
+        %OETdir=fullfile(baseDIR,'aims-matlab','OpenEarthTools');
+               
+        AODNbaseDir='c:\AIMS';
+        OETdir=fullfile(AODNbaseDir, 'matlab', 'OpenEarthTools');
         
     case 'hpc'
         baseDIR='/export/ocean/AIMS';
@@ -119,6 +126,10 @@ reAddPaths(EPdir,'AIMS easyplot',true);
 reAddPaths(fullfile(AMdir,'NaN-3.4.5'),'AIMS NaN toolbox',false);
 % IGRF
 %reAddPaths(fullfile(AMdir,'igrf'),'IGRF toolbox',true);
+
+reAddPaths(fullfile(AMdir,'panel-2.14'),'Panel toolbox',false);
+
+reAddPaths(fullfile(AMdir,'aims_proc'),'AIMS proc toolbox',false);
 
 %% add java paths
 %disp('Adding IMOS java jars, please wait ...');

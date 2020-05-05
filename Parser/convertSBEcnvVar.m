@@ -134,7 +134,7 @@ switch name
 
     % PAR/Irradiance, Biospherical/Licor
     %par/sat/log - light sensor in SBE19plus assumed in umol photons/m2/s and implemented on #550
-    case {'par0x2Fsat0x2Flog', 'par/sat/log'}
+    case {'par0x2Fsat0x2Flog', 'par/sat/log', 'par0x2Flog'}
       name = 'PAR';
       comment = 'PAR/Logarithmic/ Satlantic';
 
