@@ -85,7 +85,9 @@ parse(p, varargin{:});
 if p.Results.addOET
     if ~exist('oetsettings','file')
         disp('Adding OpenEarthTools, please wait ...');
-        run(fullfile(OETdir,'oetsettings.m'))
+        %run(fullfile(OETdir,'oetsettings.m'))
+        addpath(OETdir);
+        oetsettings('append',true);
     else
         [theDir, ~, ~] = fileparts(which('oetsettings'));
         disp('There appears to an OpenEarthTools already on your path.');
