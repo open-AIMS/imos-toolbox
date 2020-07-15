@@ -58,6 +58,9 @@ function sample_data = SBE19Parse( filename, mode )
   % read in every line in the file, separating
   % them out into each of the three sections
   
+  %instHeaderLines = {};
+  %procHeaderLines = {};
+  
   [dataLines, instHeaderLines, procHeaderLines] = readSBEcnv( filename, mode );
   
   % read in the raw instrument header
@@ -72,17 +75,7 @@ function sample_data = SBE19Parse( filename, mode )
   if strcmpi(ext, '.hex')
       [data, comment] = readSBE19hex(dataLines, instHeader);
   else
-      
-      % the cast date, if present, is used for time field offset
-      castDate = 0;
-      if isfield(instHeader, 'castDate')
-          castDate = instHeader.castDate;
-      else
-          if isfield(procHeader, 'startTime'), castDate = procHeader.startTime; end
-      end
-      
-      [data, comment] = readSBEcnvData(dataLines, instHeader, procHeader, castDate, mode);
-      
+      [data, comment] = readSBEcnvData(dataLines, instHeader, procHeader, mode);
   end
   
   % create sample data struct,

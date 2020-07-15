@@ -65,12 +65,7 @@ if strcmpi(ext, '.cnv')
     instHeader = parseInstrumentHeader(instHeaderLines);
     procHeader = parseProcessedHeader( procHeaderLines);
     
-    castDate = 0;
-    if isfield(procHeader, 'startTime')
-        castDate = procHeader.startTime;
-    end
-    
-    [data, comment] = readSBEcnvData(dataLines, instHeader, procHeader, castDate, mode);
+    [data, comment] = readSBEcnvData(dataLines, instHeader, procHeader, mode);
     
     % create sample data struct,
     % and copy all the data in

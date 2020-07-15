@@ -61,13 +61,8 @@ if strcmpi(ext, '.CNV')
     % read in the raw instrument header
     instHeader = parseInstrumentHeader(instHeaderLines);
     procHeader = parseProcessedHeader( procHeaderLines);
-    
-    castDate = 0;
-    if isfield(procHeader, 'startTime')
-        castDate = procHeader.startTime;
-    end
 
-    [data, comment] = readSBEcnvData(dataLines, instHeader, procHeader, castDate, mode);
+    [data, comment] = readSBEcnvData(dataLines, instHeader, procHeader, mode);
     
 elseif strcmpi(ext, '.CSV')
     % have csv file

@@ -1,10 +1,17 @@
-function [dataLines, instHeaderLines, procHeaderLines] = readSBEcnv( filename, mode )
-%READSBECNV Reads standard Seabird .cnv file and extract out data lines,
+function [dataLines, instHeaderLines, procHeaderLines] = readSBEcnv(filename, ~)
+%function [dataLines, instHeaderLines, procHeaderLines] = readSBEcnv(filename, ~)
+%
+% readSBEcnv Reads standard Seabird .cnv file and extract out data lines,
 % instrument header lines and processed header lines.
 %
 % Inputs:
 %   filename    - cell array of files to import (only one supported).
 %   mode        - Toolbox data type mode.
+%
+%   dataLines  - Cell array of data lines in the original file.
+%   instHeader - Cell array of instrument header lines.
+%   procHeader - Cell array of processed header lines.
+%   mode       - Toolbox data type mode.
 %
 % Outputs:
 %   dataLines  - cell array of data lines.
@@ -19,10 +26,10 @@ function [dataLines, instHeaderLines, procHeaderLines] = readSBEcnv( filename, m
 
 instHeaderLines = {};
 procHeaderLines = {};
-dataLines       = {};
+dataLines = {};
 
 try
-    
+
     fid = fopen(filename, 'rt');
     allLines = textscan(fid, '%s', 'Delimiter', '\n');
     fclose(fid);
@@ -34,7 +41,7 @@ try
     % make assumption that everything else are data lines
     iData = ~(iStar | iHash);
     dataLines = allLines(iData);
-    
+
 catch e
     if fid ~= -1, fclose(fid); end
     rethrow(e);
