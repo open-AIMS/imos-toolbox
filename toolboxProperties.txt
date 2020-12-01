@@ -4,7 +4,6 @@
 %toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
 toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
 %toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
-%toolbox.ddb =
 
 % or full connection details to other kind of deployment database :
 % class name of JDBC database driver
@@ -18,8 +17,8 @@ toolbox.ddb.driver =
 toolbox.ddb.connection =
 
 % user's login and password to database
-toolbox.ddb.user = 
-toolbox.ddb.password = 
+toolbox.ddb.user =
+toolbox.ddb.password =
 
 % toolbox execution mode. Values can be 'timeSeries' and 'profile'. 
 % If no value is set then default mode is 'timeSeries'
@@ -27,7 +26,7 @@ toolbox.mode = timeSeries
 
 % directory which contains netcdf templates
 % (defaults to ./NetCDF/template/)
-toolbox.templateDir = 
+toolbox.templateDir =
 
 % date and time formats used internally and for GUI display
 toolbox.dateFormat = dd mmm yyyy
@@ -35,6 +34,22 @@ toolbox.timeFormat = yyyy-mm-ddTHH:MM:SS
 
 % QC set in use - see section 6.2 of the IMOS NetCDF User's Manual
 toolbox.qc_set = 1
+
+%Instrument display options
+% An alias file to change instrument visual names based on matched
+% entries.
+% [matched instrument maker/model], [display_name]
+toolbox.instrumentAliases = GUI/instrumentAliases.txt
+
+% Instrument detail level display options. This set the instrument metadata
+% details. If instrumentAliases entries are found, [maker model] is substitute
+% to the respective entry in toolbox.instrumentAliases
+% name-only - [maker model]
+% short - [maker model depth]
+% medium - [maker model serial_number depth filename]
+% full - [maker model serial number depth time_range filename]
+% id - [file serial depth]
+toolbox.detailLevel = full
 
 % format in which all dates should be exported in NetCDF attributes
 exportNetCDF.dateFormat = yyyy-mm-ddTHH:MM:SSZ
@@ -50,7 +65,7 @@ autoQCManager.autoQCDefaultChain.profile = imosImpossibleDateQC imosImpossibleLo
 autoQCManager.autoQCChain.timeSeries = imosImpossibleDateQC imosInOutWaterQC imosGlobalRangeQC imosSalinityFromPTQC imosSideLobeVelocitySetQC imosTiltVelocitySetQC imosHorizontalVelocitySetQC imosVerticalVelocityQC imosCorrMagVelocitySetQC imosHistoricalManualSetQC aimsTeledyneRDITempQC
 autoQCManager.autoQCChain.profile = imosImpossibleDateQC imosImpossibleLocationSetQC imosInOutWaterQC imosGlobalRangeQC imosImpossibleDepthQC imosSalinityFromPTQC imosHistoricalManualSetQC
 
-% prompt for preprocessing (if false, 
+% prompt for preprocessing (if false,
 % preprocessing routines are not executed)
 preprocessManager.preprocessPrompt = true
 
@@ -63,7 +78,7 @@ preprocessManager.preprocessChain.timeSeries = depthPP salinityPP oxygenPP absiD
 preprocessManager.preprocessChain.profile = depthPP salinityPP oxygenPP
 
 % file status dialog formatting styles
-% can be one of 'bold', 'normal', 'italic', or an HTML colour (e.g. 'red', 
+% can be one of 'bold', 'normal', 'italic', or an HTML colour (e.g. 'red',
 % 'blue' etc)
 dataFileStatusDialog.invalidFileNameFormat = red
 dataFileStatusDialog.noFileFormat          = bold
@@ -80,18 +95,18 @@ startDialog.highDate.timeSeries = 796006.9802
 startDialog.highDate.profile = 737060
 
 % last selected directory for manual data import
-importManager.manualDir = 
+importManager.manualDir =
 
 % last selected directory for file export
 exportDialog.defaultDir = C:\Projects\_csteinberg\GBRMAG\Processed\20170528_GM39Trip6664\GBRMAG-1611\Processed
 
-% prompt user to select parser if an appropriate one 
+% prompt user to select parser if an appropriate one
 % cannot be found (if false, the data is not imported)
 importManager.noParserPrompt = true
 
 % last selected directory for saving graphs as images
 saveGraph.noPrompt  = false
-saveGraph.exportDir = 
+saveGraph.exportDir =
 saveGraph.imgType   = png
 
 % visual QC plots export properties
