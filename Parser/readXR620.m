@@ -235,7 +235,7 @@ function sample_data = readXR620( filename, mode )
                       data.(vars{k}) = data.(vars{k})/10;
                       
                       %Temperature (Celsius degree)
-                  case {'Temp', 'temp02', 'temp12'}, name = 'TEMP';
+                  case {'Temp', 'temp02', 'temp12', 'temp18'}, name = 'TEMP';
                       
                       %Pressure (dBar)
                   case {'Pres', 'pres20', 'pres21', 'pres26'}, name = 'PRES';
@@ -348,7 +348,7 @@ function sample_data = readXR620( filename, mode )
                       data.(fields{k}) = data.(fields{k})/10;
                       
                       %Temperature (Celsius degree)
-                  case {'Temp', 'temp02', 'temp12'}, name = 'TEMP';
+                  case {'Temp', 'temp02', 'temp12', 'temp18'}, name = 'TEMP';
                       
                       %Pressure (dBar)
                   case {'Pres', 'pres20', 'pres21', 'pres26'}, name = 'PRES';
