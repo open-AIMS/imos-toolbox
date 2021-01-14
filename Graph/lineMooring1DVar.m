@@ -184,7 +184,7 @@ for i=1:lenSampleData
             set(panH,'ActionPostCallback',{@zoomDateTick, hAxMooringVar});
             
             try
-                defaultColormapFh = str2func(readProperty('visualQC.defaultColormap'));
+                defaultColormapFh = str2func(readProperty('visualQC.defaultColormap1D'));
                 cMap = colormap(hAxMooringVar, defaultColormapFh(lenSampleData));
             catch e
                 cMap = colormap(hAxMooringVar, parula(lenSampleData));

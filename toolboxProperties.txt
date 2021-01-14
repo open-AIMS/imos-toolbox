@@ -62,7 +62,7 @@ autoQCManager.autoQCDefaultChain.timeSeries = imosImpossibleDateQC imosImpossibl
 autoQCManager.autoQCDefaultChain.profile = imosImpossibleDateQC imosImpossibleLocationSetQC imosInOutWaterQC imosGlobalRangeQC imosImpossibleDepthQC imosSalinityFromPTQC imosHistoricalManualSetQC
 
 % last selected set of auto QC routines
-autoQCManager.autoQCChain.timeSeries = imosImpossibleDateQC imosInOutWaterQC imosGlobalRangeQC imosSalinityFromPTQC imosSideLobeVelocitySetQC imosTiltVelocitySetQC imosHorizontalVelocitySetQC imosVerticalVelocityQC imosCorrMagVelocitySetQC imosHistoricalManualSetQC aimsTeledyneRDITempQC
+autoQCManager.autoQCChain.timeSeries = imosImpossibleDateQC imosInOutWaterQC imosGlobalRangeQC imosSalinityFromPTQC imosSideLobeVelocitySetQC imosTiltVelocitySetQC imosHorizontalVelocitySetQC imosVerticalVelocityQC imosCorrMagVelocitySetQC imosTimeSeriesSpikeQC imosHistoricalManualSetQC aimsTeledyneRDITempQC
 autoQCManager.autoQCChain.profile = imosImpossibleDateQC imosImpossibleLocationSetQC imosInOutWaterQC imosGlobalRangeQC imosImpossibleDepthQC imosSalinityFromPTQC imosHistoricalManualSetQC
 
 % prompt for preprocessing (if false,
@@ -85,9 +85,9 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % last selected values for start dialog
-startDialog.dataDir.timeSeries = C:\Projects\_csteinberg\GBRMAG\Processed\20170528_GM39Trip6664\GBRMAG-1611\Data
+startDialog.dataDir.timeSeries = C:\Projects\_darwin\Proj_003164_RTGove_Drimmie_Arm\PAR_Logging\Field_Data\Data
 startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
-startDialog.fieldTrip.timeSeries = 006664
+startDialog.fieldTrip.timeSeries = 007371
 startDialog.fieldTrip.profile = 006690
 startDialog.lowDate.timeSeries = 0
 startDialog.lowDate.profile = 0
@@ -98,7 +98,7 @@ startDialog.highDate.profile = 737060
 importManager.manualDir =
 
 % last selected directory for file export
-exportDialog.defaultDir = C:\Projects\_csteinberg\GBRMAG\Processed\20170528_GM39Trip6664\GBRMAG-1611\Processed
+exportDialog.defaultDir = C:\Projects\_darwin\Proj_003164_RTGove_Drimmie_Arm\PAR_Logging\Field_Data\Data\Processed
 
 % prompt user to select parser if an appropriate one
 % cannot be found (if false, the data is not imported)
@@ -116,6 +116,10 @@ visualQC.fastScatter = true
 % default nonspecialized scalar colormap and number of colour steps
 % jet | parula | viridis
 visualQC.defaultColormap = parula
+% jet | parula | viridis| cmap_distinguishable_colors | cmap_maxdistcolor_osaucs 
+visualQC.defaultColormap1D = cmap_distinguishable_colors
+% jet | parula | viridis
+visualQC.defaultColormap2D = parula
 visualQC.ncolors = 64
 
 % simple zbuffering of markers if using fallback fastScatterMesh plot (fastScatter = false)
