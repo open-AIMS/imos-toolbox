@@ -186,11 +186,13 @@ function sample_data = variableOffsetPP( sample_data, qcLevel, auto )
                       ' please document time_deployment_start global attributes'...
                       ' so that difference with a nearest instrument can be better calculated']);
               end
-              
+              if timeForDiff < timeCurrent(1)
+                  timeForDiff = timeCurrent(1);
+              end
               iForDiff = timeCurrent >= timeForDiff & ...
                   timeCurrent <= timeForDiff + 1;
               timeCurrentForDiff = timeCurrent(iForDiff);
-              
+
               diffHeaderLabelStr = ['Mean diff from ' datestr(timeCurrentForDiff(1), 'dd-mm-yyyy HH:MM:SS UTC') ' over 24h'];
           end
           
