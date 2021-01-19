@@ -30,8 +30,13 @@ switch computer
         width = monitorPos(:, 3);
 end
 
-iBigMonitor = width == max(width);
-        
+try
+    sizeFh = str2func(readProperty('monitor.selectSizeBy'));
+    iBigMonitor = width == sizeFh(width);
+catch e
+    iBigMonitor = width == max(width);
+end
+
 % in case exactly same biggest monitors more than once we return the first one
 if sum(iBigMonitor)>1
     firstBigMonitor = find(iBigMonitor, 1, 'first');

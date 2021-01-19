@@ -125,3 +125,7 @@ visualQC.ncolors = 64
 % simple zbuffering of markers if using fallback fastScatterMesh plot (fastScatter = false)
 % 'ascending', 'descending', 'triangle', 'vee', 'flat', 'parabolic', 'hamming', 'hann'
 visualQC.zbuffer = triangle
+
+% select monitor size (which sets plots size) by smallest (min) or largest (max)
+% min | max
+monitor.selectSizeBy = min
