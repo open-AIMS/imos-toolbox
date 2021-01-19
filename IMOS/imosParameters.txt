@@ -207,10 +207,13 @@ WWPP,                0, sea_surface_wind_wave_period_at_variance_spectral_densit
 WWSH,                1, sea_surface_wind_wave_significant_height,                                                 m,             ,              ,                                  W, 999999.0, 0.0,      100.0,    float
 XCO2_AIR,            1, mole_fraction_of_carbon_dioxide_in_air,                                                   1e-6,          ,              ,                                  K, 999999.0, ,         ,         float
 XCO2_WATER,          0, mole_fraction_of_carbon_dioxide_in_sea_water,                                             1e-6,          ,              ,                                  K, 999999.0, ,         ,         float
-% not IMOS
+%% not IMOS
+%   parameter name, is cf parameter, standard/long name, units of measurement, direction positive, reference datum, data code, fillValue, validMin, validMax, NetCDF C type
 UDA,                1, eastward_sea_water_velocity_depth_average,                                                              m s-1,         ,              true north,                        V, 999999.0, -10.0,    10.0,     float
 ULP,                1, eastward_sea_water_velocity_low_pass,                                                              m s-1,         ,              true north,                        V, 999999.0, -10.0,    10.0,     float
 UHP,                1, eastward_sea_water_velocity_high_pass,                                                              m s-1,         ,              true north,                        V, 999999.0, -10.0,    10.0,     float
 VDA,                1, northward_sea_water_velocity_depth_average,                                                              m s-1,         ,              true north,                        V, 999999.0, -10.0,    10.0,     float
 VLP,                1, northward_sea_water_velocity_low_pass,                                                              m s-1,         ,              true north,                        V, 999999.0, -10.0,    10.0,     float
 VHP,                1, northward_sea_water_velocity_high_pass,                                                              m s-1,         ,              true north,                        V, 999999.0, -10.0,    10.0,     float
+% from LISST ABS
+PARTICLE_CONCENTRATION, 0, particle_concentration, mg l-1, , , E, -9990.0, 0.0,    200000.0,     float
