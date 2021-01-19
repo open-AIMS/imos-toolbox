@@ -72,7 +72,7 @@ classdef spikeWindow < handle
         end
 
         function init_panel(obj, instrument)
-            obj.panel_opts = {'Parent', obj.ui_window, 'title', sprintf('%s - select variables/methods for Spike detection', instrument), 'Units', 'normalized', 'Position', [obj.panelMargin, obj.cancelSize, 1 - obj.panelMargin * 2, 1 - obj.cancelSize - obj.panelMargin]};
+            obj.panel_opts = {'Parent', obj.ui_window, 'title', sprintf('%s - select variables/methods for Spike detection', obj.instrument_name), 'Units', 'normalized', 'Position', [obj.panelMargin, obj.cancelSize, 1 - obj.panelMargin * 2, 1 - obj.cancelSize - obj.panelMargin]};
             obj.ui_panel = uipanel(obj.panel_opts{:});
         end
 
