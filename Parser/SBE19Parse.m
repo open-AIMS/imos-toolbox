@@ -694,7 +694,8 @@ function time = genTimestamps(instHeader, procHeader, data)
   % data - if so, we don't have to do any work
   if isfield(data, 'TIME')
       % except cnv created from SBE39plus which has timeJ variable but only
-      % to 4 decimal places.
+      % to 6 decimal places (0.0864 second resolution) which can cause the
+      % seconds value to alternate shift by one second.
       if strcmp(instHeader.instrument_model, 'SBE39plus')
         start    = procHeader.startTime;
         interval = procHeader.sampleInterval;
