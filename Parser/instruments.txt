@@ -26,6 +26,8 @@ FSI, NXIC-CTD-BIO, NXICBinary
 IMO, DL3, IMO
 IMO, NTU, IMO
 IMO, MS9, IMO
+InterOcean, S4, InterOceanS4Parse
+InterOcean, S4 Current Meter, InterOceanS4Parse
 NORTEK, ADCP - AQUAPRO, aquadoppProfiler
 NORTEK, ADCP - AWAC, awac
 NORTEK, ADCP - CONTINENTAL, continental
