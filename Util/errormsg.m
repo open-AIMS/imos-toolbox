@@ -17,16 +17,20 @@ function errormsg(msg,varargin)
 %
 % author: hugo.oliveira@utas.edu.au
 %
-cstack = dbstack;
-if numel(cstack) == 1
-	name = cstack.name;
-	stack = cstack.stack;
-else
-	name = cstack(2).name;
-	stack = cstack(2:end);
+if nargin < 1
+    error('Error at errormsg(line 21): msg argument is compulsory')
 end
 
-actualmsg = sprintf(msg,varargin{:});
+cstack = dbstack;
+if numel(cstack) == 1
+    n = 1;
+else
+    n = 2;
+end
+name = cstack(n).name;
+line = cstack(n).line;
+
+actualmsg = sprintf([name '(' num2str(line) '):' msg],varargin{:});
 dotsplit = split(name,'.');
 if numel(dotsplit) == 1
 	name_as_id = sprintf('%s:%s',dotsplit{1},dotsplit{1});
