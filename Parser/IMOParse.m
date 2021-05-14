@@ -269,9 +269,9 @@ instrument_configuration = header.headerlines(ind_conf+1:ind_cal-1);
 
 ind = find(contains(instrument_configuration, 'IN-WATER'));
 if isempty(ind)
-    header.instrument_mode = 'WATER_MODE';
-else
     header.instrument_mode = 'AIR_MODE';
+else
+    header.instrument_mode = 'WATER_MODE';
 end
 
 %DETECTOR OUTPUT = IRR
@@ -331,9 +331,20 @@ header.instrument_wiper_interval = str2num(token{1}{1}) * 3600; %hours -> second
 % instrument calibration
 instrument_calibration = header.headerlines(ind_cal+1:length(header.headerlines)-1);
 
+
 ind = find(contains(instrument_calibration, 'WAVELENGTHS ='));
 token = regexp(instrument_calibration{ind}, 'WAVELENGTHS\s+=\s+\[(\S+)\]', 'tokens');
 header.instrument_wavelengths = token{1}{1};
+
+for v = {'WAVELENGTHS' 'FWHM' 'DARKSLOPE' 'DARKYINT' 'GAIN' 'TEMPCO' 'IMM'}
+    vname = char(v);
+    ind = find(contains(instrument_calibration, [vname ' =']));
+    if ~isempty(ind)
+        token = regexp(instrument_calibration{ind}, [ vname '\s+=\s+\[(\S+)\]' ], 'tokens');
+        header.(['instrument_' vname]) = token{1}{1};
+    end
+end
+
 
 % data
 splitData = split(dataLines, ',');
@@ -366,8 +377,8 @@ else
 end
 
 data.TIME = datenum([char(splitData(:,indDate)) char(splitData(:,indTime))],'dd/mm/yyyyHH:MM:SS.FFF');
-data.TIME = data.TIME - header.instrument_utc_offset/24.0;
-comment.TIME = 'TIME';
+data.TIME = data.TIME - header.instrument_utc_offset/24.0; % convert to UTC
+comment.TIME = 'TIME (UTC)';
 
 data.WIPER_STATUS = str2double(splitData(:,indWiper));
 comment.WIPER_STATUS = 'Wiper Position (0 for open and 1 for closed)';
@@ -392,40 +403,72 @@ units.INTERNAL_TEMP = 'Degrees Celsius';
 
 % internally calculated PAR
 data.PAR = str2double(splitData(:,indPar)); % umole m^-2 s^-1
-comment.PAR = 'PAR calculated from integrated irradiance from 400 to 700nm';
+comment.PAR = [header.instrument_model ' instrument calculated PAR from integrated irradiance from 400 to 700nm'];
 units.PAR = 'umole m-2 s-1';
 
-wavelengths = split(header.instrument_wavelengths, ',');
+wavelengths = split(header.instrument_WAVELENGTHS, ',');
 for i=indCh1:indCh9
     vName = ['CH' num2str(i-indCh1+1)];
     data.(vName) = str2double(splitData(:,i));
     units.(vName) =  'uW cm-2'; %?
-    comments.(vName) = [wavelengths{i-indCh1+1} 'nm'];
+    comment.(vName) = [wavelengths{i-indCh1+1} 'nm'];
 end
 
-% PAR calculated
-% put all channel data into one array
-lambda = str2double(wavelengths);
-nChannels = length(lambda);
-nSamples = size(data.CH1,1);
-tmpData = zeros([nSamples, nChannels]);
-for i = 1:nChannels
-    vName = ['CH' num2str(i)];
-    tmpData(:,i)= data.(vName);
-end
-
-% Convert MS8EN/MS9 uW/cm^2/nm data to W/m^2/nm
-tmpData = tmpData ./ 100.0;
-
-PAR = calcPAR(tmpData, lambda);
+[data, comment, units] = calcPAR(data, comment, units, header);
 
 end
 
 %%
-function PAR = calcPAR(data, lambda)
+function [data, comment, units] = calcPAR(data, comment, units, header)
 %CALCPAR Calculate PAR by integrating irradiance over 400 to 700nm
 % Requires data (nSamples, nWavelenghts) in W m^-2 nm^-1
 % lambda (sample wavelenghts) in nm
+
+IMM = NaN;
+ableToCorrectPar = false;
+if isfield(header, 'instrument_IMM') & isfield(data, 'DEPTH')
+    ableToCorrectPar = true;
+    IMM = str2double(split(header.instrument_IMM, ','));
+end
+
+% PAR calculated
+% put all channel data into one array
+wavelengths = split(header.instrument_WAVELENGTHS, ',');
+lambda = str2double(wavelengths);
+nChannels = length(lambda);
+nSamples = size(data.CH1,1);
+channel_data = zeros([nSamples, nChannels]);
+for i = 1:nChannels
+    vName = ['CH' num2str(i)];
+    channel_data(:,i)= data.(vName);
+end
+
+correctionString = '';
+depth_offset = 0.30; % m between pressure sensor and light meter
+if ableToCorrectPar
+    if strcmp(header.instrument_mode, 'WATER_MODE')
+        iBad = data.DEPTH < depth_offset;
+        if sum(iBad) > 1
+            correctionString = [' Channel data (' num2str(sum(iBad)) ' of ' num2str(length(iBad)) ') has been corrected for ' header.instrument_mode ' deployment and DEPTH values < ' num2str(depth_offset) 'm.'];
+            for i = 1:nChannels
+                vName = ['CH' num2str(i)];
+                channel_data(iBad,i)= channel_data(iBad,i) / IMM(i);
+            end
+        end
+    else
+        iBad = data.DEPTH > depth_offset;
+        if sum(iBad) > 1
+            correctionString = [' Channel data (' num2str(sum(iBad)) ' of ' num2str(length(iBad)) ') has been corrected for ' header.instrument_mode ' deployment and DEPTH values > ' num2str(depth_offset) 'm.'];
+            for i = 1:nChannels
+                vName = ['CH' num2str(i)];
+                channel_data(iBad,i)= channel_data(iBad,i) * IMM(i);
+            end
+        end
+    end
+end
+
+% Convert MS8EN/MS9 uW/cm^2/nm data to W/m^2/nm
+channel_data = channel_data ./ 100.0;
 
 % for MS8EN
 % lambda = [425, 455, 485, 515, 555, 615, 660, 695];
@@ -434,16 +477,14 @@ function PAR = calcPAR(data, lambda)
 
 lambda = lambda(:);
 
-PAR = struct;
-
 % derive PAR from MS8EN sampled wavelengths using method from
 % Wojciech Klonowski @ Insitu Marine Optics
 nChannels = length(lambda);
-nSamples = size(data,1);
+nSamples = size(channel_data,1);
 
 % new spacing between 400 - 700 nm.
-newLambda = 400:1:700;
-nNewChannels = size(newLambda,2);
+new_lambdas = 400:1:700;
+nNewChannels = size(new_lambdas,2);
 
 % IMO: convert to photons per second by dividing by h*c / lambda.
 % factor 1e-9 converts nm to m.
@@ -461,24 +502,25 @@ c = 2.99792458e+08; % speed of light, m s^-1
 avo = 6.02214076e+23; % Avogadro's constant, mol^-1
 denom = h*c*avo; % J m mol-1
 
-data = (data .*  lambda' .* 1e-9) ./ denom; % mol s^-1
+channel_data = (channel_data .*  lambda' .* 1e-9) ./ denom; % mol s^-1
 
-newData=nan([nSamples, nNewChannels]);
+interpolated_channels=nan([nSamples, nNewChannels]);
 for i = 1:nSamples
-    newData(i,:) = interp1(lambda, data(i, :), newLambda, 'linear', 'extrap');
+    interpolated_channels(i,:) = interp1(lambda, channel_data(i, :), new_lambdas, 'linear', 'extrap');
 end
 
-data = nan([nSamples, 1]);
+new_par = nan([nSamples, 1]);
 for i = 1:nSamples
-    data(i) = trapz(newLambda, newData(i,:));
+    new_par(i) = trapz(new_lambdas, interpolated_channels(i,:));
 end
 
 % data -> moles m^-2 s^-1
 % data * 1e6 -> umoles m^-2 s^-1
-PAR.data = data * 1e6;
-PAR.name = 'PAR';
-PAR.comment = 'PAR calculated by integrating irradiance over 400 to 700nm.';
-PAR.units = 'umole m-2 s-1';
+vname = 'PAR_2';
+data.(vname) = new_par * 1e6;
+name.(vname) = 'PAR';
+comment.(vname) = ['PAR calculated by integrating irradiance over 400 to 700nm in 1nm steps.' correctionString];
+units.(vname) = 'umole m-2 s-1';
 
 end
 
