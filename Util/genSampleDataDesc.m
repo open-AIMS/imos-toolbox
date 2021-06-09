@@ -106,7 +106,7 @@ instrument_entry = [maker ' ' model ];
 if ~isempty(alias_file)
     try
         map = readMappings(alias_file);
-        instrument_entry = map(instrument_entry);
+        instrument_entry = map(upper(instrument_entry));
     catch
     end
 end
