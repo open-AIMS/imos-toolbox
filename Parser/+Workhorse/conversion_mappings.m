@@ -53,6 +53,7 @@ mms_to_ms = @(x)(0.001 * x); % mm/s -> m/s
 cdeg_to_deg = @(x)(0.01 * x); % 0.01 deg -> deg
 decapascal_to_decibar = @(x)(0.001 * x); %decapascal -> decibar
 xmitcounts_to_volt = @(x)(1e-6 * xmit_voltage_scale * x);
+xmitcounts_to_amps = @(x)(1e-6 * xmit_current_scale * x);
 
 switch frame_of_reference
     case 'earth'
@@ -88,5 +89,6 @@ if sensors.Heading
 end
 
 cmap.('TX_VOLT') = xmitcounts_to_volt;
+cmap.('TX_CURRENT') = xmitcounts_to_amps;
 
 end

@@ -90,26 +90,32 @@ switch model_id% see readWorkhorseEnsembles.m table.
         adcp_system.system_freq = 75;
         adcp_system.model_name = 'Long Ranger';
         adcp_system.xmit_voltage_scale = 2092719;
+		adcp_system.xmit_current_scale = 43838;
     case '001'
         adcp_system.system_freq = 150;
         adcp_system.model_name = 'Quartermaster';
         adcp_system.xmit_voltage_scale = 592157;
+		adcp_system.xmit_current_scale = 11451;
     case '010'
         adcp_system.system_freq = 300;
         adcp_system.model_name = 'Sentinel or Monitor';
         adcp_system.xmit_voltage_scale = 592157;
+		adcp_system.xmit_current_scale = 11451;
     case '011'
         adcp_system.system_freq = 600;
         adcp_system.model_name = 'Sentinel or Monitor';
         adcp_system.xmit_voltage_scale = 380667;
+		adcp_system.xmit_current_scale = 11451;
     case '100'
         adcp_system.system_freq = 1200;
         adcp_system.model_name = 'Sentinel or Monitor';
         adcp_system.xmit_voltage_scale = 253765;
+		adcp_system.xmit_current_scale = 11451;
     case '101'
         adcp_system.system_freq = 2400;
         adcp_system.model_name = 'DVS';
         adcp_system.xmit_voltage_scale = 253765;
+		adcp_system.xmit_current_scale = 11451;
     otherwise
         errormsg('ADCP system frequency bit is invalid.')
 end
