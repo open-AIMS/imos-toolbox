@@ -102,7 +102,13 @@ function sample_data = workhorseParse( filename, ~)
     vaddr = imap.(vname);
     ogroup = vaddr{1};
     ovar = vaddr{2};
-    imported.(vname) = ensembles.(ogroup).(ovar);
+    try
+      imported.(vname) = ensembles.(ogroup).(ovar);
+    catch
+      %raise a nice error msg in case the ensembles functionality is changed 
+      % and we didn't update the import maps, or the import mapping is outdated.
+      errormsg('Trying to associate vname=%s with associated with ogroup=%s and ovar=%s failed!',vname,ogroup,ovar)
+    end
     ensembles.(ogroup) = rmfield(ensembles.(ogroup),ovar);
   end
 
@@ -196,7 +202,11 @@ function sample_data = workhorseParse( filename, ~)
       vars2d_vel = cell(1,numel(all_vel_vars));
       for k=1:numel(all_vel_vars)
         vname = all_vel_vars{k};
-        vars2d_vel{k} = struct('name',vname,'typeCastFunc',IMOS.resolve.imos_type(vname),'dimensions',earth_dims,'data',imported.(vname),'coordinates',coords2d_vel);
+        %force conversion for backward compatibility - this incur in at least 4 type-conversion from original data to netcdf - madness!
+        typecast_func = IMOS.resolve.imos_type(vname);
+        type_converted_var = typecast_func(imported.(vname));
+        imported = rmfield(imported,vname);
+        vars2d_vel{k} = struct('name',vname,'typeCastFunc',typecast_func,'dimensions',earth_dims,'data',type_converted_var,'coordinates',coords2d_vel);
       end          
     otherwise 
          errormsg('Frame of reference `%s` not supported',meta.adcp_info.coords.frame_of_reference)
@@ -277,7 +287,7 @@ function sample_data = workhorseParse( filename, ~)
           sample_data{2}.dimensions{i}.data         = sample_data{2}.dimensions{i}.typeCastFunc(dims{i, 2});
           if strcmpi(dims{i, 1}, 'DIR')
               sample_data{2}.dimensions{i}.compass_correction_applied = meta.compass_correction_applied;
-              sample_data{2}.dimensions{i}.comment  = magdec_name_comment;
+              sample_data{2}.dimensions{i}.comment  = magdec_attrs.comment;
           end
       end
       clear dims;
@@ -336,7 +346,7 @@ function sample_data = workhorseParse( filename, ~)
           sample_data{2}.variables{i}.data         = sample_data{2}.variables{i}.typeCastFunc(vars{i, 3});
           if any(strcmpi(vars{i, 1}, {'WPDI', 'WWPD', 'SWPD', 'VDIR', 'SSWV'}))
               sample_data{2}.variables{i}.compass_correction_applied = meta.compass_correction_applied;
-              sample_data{2}.variables{i}.comment  = magdec_name_comment;
+              sample_data{2}.variables{i}.comment  = magdec_attrs.comment;
           end
       end
       clear vars;

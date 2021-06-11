@@ -239,12 +239,9 @@ if isfield(header, 'tabular_format') && strcmp(header.tabular_format, 'SPD')
     data.VCUR = data.CSPD .* cos(theta);
 else
     data.CSPD = sqrt(data.VCUR.^2 + data.UCUR.^2);
-    % I'm not sure why this is done with getDirectionUV instead of
-    % cdir = atan2(data.VCUR, data.UCUR) * 180/pi; % atan2 goes positive anti-clockwise with 0 on the right side
-    % cdir = -cdir + 90; % we want to go positive clockwise with 0 on the top side
-    % cdir = cdir + 360*(cdir < 0); % we shift +360 for whatever is left negative
-    % But to keep it as per workhorse code
-    data.CDIR = getDirectionFromUV(data.UCUR, data.VCUR);
+    data.CDIR = atan2(data.VCUR, data.UCUR) * 180/pi; % atan2 goes positive anti-clockwise with 0 on the right side
+    data.CDIR = -data.CDIR + 90; % we want to go positive clockwise with 0 on the top side
+    data.CDIR = data.CDIR + 360*(data.CDIR < 0); % we shift +360 for whatever is left negative
 end
 
 % if a tabular data header only ascii file was used then need to set
