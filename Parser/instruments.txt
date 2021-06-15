@@ -11,6 +11,7 @@ AQUATEC, AQUALOGGER, aquatec
 Aquatec, Aqualogger 520PT, aquatec
 Aquatec, Aqualogger 520T, aquatec
 AQUATEC, AQUALOGGER MODEL 520, aquatec
+AQUATEC, AQUAlogger 520 PT, aquatec
 BRANCKER, Duet TD, XR
 BRANCKER, TEMPERATURE LOGGER TR-1060P, XR
 BRANCKER, TIDE GAUGE - TDR-2050, XR
@@ -34,6 +35,7 @@ NORTEK, ADCP - CONTINENTAL, continental
 NORTEK, ADCP - AWAC AST, awac
 NORTEK, ADCP - AWAC with NIP-600KHz, awac
 NORTEK, AQD, aquadoppProfiler
+NORTEK, Signature 500, signature
 Nortek, Aquadopp DW, aquadoppVelocity
 Nortek, ADCP 190kHz, continental
 ONSET, HOBO_U22_001, hoboU22
@@ -99,4 +101,5 @@ WETLABS, ECO-PARSB, ECOTriplet
 Wetlabs, ECO-NTUS, ECOTriplet
 WETLABS, ECO-FLNTUSB, ECOTriplet
 WETLABS, PARS, ECOTriplet
+
 
