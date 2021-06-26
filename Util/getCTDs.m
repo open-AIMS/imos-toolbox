@@ -37,7 +37,7 @@ function [fieldTrip ctds sites dataDir] = getCTDs(auto)
 % If not, see <https://www.gnu.org/licenses/gpl-3.0.en.html>.
 %
 ctds  = struct;
-sites = struct;
+
 
 % prompt the user to select a field trip and
 % directory which contains raw data files
@@ -64,6 +64,7 @@ ctds = executeQuery('CTDData', 'FieldTrip', fId);
 
 % query the ddb for all sites related to these ctds
 lenDep = length(ctds);
+sites = cell([lenDep, 1]);
 for i=1:lenDep
     if i==1
         tempVal = executeQuery('Sites', 'Site', ctds(i).Site);
@@ -72,6 +73,15 @@ for i=1:lenDep
         if ~isempty(tempVal), sites = tempVal; end
     else
         tempVal = executeQuery('Sites', 'Site', ctds(i).Site);
-        if ~isempty(tempVal), sites(i) = tempVal; end
+        if ~isempty(tempVal), sites{i} = tempVal; end
     end
 end
+
+% it is possible that some queries produced an empty results, remove these
+iNoSite = cellfun(@isempty, sites);
+sites = sites(~iNoSite);
+sites = [sites{:}];
+ctds = ctds(~iNoSite);
+
+end
+
