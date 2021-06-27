@@ -122,6 +122,16 @@ nBytes(oob) = [];
 nLen(oob)   = [];
 clear oob;
 
+% check that the next sectorID after the header is the fixed leader (0x0000)
+nDataTypes = double(data(idx+5));
+%iPossibleFixedLeader = double(data(idx + 2*nDataTypes+6)) + double(data(idx + 2*nDataTypes+6 + 1));
+leaderIndex     = [data(idx(:)+2*nDataTypes+6) data(idx(:)+2*nDataTypes+6+1)]';
+iPossibleFixedLeader = bytecast(leaderIndex(:), 'L', 'uint16', cpuEndianness);
+oob = iPossibleFixedLeader ~= 0;
+idx(oob)    = [];
+nBytes(oob) = [];
+nLen(oob)   = [];
+clear oob iPossibleFixedLeader leaderIndex;																			
 % check sum is in last two bytes
 givenCrc = indexData(data, idx+nLen-2, idx+nLen-1, 'uint16', cpuEndianness)';
 clear nLen;

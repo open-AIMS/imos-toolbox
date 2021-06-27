@@ -93,12 +93,18 @@ cfg.sourceprog='INSTRUMENT';
 fid = -1;
 data = [];
 try
-    fid = fopen(filename, 'rb');
-    data = fread(fid, inf, '*uint8');
-    fclose(fid);
-catch e
-    if fid ~= -1, fclose(fid); end
-    rethrow e;
+    %reduce a lot of peak memory consumption.
+    m = memmapfile(filename,'Format','uint8','Writable',false);
+    data = m.data;
+catch 
+  try
+      fid = fopen(filename, 'rb');
+      data = fread(fid, inf, '*uint8');
+      fclose(fid);
+  catch e
+      if fid ~= -1, fclose(fid); end
+      rethrow e;
+  end
 end
 
 % get ensemble start key
@@ -113,8 +119,8 @@ dataSourceID    = 127;      % hexadecimal '7F'
 
 % ensemble is indicated by header and data source IDs in the data field;
 % idx will indicate the start of a possible ensemble
-idh = data(1:end-1) == headerID;
-ids = data(2:end) == dataSourceID;
+idh = data(1:end-3) == headerID;
+ids = data(2:end-2) == dataSourceID;
 idx = find(idh & ids);
 clear idh ids;
 
@@ -400,6 +406,11 @@ clear I J;
 ibad = IND > K;
 clear K;
 
+if any(any(ibad))
+    % We assume that if an ensemble contain one bad data, all data are bad
+    % in this ensemble
+    ibad(:,any(ibad)) = ones(size(ibad,1), 1);
+end
 datatst = data(IND(:));
 datatst(ibad(:)) = 0;
 
@@ -478,26 +489,32 @@ function [sect, len, cfg] = parseFixedLeader(data, idx, cpuEndianness, cfg)
 % 0 1 0 0 - - - - 4-BEAM JANUS CONFIG
 % 0 1 0 1 - - - - 5-BM JANUS CFIG DEMOD)
 % 1 1 1 1 - - - - 5-BM JANUS CFIG.(2 DEMD)
-  LSB = dec2bin(double(data(idx+4)));
-  MSB = dec2bin(double(data(idx+5)));
-  while(size(LSB, 2) < 8), LSB = [repmat('0', size(LSB, 1), 1) LSB]; end
-  while(size(MSB, 2) < 8), MSB = [repmat('0', size(MSB, 1), 1) MSB]; end
+LSB = dec2bin(double(data(idx+4)));
+MSB = dec2bin(double(data(idx+5)));
+while(size(LSB, 2) < 8), LSB = [repmat('0', size(LSB, 1), 1) LSB]; end
+while(size(MSB, 2) < 8), MSB = [repmat('0', size(MSB, 1), 1) MSB]; end
+LSB = bin2logical(LSB);
+MSB = bin2logical(MSB);
+% compatibility layer, code above is equivalent to:
+%LSB = logical(de2bi(data(idx+4),8,'left-msb'));
+%MSB = logical(de2bi(data(idx+5),8,'left-msb'));
+%
   sect.systemConfiguration = [LSB MSB];
 
   sect.systemConfigurationLSB = double(data(idx+4));
   sect.systemConfigurationMSB = double(data(idx+5));
   if strcmpi(cfg.name,'V-ADCP')
       sect.beamAngle   = 25;
-      sect.numBeams    = getopt(bitand(mode(sect.systemConfigurationMSB),16)==16,4,5);
-      sect.freq        = getopt(bitand(mode(sect.systemConfigurationLSB),7),NaN,NaN,300,500,1000,NaN,NaN);
+      sect.numBeams    = Workhorse.getopt(bitand(mode(sect.systemConfigurationMSB),16)==16,4,5);
+      sect.freq        = Workhorse.getopt(bitand(mode(sect.systemConfigurationLSB),7),NaN,NaN,300,500,1000,NaN,NaN);
       sect.orientation = 'convex';
-      sect.orientation  = getopt(bitand(mode(sect.systemConfigurationLSB),128)==128,'down','up');    % 1=up,0=down
+      sect.orientation  = Workhorse.getopt(bitand(mode(sect.systemConfigurationLSB),128)==128,'down','up');    % 1=up,0=down
   else
-      sect.beamAngle     = getopt(bitand(mode(sect.systemConfigurationMSB),3),15,20,30,'other');
-      sect.numBeams      = getopt(bitand(mode(sect.systemConfigurationMSB),16)==16,4,5);
-      sect.freq = getopt(bitand(mode(sect.systemConfigurationLSB),7),75,150,300,600,1200,2400,38);
-      sect.beamPattern = getopt(bitand(mode(sect.systemConfigurationLSB),8)==8,'concave','convex'); % 1=convex,0=concave
-      sect.orientation = getopt(bitand(mode(sect.systemConfigurationLSB),128)==128,'down','up');    % 1=up,0=down
+      sect.beamAngle     = Workhorse.getopt(bitand(mode(sect.systemConfigurationMSB),3),15,20,30,'other');
+      sect.numBeams      = Workhorse.getopt(bitand(mode(sect.systemConfigurationMSB),16)==16,4,5);
+      sect.freq = Workhorse.getopt(bitand(mode(sect.systemConfigurationLSB),7),75,150,300,600,1200,2400,38);
+      sect.beamPattern = Workhorse.getopt(bitand(mode(sect.systemConfigurationLSB),8)==8,'concave','convex'); % 1=convex,0=concave
+      sect.orientation = Workhorse.getopt(bitand(mode(sect.systemConfigurationLSB),128)==128,'down','up');    % 1=up,0=down
       switch bitshift(mode(sect.systemConfigurationMSB),-4)
           case 4
               sect.beamConfig = '4-BEAM JANUS';
@@ -539,10 +556,20 @@ function [sect, len, cfg] = parseFixedLeader(data, idx, cpuEndianness, cfg)
   block                    = indexData(data, idx+26, idx+29, 'int16', cpuEndianness)';
   sect.headingAlignment    = block(:,1);
   sect.headingBias         = block(:,2);
-  sect.sensorSource        = dec2bin(double(data(idx+30)));
-  while(size(sect.sensorSource, 2) < 8), sect.sensorSource = [repmat('0', size(sect.sensorSource, 1), 1) sect.sensorSource]; end
-  sect.sensorsAvailable    = dec2bin(double(data(idx+31)));
-  while(size(sect.sensorsAvailable, 2) < 8), sect.sensorsAvailable = [repmat('0', size(sect.sensorsAvailable, 1), 1) sect.sensorsAvailable]; end
+  %
+  ss = dec2bin(double(data(idx+30)));
+  while(size(ss, 2) < 8), ss = [repmat('0', size(ss,1), 1) ss]; end
+  ss = bin2logical(ss);
+  sect.sensorSource = ss;
+  %compatibility layer, code above is equivalent to:
+  %sect.sensorSource        = logical(de2bi(data(idx+30),8,'left-msb'));
+  sa = dec2bin(double(data(idx+31)));
+  while(size(sa, 2) < 8), sa = [repmat('0', size(sa,1), 1) sa]; end
+  sa = bin2logical(sa);
+  sect.sensorsAvailable = sa;
+  %compatibility layer, code above is equivalent to:
+  %sect.sensorsAvailable    = logical(de2bi(data(idx+31),8,'left-msb'));
+  
   block                    = indexData(data, idx+32, idx+35, 'uint16', cpuEndianness)';
   sect.bin1Distance        = block(:,1);
   sect.xmitPulseLength     = block(:,2);
@@ -819,368 +846,4 @@ function [sect, length] = parseBottomTrack( data, idx, cpuEndianness )
   sect.btBeam3RangeMsb        = double(data(idx+79));
   sect.btBeam4RangeMsb        = double(data(idx+80));
   %bytes 82-85 are spare
-end
-
-function [sect length] = parseVMDAS( data, idx, cpuEndianness )
-%PARSEVMDAS Parses a VMDAS nav data section from an ADCP ensemble.
-%
-% Inputs:
-%   data   - vector of raw bytes.
-%   idx    - index that the section starts at.
-%
-% Outputs:
-%   sect   - struct containing the fields that were parsed from trawhe bottom
-%            track section.
-%   length - number of bytes that were parsed.
-%
-
-% Bytes 79 through 92 were added in VmDas version 1.43. How do I test for
-% that.
-
-sect = struct;
-length = 92;
-
-sect.navLeaderId       = indexData(data, idx, idx+1, 'uint16', cpuEndianness)';
-
-sect.utcDay_s       = double(data(idx+2)); % UTC Day
-sect.utcMonth_s     = double(data(idx+3)); % UTC Month
-sect.utcYear_s      = indexData(data, idx+4, idx+5, 'uint16', cpuEndianness)'; % UTC Year
-sect.utcSeconds_s =  indexData(data, idx+6, idx+9, 'uint32', cpuEndianness)'; % UTC time of first fix, seconds since midnight
-
-sect.clockOffset =  indexData(data, idx+10, idx+13, 'int32', cpuEndianness)'; % UTC time of first fix, seconds since midnight
-
-cfac=180/2^31;
-cfac2 = 180/2^15;
-% first latitude position received after the previous ADCP ping
-sect.slatitude = indexData(data, idx+14, idx+17, 'int32', cpuEndianness)' * cfac;
-% This is the first longitude position received after the previous ADCP ping.
-sect.slongitude = indexData(data, idx+18, idx+21, 'int32', cpuEndianness)' * cfac;
-
-% UTC Time of last fix. Time since midnight UTC; LSB = 1E-4 seconds
-sect.y2kSeconds_e =  indexData(data, idx+22, idx+25, 'uint32', cpuEndianness)';
-% Last Latitude. This is the last latitude position received prior to the
-% current ADCP ping
-sect.elatitude = indexData(data, idx+26, idx+29, 'int32', cpuEndianness)' * cfac;
-% Last Longitude. This is the last longitude position received prior to the
-% current ADCP ping
-sect.elatitude = indexData(data, idx+30, idx+33, 'int32', cpuEndianness)' * cfac;
-
-sect.avgSpeed = indexData(data, idx+34, idx+35, 'int16', cpuEndianness)'; % mm/sec
-sect.avgTrackTrue = indexData(data, idx+36, idx+37, 'int16', cpuEndianness)' * cfac2;
-sect.avgTrackMagnetic = indexData(data, idx+38, idx+39, 'int16', cpuEndianness)' * cfac2;
-sect.speedMadeGood = indexData(data, idx+40, idx+41, 'int16', cpuEndianness)'; % mm/sec
-sect.directionMadeGood = indexData(data, idx+42, idx+43, 'int16', cpuEndianness)' * cfac2;
-
-% bytes 45:46 (idx+44:idx+45) reserved for TRDI use.
-
-sect.flags = indexData(data, idx+46, idx+47, 'int16', cpuEndianness)';
-
-% bytes 49:50 (idx+48:idx+49) reserved for TRDI use.
-
-sect.ensembleNumber = indexData(data, idx+50, idx+53, 'uint32', cpuEndianness)';
-sect.ensembleYear      = indexData(data, idx+54, idx+55, 'uint16', cpuEndianness)';
-sect.ensembleDay     = double(data(idx+56));
-sect.ensembleMonth     = double(data(idx+57));
-sect.ensembleSeconds =  indexData(data, idx+58, idx+61, 'uint32', cpuEndianness)';
-
-sect.pitch = indexData(data, idx+62, idx+63, 'int16', cpuEndianness)' * cfac;
-sect.roll = indexData(data, idx+64, idx+65, 'int16', cpuEndianness)' * cfac;
-sect.heading = indexData(data, idx+66, idx+67, 'int16', cpuEndianness)' * cfac;
-
-sect.nSpeedSamplesAveraged = indexData(data, idx+68, idx+69, 'uint16', cpuEndianness)';
-sect.nTrueTrackSamplesAveraged = indexData(data, idx+70, idx+71, 'uint16', cpuEndianness)';
-sect.nMagneticTrackSamplesAveraged = indexData(data, idx+72, idx+73, 'uint16', cpuEndianness)';
-sect.nHeadingSamplesAveraged = indexData(data, idx+74, idx+75, 'uint16', cpuEndianness)';
-sect.nPRSamplesAveraged = indexData(data, idx+76, idx+77, 'uint16', cpuEndianness)';
-
-sect.avgTrueVelNorth = indexData(data, idx+78, idx+79, 'int16', cpuEndianness)';
-sect.avgTrueVelEast = indexData(data, idx+80, idx+81, 'int16', cpuEndianness)';
-sect.avgMagVelNorth = indexData(data, idx+82, idx+83, 'int16', cpuEndianness)';
-sect.avgMagVelEast = indexData(data, idx+84, idx+85, 'int16', cpuEndianness)';
-sect.speedMadeGoodNorth = indexData(data, idx+86, idx+87, 'int16', cpuEndianness)';
-sect.speedMadeGoodEast = indexData(data, idx+88, idx+89, 'int16', cpuEndianness)';
-
-sect.primaryFlags = indexData(data, idx+90, idx+91, 'int16', cpuEndianness)';
-
-end
-
-function [sect length cfg deltaT] = parseWinRiver2( data, idx, cpuEndianness, cfg, iWinRiver2Ens, time)
-%PARSEWINRIVERGENERAL Parses a WinRiver nav data section from an ADCP ensemble.
-%
-% Inputs:
-%   data   - vector of raw bytes.
-%   idx    - index that the section starts at.
-%
-% Outputs:
-%   sect   - struct containing the fields that were parsed from the nav
-%   length - number of bytes that were parsed.
-%
-
-% WinRiver II Software User's Guide pg 268-275, Aug 2016 edition
-% General NMEA WinRiver II Structure (prior to ver. 2.00)
-WR2_NMEA_GGA_V1=100;
-WR2_NMEA_VTG_V1=101;
-WR2_NMEA_DBT_V1=102;
-WR2_NMEA_HDT_V1=103;
-% General NMEA WinRiver II Structure (ver. 2.00 and later)
-WR2_NMEA_GGA_V2=104;
-WR2_NMEA_VTG_V2=105;
-WR2_NMEA_DBT_V2=106;
-WR2_NMEA_HDT_V2=107;
-
-sect = struct;
-length = NaN; % I don't what length is in this context
-
-cfg.sourceprog='WINRIVER2';
-%if cfg.SOURCE~=3
-%    fprintf('\n***** Apparently a WINRIVER II file.\n\n');
-%end
-cfg.SOURCE=3;
-
-specID  = indexData(data, idx+2, idx+3, 'uint16', cpuEndianness);
-msgSize = indexData(data, idx+4, idx+5, 'uint16', cpuEndianness);
-% need to confirm deltaT always written, and deltaT represents
-% time diff between end of ensemble and GPS reading
-deltaT = indexData(data, idx+6, idx+13, 'double', cpuEndianness)';
-
-% WR2_NMEA_GGA_V1=100
-% typedef struct S_NMEA_GGA {
-% TCHAR szHeader[10];
-% TCHAR szUTC[10];
-% DOUBLE dLatitude;
-% TCHAR tcNS;
-% DOUBLE dLongitude;
-% TCHAR tcEW;
-% BYTE ucQuality;
-% BYTE ucNmbSat;
-% FLOAT fHDOP;
-% FLOAT fAltitude;
-% TCHAR tcAltUnit;
-% FLOAT fGeoid;
-% TCHAR tcGeoidUnit;
-% FLOAT fAgeDGPS;
-% SHORT sRefStationId;
-% }S_NMEA_GGA;
-iWR2_NMEA_GGA_V1 = specID == WR2_NMEA_GGA_V1;
-if any(iWR2_NMEA_GGA_V1)
-    sect.WR2_NMEA_GGA_V1.time = time(iWinRiver2Ens(iWR2_NMEA_GGA_V1)) + deltaT(iWR2_NMEA_GGA_V1)/24/3600;
-    %sect.WR2_NMEA_GGA_V1.deltaT = deltaT(iWR2_NMEA_GGA_V1);
-    IND = idx(iWR2_NMEA_GGA_V1)+14;
-    %sect.WR2_NMEA_GGA_V1.szHeader = char(indexData(data, IND(:), IND(:)+9, 'uint8', cpuEndianness))';
-    %szUTC = char(indexData(data, IND(:)+10, IND(:)+19, 'uint8', cpuEndianness))';
-    %sect.WR2_NMEA_GGA_V1.UTC = (sscanf([szUTC(:,1:2)]','%2d')+sscanf([szUTC(:,3:4)]','%2d')/60+sscanf([szUTC(:,5:6)]','%2d')/3600)/24;
-    dLatitude = indexData(data, IND(:)+20, IND(:)+27, 'double', cpuEndianness)';
-    tcNS = char(data(IND(:)+28));
-    dLatitude(tcNS == 'S') = -dLatitude(tcNS == 'S');
-    sect.WR2_NMEA_GGA_V1.dLatitude = dLatitude;
-    dLongitude = indexData(data, IND(:)+29, IND(:)+36, 'double', cpuEndianness)';
-    tcEW = char(data(IND(:)+37));
-    dLongitude(tcEW == 'W') = -dLongitude(tcEW == 'W');
-    sect.WR2_NMEA_GGA_V1.dLongitude = dLongitude;
-    sect.WR2_NMEA_GGA_V1.ucQuality = data(IND+37);
-    sect.WR2_NMEA_GGA_V1.ucNmbSat = data(IND+38);
-    sect.WR2_NMEA_GGA_V1.fHDOP = indexData(data, IND+39, IND+42, 'single', cpuEndianness)';
-    sect.WR2_NMEA_GGA_V1.fAltitude = indexData(data, IND+43, IND+46, 'single', cpuEndianness)';
-    sect.WR2_NMEA_GGA_V1.tcAltUnit = char(data(IND+47));
-    sect.WR2_NMEA_GGA_V1.fGeoid = indexData(data, IND+48, IND+51, 'single', cpuEndianness)';
-    sect.WR2_NMEA_GGA_V1.tcGeoidUnit = char(data(IND+52));
-    sect.WR2_NMEA_GGA_V1.fAgeDGPS = indexData(data, IND+53, IND+56, 'single', cpuEndianness)';
-    sect.WR2_NMEA_GGA_V1.sRefStationId = indexData(data, IND+57, IND+58, 'uint16', cpuEndianness)';
-end
-
-%WR2_NMEA_VTG_V1=101;
-% typedef struct S_NMEA_VTG {
-% TCHAR szHeader[10];
-% FLOAT fCOGTrue;
-% TCHAR tcTrueIndicator;
-% FLOAT fCOGMagn;
-% TCHAR tcMagnIndicator;
-% FLOAT fSpdOverGroundKts;
-% TCHAR tcKtsIndicator;
-% FLOAT fSpdOverGroundKmh;
-% TCHAR tcKmhIndicator;
-% TCHAR tcModeIndicator;
-% }S_NMEA_VTG;
-iWR2_NMEA_VTG_V1 = specID == WR2_NMEA_VTG_V1;
-if any(iWR2_NMEA_VTG_V1)
-    sect.WR2_NMEA_VTG_V1.time = time(iWinRiver2Ens(iWR2_NMEA_VTG_V1)) + deltaT(iWR2_NMEA_VTG_V1)/24/3600;
-    %sect.WR2_NMEA_VTG_V1.deltaT = deltaT(iWR2_NMEA_VTG_V1);
-    IND = idx(iWR2_NMEA_VTG_V1)+14;
-    %sect.WR2_NMEA_VTG_V2.szHeader = char(indexData(data, IND+8, IND+17, 'uint8', cpuEndianness));
-    sect.WR2_NMEA_VTG_V1.fCOGTrue = indexData(data, IND+18, IND+21, 'single', cpuEndianness)';
-    sect.WR2_NMEA_VTG_V1.tcTrueIndicator = char(data(IND+22));
-    sect.WR2_NMEA_VTG_V1.fCOGMagn = indexData(data, IND+23, IND+26, 'single', cpuEndianness)';
-    sect.WR2_NMEA_VTG_V1.tcMagnIndicator = char(data(IND+27));
-    sect.WR2_NMEA_VTG_V1.fSpdOverGroundKts = indexData(data, IND+28, IND+31, 'single', cpuEndianness)';
-    sect.WR2_NMEA_VTG_V1.tcKtsIndicator = char(data(IND+32));
-    sect.WR2_NMEA_VTG_V1.fSpdOverGroundKmh = indexData(data, IND+33, IND+36, 'single', cpuEndianness)';
-    sect.WR2_NMEA_VTG_V1.tcKmhIndicator = char(data(IND+37));
-    sect.WR2_NMEA_VTG_V1.tcModeIndicator = char(data(IND+38));
-end
-
-% WR2_NMEA_DBT_V1=102
-% typedef struct S_NMEA_DBT{
-% TCHAR szHeader[10];
-% FLOAT fWaterDepth_ft;
-% TCHAR tcFeetIndicator;
-% FLOAT fWaterDepth_m;
-% TCHAR tcMeterIndicator;
-% FLOAT fWaterDepth_F;
-% TCHAR tcFathomIndicator;
-% }S_NMEA_DBT;
-iWR2_NMEA_DBT_V1 = specID == WR2_NMEA_DBT_V1;
-if any(iWR2_NMEA_DBT_V1)
-    sect.WR2_NMEA_DBT_V1.time = time(iWinRiver2Ens(iWR2_NMEA_DBT_V1)) + deltaT(iWR2_NMEA_DBT_V1)/24/3600;
-    %sect.WR2_NMEA_DBT_V1.deltaT = deltaT(iWR2_NMEA_DBT_V1);
-    IND = idx(iWR2_NMEA_DBT_V1)+14;
-    %sect.WR2_NMEA_DBT_V1.szHeader = char(indexData(data, IND+8, IND+17, 'uint8', cpuEndianness));
-    sect.WR2_NMEA_DBT_V1.fWaterDepth_ft = indexData(data, IND+18, IND+23, 'single', cpuEndianness)';
-    sect.WR2_NMEA_DBT_V1.tcFeetIndicator = char(data(IND+24));
-    sect.WR2_NMEA_DBT_V1.fWaterDepth_m = indexData(data, IND+25, IND+28, 'single', cpuEndianness)';
-    sect.WR2_NMEA_DBT_V1.tcMeterIndicator = char(data(IND+29));
-    sect.WR2_NMEA_DBT_V1.fWaterDepth_F = indexData(data, IND+30, IND+33, 'single', cpuEndianness)';
-    sect.WR2_NMEA_DBT_V1.tcFathomIndicator = char(data(IND+34));
-end
-
-% WR2_NMEA_HDT_V1=103
-% typedef struct S_NMEA_HDT {
-% TCHAR szHeader[10];
-% double dHeading;
-% TCHAR tcTrueIndicator;
-% }S_NMEA_HDT;
-iWR2_NMEA_HDT_V1 = specID == WR2_NMEA_HDT_V1;
-if any(iWR2_NMEA_HDT_V1)
-    sect.WR2_NMEA_HDT_V1.deltaT = deltaT(iWR2_NMEA_HDT_V1);
-    IND = idx(iWR2_NMEA_HDT_V1)+14;
-    %sect.WR2_NMEA_HDT_V1.szHeader = char(indexData(data, IND+8, IND+17, 'uint8', cpuEndianness));
-    sect.WR2_NMEA_HDT_V1.dHeading = indexData(data, IND+18, IND+25, 'double', cpuEndianness)';
-    sect.WR2_NMEA_HDT_V1.tcTrueIndicator = char(data(IND+26));
-end
-
-% WR2_NMEA_GGA_V2=104
-% typedef struct S_NMEA_GGA_V2 {
-% CHAR szHeader[7];
-% CHAR szUTC[10];
-% DOUBLE dLatitude;
-% CHAR tcNS;
-% DOUBLE dLongitude; %8bytes
-% CHAR tcEW;
-% BYTE ucQuality;
-% BYTE ucNmbSat; %1byte
-% FLOAT fHDOP;
-% FLOAT fAltitude;
-% CHAR tcAltUnit; %1byte
-% FLOAT fGeoid; %4bytes
-% CHAR tcGeoidUnit;
-% FLOAT fAgeDGPS;
-% SHORT sRefStationId; %2bytes
-% } S_NMEA_GGA_V2;
-iWR2_NMEA_GGA_V2 = specID == WR2_NMEA_GGA_V2;
-if any(iWR2_NMEA_GGA_V2)
-    sect.WR2_NMEA_GGA_V2.time = time(iWinRiver2Ens(iWR2_NMEA_GGA_V2)) + deltaT(iWR2_NMEA_GGA_V2)/24/3600;
-    %sect.WR2_NMEA_GGA_V2.deltaT = deltaT(iWR2_NMEA_GGA_V2);
-    IND = idx(iWR2_NMEA_GGA_V2)+14;
-    %sect.WR2_NMEA_GGA_V2.szHeader = char(indexData(data, IND(:), IND(:)+6, 'uint8', cpuEndianness))';
-    szUTC = char(indexData(data, IND(:)+7, IND(:)+16, 'uint8', cpuEndianness))';
-    sect.WR2_NMEA_GGA_V2.szUTC = szUTC;
-    sect.WR2_NMEA_GGA_V2.UTC = (sscanf([szUTC(:,1:2)]','%2d')+sscanf([szUTC(:,3:4)]','%2d')/60+sscanf([szUTC(:,5:6)]','%2d')/3600)/24;
-    dLatitude = indexData(data, IND(:)+17, IND(:)+24, 'double', cpuEndianness)';
-    tcNS = char(data(IND(:)+25));
-    dLatitude(tcNS == 'S') = -dLatitude(tcNS == 'S');
-    sect.WR2_NMEA_GGA_V2.dLatitude = dLatitude;
-    dLongitude = indexData(data, IND(:)+26, IND(:)+33, 'double', cpuEndianness)';
-    tcEW = char(data(IND(:)+34));
-    dLongitude(tcEW == 'W') = -dLongitude(tcEW == 'W');
-    sect.WR2_NMEA_GGA_V2.dLongitude = dLongitude;
-    sect.WR2_NMEA_GGA_V2.ucQuality = data(IND+35);
-    sect.WR2_NMEA_GGA_V2.ucNmbSat = data(IND+36);
-    sect.WR2_NMEA_GGA_V2.fHDOP = indexData(data, IND+37, IND+40, 'single', cpuEndianness)';
-    sect.WR2_NMEA_GGA_V2.fAltitude = indexData(data, IND+41, IND+44, 'single', cpuEndianness)';
-    sect.WR2_NMEA_GGA_V2.tcAltUnit = char(data(IND+45));
-    sect.WR2_NMEA_GGA_V2.fGeoid = indexData(data, IND+46, IND+49, 'single', cpuEndianness)';
-    sect.WR2_NMEA_GGA_V2.tcGeoidUnit = char(data(IND+50));
-    sect.WR2_NMEA_GGA_V2.fAgeDGPS = indexData(data, IND+51, IND+54, 'single', cpuEndianness)';
-    sect.WR2_NMEA_GGA_V2.sRefStationId = indexData(data, IND+55, IND+58, 'uint16', cpuEndianness)';
-end
-
-% S_NMEA_VTG_V2=105
-% typedef struct S_NMEA_VTG_V2 {
-% CHAR szHeader[7];
-% FLOAT fCOGTrue;
-% CHAR tcTrueIndicator;
-% FLOAT fCOGMagn;
-% CHAR tcMagnIndicator;
-% FLOAT fSpdOverGroundKts;
-% CHAR tcKtsIndicator;
-% FLOAT fSpdOverGroundKmh;
-% CHAR tcKmhIndicator;
-% CHAR tcModeIndicator;
-% } S_NMEA_VTG_V2;
-iWR2_NMEA_VTG_V2 = specID == WR2_NMEA_VTG_V2;
-if any(iWR2_NMEA_VTG_V2)
-    sect.WR2_NMEA_VTG_V2.time = time(iWinRiver2Ens(iWR2_NMEA_VTG_V2)) + deltaT(iWR2_NMEA_VTG_V2)/24/3600;
-    %sect.WR2_NMEA_VTG_V2.deltaT = deltaT(iWR2_NMEA_VTG_V2);
-    IND = idx(iWR2_NMEA_VTG_V2)+14;
-    %sect.WR2_NMEA_VTG_V2.szHeader = char(indexData(data, IND+8, IND+14, 'uint8', cpuEndianness));
-    sect.WR2_NMEA_VTG_V2.fCOGTrue = indexData(data, IND+15, IND+18, 'single', cpuEndianness)';
-    sect.WR2_NMEA_VTG_V2.tcTrueIndicator = char(data(IND+19));
-    sect.WR2_NMEA_VTG_V2.fCOGMagn = indexData(data, IND+20, IND+23, 'single', cpuEndianness)';
-    sect.WR2_NMEA_VTG_V2.tcMagnIndicator = char(data(IND+20));
-    sect.WR2_NMEA_VTG_V2.fSpdOverGroundKts = indexData(data, IND+21, IND+24, 'single', cpuEndianness)';
-    sect.WR2_NMEA_VTG_V2.tcKtsIndicator = char(data(IND+21));
-    sect.WR2_NMEA_VTG_V2.fSpdOverGroundKmh = indexData(data, IND+22, IND+25, 'single', cpuEndianness)';
-    sect.WR2_NMEA_VTG_V2.tcKmhIndicator = char(data(IND+26));
-    sect.WR2_NMEA_VTG_V2.tcModeIndicator = char(data(IND+27));
-end
-
-% S_NMEA_DBT_V2=106;
-% typedef struct S_NMEA_DBT_V2 {
-% CHAR szHeader[7];
-% FLOAT fWaterDepth_ft;
-% CHAR tcFeetIndicator;
-% FLOAT fWaterDepth_m;
-% CHAR tcMeterIndicator;
-% FLOAT fWaterDepth_F;
-% CHAR tcFathomIndicator;
-% } S_NMEA_DBT_V2;
-iWR2_NMEA_DBT_V2 = specID == WR2_NMEA_DBT_V2;
-if any(iWR2_NMEA_DBT_V2)
-    sect.WR2_NMEA_DBT_V2.time = time(iWinRiver2Ens(iWR2_NMEA_DBT_V2)) + deltaT(iWR2_NMEA_DBT_V2)/24/3600;
-    %sect.WR2_NMEA_DBT_V2.deltaT = deltaT(iWR2_NMEA_DBT_V2);
-    IND = idx(iWR2_NMEA_DBT_V2)+14;
-    %sect.WR2_NMEA_DBT_V2.szHeader = char(indexData(data, IND+8, IND+14, 'uint8', cpuEndianness));
-    sect.WR2_NMEA_DBT_V2.fWaterDepth_ft = indexData(data, IND+15, IND+18, 'single', cpuEndianness)';
-    sect.WR2_NMEA_DBT_V2.tcFeetIndicator = char(data(IND+19));
-    sect.WR2_NMEA_DBT_V2.fWaterDepth_m = indexData(data, IND+20, IND+23, 'single', cpuEndianness)';
-    sect.WR2_NMEA_DBT_V2.tcMeterIndicator = char(data(IND+24));
-    sect.WR2_NMEA_DBT_V2.fWaterDepth_F = indexData(data, IND+25, IND+28, 'single', cpuEndianness)';
-    sect.WR2_NMEA_DBT_V2.tcFathomIndicator = char(data(IND+29));
-end
-
-% S_NMEA_HDT_V2=107;
-% typedef struct S_NMEA_HDT_V2 {
-% CHAR szHeader[7];
-% double dHeading;
-% CHAR tcTrueIndicator;
-% } S_NMEA_HDT_V2;
-iWR2_NMEA_HDT_V2 = specID == WR2_NMEA_HDT_V2;
-if any(iWR2_NMEA_HDT_V2)
-    sect.WR2_NMEA_HDT_V2.time = time(iWinRiver2Ens(iWR2_NMEA_HDT_V2)) + deltaT(iWR2_NMEA_HDT_V2)/24/3600;
-    %sect.WR2_NMEA_HDT_V2.deltaT = deltaT(iWR2_NMEA_HDT_V2);
-    IND = idx(iWR2_NMEA_HDT_V2)+14;
-    %sect.WR2_NMEA_HDT_V2.szHeader = char(indexData(data, IND+8, IND+14, 'uint8', cpuEndianness));
-    sect.WR2_NMEA_HDT_V2.dHeading = indexData(data, IND+15, IND+22, 'double', cpuEndianness)';
-    sect.WR2_NMEA_HDT_V2.tcTrueIndicator = char(data(IND+23));
-end
-
-end
-
-%-------------------------------------
-function opt=getopt(val,varargin);
-% Returns one of a list (0=first in varargin, etc.)
-if val+1>length(varargin)
-    opt='unknown';
-else
-    opt=varargin{val+1};
-end
 end
