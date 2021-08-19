@@ -1,5 +1,5 @@
 % what
-S, project                      = Integrated Marine Observing System (IMOS)
+S, project                      = [mat setAIMSmetadata('[ddb Site]','project')]
 S, Conventions                  = CF-1.6,IMOS-1.4
 S, standard_name_vocabulary     = NetCDF Climate and Forecast (CF) Metadata Convention Standard Name Table 45
 S, title                        = [ddb Site Sites Description]
@@ -12,13 +12,13 @@ S, source                       = [ddb DeploymentType]
 S, instrument                   = [ddb InstrumentID Instruments Make] [ddb InstrumentID Instruments Model]
 S, keywords                     = [ddb InstrumentID Instruments Model], [mat cellStructCons(sample_data.dimensions, 'name', ', ')], [mat cellStructCons(sample_data.variables, 'name', ', ')]
 S, keywords_vocabulary          = IMOS parameter names. See https://github.com/aodn/imos-toolbox/blob/master/IMOS/imosParameters.txt
-S, references                   = http://imos.org.au, http://www.aims.gov.au/imosmoorings/
+S, references                   = [mat setAIMSmetadata('[ddb Site]','references')]
 S, site_code                    = [mat strtok('[ddb Site]', '-')]
 S, platform_code                = [mat strtok('[ddb Site]', '-')]
 S, deployment_code              = [ddb Site]
 S, featureType                  = [mat sample_data.meta.featureType]
 S, cdm_data_type                = Station
-S, naming_authority             = IMOS
+S, naming_authority             = [mat setAIMSmetadata('[ddb Site]','naming_authority')]
 S, metadata                     = 
 S, sensorML                     = 
 S, instrument_serial_number     = [mat updateIfEmpty('[ddb InstrumentID Instruments SerialNumber]', sample_data.meta.instrument_serial_no)]
@@ -64,8 +64,8 @@ D, time_coverage_start          =
 D, time_coverage_end            = 
 
 % who
-S, data_centre                  = Australian Ocean Data Network (AODN)
-S, data_centre_email            = info@aodn.org.au
+S, data_centre                  = [mat setAIMSmetadata('[ddb Site]','data_centre')]
+S, data_centre_email            = [mat setAIMSmetadata('[ddb Site]','data_centre_email')]
 S, author_email                 = adc@aims.gov.au
 S, author                       = Australian Institute of Marine Science
 S, principal_investigator       = [mat setAIMSmetadata('[ddb Site]','principal_investigator')]
@@ -74,7 +74,7 @@ S, institution_references       = [mat setAIMSmetadata('[ddb Site]','institution
 
 % how
 S, lineage                 = 
-S, citation                = The citation in a list of references is: "IMOS [year-of-data-download], [Title], [data-access-URL], accessed [date-of-access].".
+S, citation                = [mat setAIMSmetadata('[ddb Site]','citation')]
 S, acknowledgement         = [mat setAIMSmetadata('[ddb Site]','acknowledgement')]
-S, disclaimer              = Data, products and services from IMOS are provided "as is" without any warranty as to fitness for a particular purpose.
+S, disclaimer              = [mat setAIMSmetadata('[ddb Site]','disclaimer')]
 S, license                 = http://creativecommons.org/licenses/by/4.0/
