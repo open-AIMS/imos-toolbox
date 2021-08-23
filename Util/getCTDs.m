@@ -70,7 +70,7 @@ for i=1:lenDep
         tempVal = executeQuery('Sites', 'Site', ctds(i).Site);
         % A CTDData doesn't necessarily has an associated site, 
         % CTDData already contains some site information
-        if ~isempty(tempVal), sites = tempVal; end
+        if ~isempty(tempVal), sites{1} = tempVal; end
     else
         tempVal = executeQuery('Sites', 'Site', ctds(i).Site);
         if ~isempty(tempVal), sites{i} = tempVal; end
