@@ -89,11 +89,20 @@ switch mode
         % significantly out against the ddb station time (check for 
         % instrument clock not properly set or typos in the database)
         if ~strcmpi(sample_data.(type){k}.name, 'TIME'), return; end
-        
-        if time < time_in_water
+
+        % get in/out water times leeway (in minutes), usefull if recored
+        % times in the db aren't accurate enough
+        propFile = fullfile('AutomaticQC', 'imosInOutWaterQC.txt');
+        try
+            inoutleeway = str2double(readProperty('inoutleeway',   propFile)) / 1440;
+        catch
+            inoutleeway = 0;
+        end
+
+        if time < (time_in_water - inoutleeway)
             error(['TIME value ' datestr(time, 'yyyy-mm-dd HH:MM:SS') ' is lower than time_deployment_start ' datestr(time_in_water, 'yyyy-mm-dd HH:MM:SS') ' => Check ddb station time values against data file time values!']);
         end
-        if time > time_out_water
+        if time > (time_out_water + inoutleeway)
             error(['TIME value ' datestr(time, 'yyyy-mm-dd HH:MM:SS') ' is greater than time_deployment_end ' datestr(time_out_water, 'yyyy-mm-dd HH:MM:SS') ' => Check ddb station time values against data file time values!']);
         end
         
