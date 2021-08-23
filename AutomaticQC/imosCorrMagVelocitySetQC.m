@@ -48,11 +48,11 @@ idVcur = 0;
 idWcur = 0;
 idCspd = 0;
 idCdir = 0;
-num_beams = sample_data.meta.adcp_info.number_of_beams;
-idCMAG = cell(num_beams, 1);
-for j=1:num_beams
-    idCMAG{j}  = 0;
-end
+
+% check if the data is compatible with the QC algorithm
+% test split to first test for current variables, then
+% correlation magnitude, of which the may be more/less than
+% assume 4 for RDI workhorse instrument.
 lenVar = length(sample_data.variables);
 for i=1:lenVar
     paramName = sample_data.variables{i}.name;
@@ -62,14 +62,23 @@ for i=1:lenVar
     if strcmpi(paramName, 'WCUR'),      idWcur = i; end
     if strcmpi(paramName, 'CSPD'),      idCspd = i; end
     if strncmpi(paramName, 'CDIR', 4),  idCdir = i; end
+end
+idMandatory = (idUcur | idVcur | idWcur | idCspd | idCdir);
+if ~idMandatory, return; end
+
+% test for correlation magnitude
+num_beams = sample_data.meta.adcp_info.number_of_beams;
+idCMAG = cell(num_beams, 1);
+for j=1:num_beams
+    idCMAG{j}  = 0;
+end
+for i=1:lenVar
+    paramName = sample_data.variables{i}.name;
     for j=1:num_beams
         cc = int2str(j);
         if strcmpi(paramName, ['CMAG' cc]), idCMAG{j} = i; end
     end
 end
-
-% check if the data is compatible with the QC algorithm
-idMandatory = (idUcur | idVcur | idWcur | idCspd | idCdir);
 for j=1:num_beams
     idMandatory = idMandatory & idCMAG{j};
 end
