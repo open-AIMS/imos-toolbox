@@ -152,7 +152,7 @@ function sample_data = workhorseParse( filename, ~)
       'will vary between same frequency WH ADCPs.']);
 
   imported.('TX_CURRENT') = fillmissing(imported.('TX_CURRENT'),'next');
-  volt_attr = struct('comment', ['This parameter is the transmit current (ADC channel 0). ' ...
+  current_attr = struct('comment', ['This parameter is the transmit current (ADC channel 0). ' ...
       'The transmit voltage and current values are calculated for the built-in-test by multiplying the ADC upper ', ...
       '8-bit value by the scale factor (they are very rough values). However, the transmit voltage and current ', ...
       'measurements are not necessarily accurate, since the sampling is not synchronized to the phasing of the ', ...
@@ -233,6 +233,7 @@ function sample_data = workhorseParse( filename, ~)
   end
 
   xattrs('TX_VOLT') = volt_attr;
+  xattrs('TX_CURRENT') = current_attr;
   cast_fun = IMOS.resolve.imos_type('PRES_REL');
   xattrs('PRES_REL') = struct('applied_offset',cast_fun(-gsw_P0/10^4)); % (gsw_P0/10^4 = 10.1325 dbar)
 

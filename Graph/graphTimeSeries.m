@@ -160,6 +160,11 @@ function [graphs, lines, vars] = graphTimeSeries( parent, sample_data, vars, ext
             yLimits = [floor(min(sample_data.dimensions{iFDim}.data)*10)/10, ...
                 ceil(max(sample_data.dimensions{iFDim}.data)*10)/10];
             
+        case 'graphTimeSeriesTimeWavelength'
+            iFDim = sample_data.variables{k}.dimensions(2);
+            yLimits = [floor(min(sample_data.dimensions{iFDim}.data)*10)/10, ...
+                ceil(max(sample_data.dimensions{iFDim}.data)*10)/10];
+            
         case 'graphTimeSeriesTimeFrequencyDirection'
             yLimits = [-1, 1];
             xLimits = [-1, 1];

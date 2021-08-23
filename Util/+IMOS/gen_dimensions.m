@@ -102,6 +102,9 @@ if nargin < 2
     elseif strcmpi(mode, 'adcp')
         dimensions = IMOS.templates.dimensions.adcp;
         return
+    elseif strcmpi(mode, 'multispec')
+        dimensions = IMOS.templates.dimensions.multispec;
+        return
     else
         ndims = 1;
         d_names = randomNames();

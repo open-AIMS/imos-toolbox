@@ -5,6 +5,7 @@ classdef  dimensions
 		profile = profile_dims();
 		ad_profile = ad_profile_dims();
 		adcp = adcp_dims();
+        multispec = multispec_dims();
 	end
 end
 
@@ -29,4 +30,10 @@ end
 function [dimensions] = adcp_dims()
 dimensions = timeseries_dims();
 dimensions{2} = struct('name','DIST_ALONG_BEAMS','typeCastFunc',getIMOSType('DIST_ALONG_BEAMS'),'data',[]);
+end
+
+function [dimensions] = multispec_dims()
+dimensions = timeseries_dims();
+%dimensions{2} = struct('name','WAVELENGTHS','typeCastFunc',getIMOSType('WAVELENGTHS'),'data',[]);
+dimensions{2} = struct('name','WAVELENGTHS','typeCastFunc',@single,'data',[]);
 end

@@ -62,7 +62,7 @@ IUCLdir=fullfile(AODNbaseDir,'imos-user-code-library','MATLAB_R2011');
 %
 defaultPath = '';
 defaultAddOET=true; % add openearth tools
-defaultAddNCT=true; % add nctoolbox, used by imos user code library
+defaultAddNCT=false; % add nctoolbox, used by imos user code library
 
 %% user should not need to edit anything further
 [imosToolboxDir, name, ext] = fileparts(mfilename('fullpath'));
@@ -125,7 +125,7 @@ reAddPaths(EPdir,'AIMS easyplot',true);
 %reAddPaths(fullfile(AMdir,'aims_proc'),'AIMS aims_proc',true);
 % nan safe routines used by aims_vpca
 % but from R2018b all (?) stats routines nansafe
-reAddPaths(fullfile(AMdir,'NaN-3.4.5'),'AIMS NaN toolbox',false);
+reAddPaths(fullfile(AMdir,'NaN-3.6.0'),'AIMS NaN toolbox',false);
 % IGRF
 %reAddPaths(fullfile(AMdir,'igrf'),'IGRF toolbox',true);
 

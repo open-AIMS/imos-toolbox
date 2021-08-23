@@ -18,7 +18,7 @@ function sample_data = IMOParse( filename, mode )
 % Outputs:
 %   sample_data - Struct containing sample data.
 %
-% Code based on SBE37SMParse.m
+% Code based on workhorseParse.m, SBE37SMParse.m
 %
 % Each data record starts with a Port Identifier. These Ports correspond
 % to the Port numbering on the bulkhead connectors, with the exception
@@ -110,16 +110,14 @@ try
     frewind(fid);
     if strcmpi(line, 'In-situ Marine Optics')
         % most likely a .TXT format DL3 file
-        [procHeader, data, units, comment] = readIMODL3(fid);
+        [procHeader, data, xattrs] = IMO.readIMODL3(fid);
     elseif strcmp(line(1), '$') || strfind(line, 'IMO-DL3')
         % most likely a .log format MS8/NTU/PAR file
-        [procHeader, data, units, comment] = readIMOsensor(fid);
+        [procHeader, data, xattrs] = IMO.readIMOsensor(fid);
     else
         error('Unknown IMO format');
     end
-    
     fclose(fid);
-    
 catch e
     if fid ~= -1, fclose(fid); end
     rethrow(e);
@@ -130,580 +128,113 @@ procHeader.toolbox_input_file = filename;
 % create sample data struct,
 % and copy all the data in
 sample_data = struct;
-
 sample_data.toolbox_input_file  = filename;
-sample_data.meta.featureType    = mode;
-sample_data.meta.procHeader     = procHeader;
 
-sample_data.meta.instrument_make = 'IMO';
+%%
+meta = struct;
+meta.featureType    = mode;
+meta.procHeader     = procHeader;
+
+meta.instrument_make = 'IMO';
 if isfield(procHeader, 'instrument_model')
-    sample_data.meta.instrument_model = procHeader.instrument_model;
+    meta.instrument_model = procHeader.instrument_model;
 else
-    sample_data.meta.instrument_model = 'IMO Unknown';
+    meta.instrument_model = 'IMO Unknown';
 end
 
 if isfield(procHeader, 'instrument_firmware')
-    sample_data.meta.instrument_firmware = procHeader.instrument_firmware;
+    meta.instrument_firmware = procHeader.instrument_firmware;
 else
-    sample_data.meta.instrument_firmware = '';
+    meta.instrument_firmware = '';
 end
 
 if isfield(procHeader, 'instrument_serial_num')
-    sample_data.meta.instrument_serial_no = procHeader.instrument_serial_num;
+    meta.instrument_serial_no = procHeader.instrument_serial_num;
 elseif isfield(procHeader, 'instrument_serial_number')
-    sample_data.meta.instrument_serial_no = procHeader.instrument_serial_number;
+    meta.instrument_serial_no = procHeader.instrument_serial_number;
 else
-    sample_data.meta.instrument_serial_no = '';
+    meta.instrument_serial_no = '';
 end
 
 time = data.TIME;
 
 if isfield(procHeader, 'instrument_sample_interval')
-    sample_data.meta.instrument_sample_interval = procHeader.instrument_sample_interval;
+    meta.instrument_sample_interval = procHeader.instrument_sample_interval;
 else
-    sample_data.meta.instrument_sample_interval = median(diff(time*24*3600));
+    meta.instrument_sample_interval = median(diff(time*24*3600));
 end
 
-if isfield(procHeader, 'instrument_sampling_mode') && strcmp(procHeader.instrument_sampling_mode, 'BURST')
-    sample_data.meta.instrument_burst_interval = procHeader.instrument_burst_interval;
-    sample_data.meta.instrument_burst_duration = procHeader.instrument_burst_duration;
+if isfield(procHeader, 'instrument_burst_interval')
+    meta.instrument_burst_interval = procHeader.instrument_burst_interval;
 end
 
-sample_data.dimensions = {};
-sample_data.variables  = {};
-
-% generate time data from header information
-sample_data.dimensions{1}.name          = 'TIME';
-sample_data.dimensions{1}.typeCastFunc  = str2func(netcdf3ToMatlabType(imosParameters(sample_data.dimensions{1}.name, 'type')));
-sample_data.dimensions{1}.data          = sample_data.dimensions{1}.typeCastFunc(time);
-
-sample_data.variables{end+1}.name           = 'TIMESERIES';
-sample_data.variables{end}.typeCastFunc     = str2func(netcdf3ToMatlabType(imosParameters(sample_data.variables{end}.name, 'type')));
-sample_data.variables{end}.data             = sample_data.variables{end}.typeCastFunc(1);
-sample_data.variables{end}.dimensions       = [];
-sample_data.variables{end+1}.name           = 'LATITUDE';
-sample_data.variables{end}.typeCastFunc     = str2func(netcdf3ToMatlabType(imosParameters(sample_data.variables{end}.name, 'type')));
-sample_data.variables{end}.data             = sample_data.variables{end}.typeCastFunc(NaN);
-sample_data.variables{end}.dimensions       = [];
-sample_data.variables{end+1}.name           = 'LONGITUDE';
-sample_data.variables{end}.typeCastFunc     = str2func(netcdf3ToMatlabType(imosParameters(sample_data.variables{end}.name, 'type')));
-sample_data.variables{end}.data             = sample_data.variables{end}.typeCastFunc(NaN);
-sample_data.variables{end}.dimensions       = [];
-sample_data.variables{end+1}.name           = 'NOMINAL_DEPTH';
-sample_data.variables{end}.typeCastFunc     = str2func(netcdf3ToMatlabType(imosParameters(sample_data.variables{end}.name, 'type')));
-sample_data.variables{end}.data             = sample_data.variables{end}.typeCastFunc(NaN);
-sample_data.variables{end}.dimensions       = [];
-
-% scan through the list of parameters that were read
-% from the file, and create a variable for each
-vars = fieldnames(data);
-coordinates = 'TIME LATITUDE LONGITUDE NOMINAL_DEPTH';
-for k = 1:length(vars)
-    
-    if strncmp('TIME', vars{k}, 4), continue; end
-    
-    % dimensions definition must stay in this order : T, Z, Y, X, others;
-    % to be CF compliant
-    sample_data.variables{end+1}.dimensions     = 1;
-    sample_data.variables{end  }.name           = vars{k};
-    sample_data.variables{end  }.typeCastFunc   = str2func(netcdf3ToMatlabType(imosParameters(sample_data.variables{end}.name, 'type')));
-    sample_data.variables{end  }.data           = sample_data.variables{end}.typeCastFunc(data.(vars{k}));
-    sample_data.variables{end  }.coordinates    = coordinates;
-    if isfield(comment, vars{k})
-        sample_data.variables{end  }.comment        = comment.(vars{k});
-    end
-    if isfield(units, vars{k})
-        sample_data.variables{end  }.units        = units.(vars{k});
-    end
+if isfield(procHeader, 'instrument_burst_duration')
+    meta.instrument_burst_duration = procHeader.instrument_burst_duration;
 end
 
+if isfield(procHeader, 'instrument_burst_samples')
+    meta.instrument_burst_samples = procHeader.instrument_burst_samples;
+end
+
+% While some basic metadata has been extracted not sure what is required
+% for later procesing so copy all calibration_X or configuration_X entries
+header_keys = fieldnames(procHeader);
+ind = find(~cellfun(@isempty, regexp(header_keys, '^calibration_|^configuration_', 'match')));
+for k = 1:numel(ind)
+   meta_name = char(header_keys{ind(k)});
+   meta.(meta_name) = procHeader.(meta_name);
 end
 
 %%
-function [header, data, units, comment] = readIMODL3(fid)
-% parse IMO DL3 TXT file
+[multispec_vars, ts_vars, isMultispec] = IMO.import_mappings(procHeader, data);
 
-% unlikely to be handled.
-
-header = struct;
-data = struct;
-units = struct;
-comment = struct;
-
-try
-    frewind(fid);
-    allLines = textscan(fid, '%s', 'Delimiter', '\n');
-    allLines = allLines{1};
-catch e
-    if fid ~= -1, fclose(fid); end
-    rethrow(e);
-end
-
-tf = contains(allLines, '-------------------------------');
-ind = find(tf);
-if isempty(ind)
-    error('IMO DL3 TXT format not handled.')
-end
-header.headerlines = allLines(1:ind);
-dataLines = allLines(ind+1:end);
-
-ind_conf = find(contains(header.headerlines, '---------CONFIGURATION---------'));
-
-% instrument info
-instrument_info = header.headerlines(1:ind_conf-1);
-
-% assume ordering in instrument_info are fixed
-header.instrument_make = strtrim(instrument_info{1});
-header.instrument_comment = strtrim(instrument_info{2});
-tokens = regexp(instrument_info{3}, '([\w-]*)\s+\(SN:(\d+)\)', 'tokens');
-header.instrument_model = tokens{1}{1};
-header.instrument_serial_number = tokens{1}{2};
-
-ind = find(contains(instrument_info, 'FIRMWARE'));
-token = regexp(instrument_info{ind}, 'FIRMWARE:\s+(\w*)', 'tokens');
-header.firmware = cell2str(token{1});
-
-% instrument configuration
-ind_cal = find(contains(header.headerlines, '---CALIBRATION CONFIGURATION---'));
-instrument_configuration = header.headerlines(ind_conf+1:ind_cal-1);
-
-ind = find(contains(instrument_configuration, 'IN-WATER'));
-if isempty(ind)
-    header.instrument_mode = 'AIR_MODE';
-else
-    header.instrument_mode = 'WATER_MODE';
-end
-
-%DETECTOR OUTPUT = IRR
-ind = find(contains(instrument_configuration, 'DETECTOR OUTPUT ='));
-token = regexp(instrument_configuration{ind}, 'DETECTOR OUTPUT =\s+(\w*)', 'tokens');
-% if not IRR or RAD then error as cannot handle RAW
-if ~(strcmp(token{1}{1}, 'IRR') | strcmp(token{1}{1}, 'RAD'))
-    error('Cannot handle DETECTOR OUTPUT = RAW.');
-end
-
-ind = find(contains(instrument_configuration, 'SAMPLERATE ='));
-token = regexp(instrument_configuration{ind}, 'SAMPLERATE =\s+(\w*)', 'tokens');
-header.instrument_sampling_rate = 1.0/str2num(token{1}{1}); % hertz -> seconds
-
-isBurstSampling = false;
-isContinuousSampling = false;
-
-% SAMPLERATE = 1
-% SAMPLING MODE = BURSTMODE
-% BURST SAMPLES = 10
-% BURST INTERVAL = 15
-% BURST PROGRAM = 1
-
-ind = find(contains(instrument_configuration, 'SAMPLING MODE ='));
-token = regexp(instrument_configuration{ind}, 'SAMPLING MODE =\s+(\w*)', 'tokens');
-if contains(instrument_configuration{ind}, 'BURST')
-    isBurstSampling = true;
-    header.instrument_sampling_mode = 'BURST';
-    
-    ind = find(contains(instrument_configuration, 'BURST SAMPLES ='));
-    token = regexp(instrument_configuration{ind}, 'BURST SAMPLES =\s+(\d*)', 'tokens');
-    header.instrument_burst_duration = str2num(token{1}{1}) * header.instrument_sampling_rate; %seconds
-    
-    ind = find(contains(instrument_configuration, 'BURST INTERVAL ='));
-    token = regexp(instrument_configuration{ind}, 'BURST INTERVAL =\s+(\d*)', 'tokens');
-    header.instrument_burst_interval = str2num(token{1}{1}) * 60; %minutes -> seconds
-elseif contains(instrument_configuration{ind}, 'CONTINUOUS')
-    isContinuousSampling = true;
-    header.instrument_sampling_mode = 'CONTINUOUS';
-else
-    error('Unknown sampling mode.');
-end
-
-ind = find(contains(instrument_configuration, 'SAMPLING MODE ='));
-if ~isempty(ind)
-    isBurstSampling = true;
-end
-
-ind = find(contains(instrument_configuration, 'TIMEZONE ='));
-token = regexp(instrument_configuration{ind}, 'TIMEZONE =\s+([+-]?(?:\d+\.?\d*|\d*\.\d+))', 'tokens');
-header.instrument_utc_offset = str2num(token{1}{1}); %hours
-
-ind = find(contains(instrument_configuration, 'WIPE INTERVAL ='));
-token = regexp(instrument_configuration{ind}, 'WIPE INTERVAL =\s+(\d*)', 'tokens');
-header.instrument_wiper_interval = str2num(token{1}{1}) * 3600; %hours -> seconds
-
-% instrument calibration
-instrument_calibration = header.headerlines(ind_cal+1:length(header.headerlines)-1);
-
-
-ind = find(contains(instrument_calibration, 'WAVELENGTHS ='));
-token = regexp(instrument_calibration{ind}, 'WAVELENGTHS\s+=\s+\[(\S+)\]', 'tokens');
-header.instrument_wavelengths = token{1}{1};
-
-for v = {'WAVELENGTHS' 'FWHM' 'DARKSLOPE' 'DARKYINT' 'GAIN' 'TEMPCO' 'IMM'}
-    vname = char(v);
-    ind = find(contains(instrument_calibration, [vname ' =']));
-    if ~isempty(ind)
-        token = regexp(instrument_calibration{ind}, [ vname '\s+=\s+\[(\S+)\]' ], 'tokens');
-        header.(['instrument_' vname]) = token{1}{1};
-    end
-end
-
-
-% data
-splitData = split(dataLines, ',');
-[nrows, ncols] = size(splitData);
-
-if ncols == 18 % no TEMP or DEPTH sensor
-    indDate = 3;
-    indTime = 4;
-    indWiper = 5;
-    indBatt = 6;
-    indTilt = 7;
-    indInternalTemp = 8;
-    indPar = 9;
-    indCh1 = 10;
-    indCh9 = 18;
-elseif ncols == 20
-    indDate = 3;
-    indTime = 4;
-    indWiper = 5;
-    indBatt = 6;
-    indDepth = 7;
-    indTemp = 8;
-    indTilt = 9;
-    indInternalTemp = 10;
-    indPar = 11;
-    indCh1 = 12;
-    indCh9 = 20;
-else
-    error('Unknown data layout.')
-end
-
-data.TIME = datenum([char(splitData(:,indDate)) char(splitData(:,indTime))],'dd/mm/yyyyHH:MM:SS.FFF');
-data.TIME = data.TIME - header.instrument_utc_offset/24.0; % convert to UTC
-comment.TIME = 'TIME (UTC)';
-
-data.WIPER_STATUS = str2double(splitData(:,indWiper));
-comment.WIPER_STATUS = 'Wiper Position (0 for open and 1 for closed)';
-
-data.BAT_VOLT = str2double(splitData(:,indBatt));
-comment.BAT_VOLT = 'Input Voltage (V)';
-units.BAT_VOLT = 'volts';
-
-if ncols == 20
-    data.DEPTH = str2double(splitData(:,indDepth));
-    units.DEPTH = 'm';
-    data.TEMP = str2double(splitData(:,indTemp));
-    units.TEMP =  'Degrees Celsius';
-end
-
-data.TILT = str2double(splitData(:,indTilt));
-units.TILT = 'degrees';
-
-data.INTERNAL_TEMP = str2double(splitData(:,indInternalTemp));
-comment.INTERNAL_TEMP = 'Internal instrument temperature';
-units.INTERNAL_TEMP = 'Degrees Celsius';
-
-% internally calculated PAR
-data.PAR = str2double(splitData(:,indPar)); % umole m^-2 s^-1
-comment.PAR = [header.instrument_model ' instrument calculated PAR from integrated irradiance from 400 to 700nm'];
-units.PAR = 'umole m-2 s-1';
-
-wavelengths = split(header.instrument_WAVELENGTHS, ',');
-for i=indCh1:indCh9
-    vName = ['CH' num2str(i-indCh1+1)];
-    data.(vName) = str2double(splitData(:,i));
-    units.(vName) =  'uW cm-2'; %?
-    comment.(vName) = [wavelengths{i-indCh1+1} 'nm'];
-end
-
-[data, comment, units] = calcPAR(data, comment, units, header);
-
-end
-
-%%
-function [data, comment, units] = calcPAR(data, comment, units, header)
-%CALCPAR Calculate PAR by integrating irradiance over 400 to 700nm
-% Requires data (nSamples, nWavelenghts) in W m^-2 nm^-1
-% lambda (sample wavelenghts) in nm
-
-IMM = NaN;
-ableToCorrectPar = false;
-if isfield(header, 'instrument_IMM') & isfield(data, 'DEPTH')
-    ableToCorrectPar = true;
-    IMM = str2double(split(header.instrument_IMM, ','));
-end
-
-% PAR calculated
-% put all channel data into one array
-wavelengths = split(header.instrument_WAVELENGTHS, ',');
-lambda = str2double(wavelengths);
-nChannels = length(lambda);
-nSamples = size(data.CH1,1);
-channel_data = zeros([nSamples, nChannels]);
-for i = 1:nChannels
-    vName = ['CH' num2str(i)];
-    channel_data(:,i)= data.(vName);
-end
-
-correctionString = '';
-depth_offset = 0.30; % m between pressure sensor and light meter
-if ableToCorrectPar
-    if strcmp(header.instrument_mode, 'WATER_MODE')
-        iBad = data.DEPTH < depth_offset;
-        if sum(iBad) > 1
-            correctionString = [' Channel data (' num2str(sum(iBad)) ' of ' num2str(length(iBad)) ') has been corrected for ' header.instrument_mode ' deployment and DEPTH values < ' num2str(depth_offset) 'm.'];
-            for i = 1:nChannels
-                vName = ['CH' num2str(i)];
-                channel_data(iBad,i)= channel_data(iBad,i) / IMM(i);
-            end
-        end
+if isMultispec
+    dimensions = IMOS.gen_dimensions('multispec');
+    idx = getVar(dimensions, 'TIME');
+    dimensions{idx}.data = time;
+    if isfield(meta, 'instrument_average_interval')
+        dimensions{idx}.comment = ['Time stamp corresponds to the start of the measurement which lasts ' num2str(meta.instrument_average_interval) ' seconds.'];
     else
-        iBad = data.DEPTH > depth_offset;
-        if sum(iBad) > 1
-            correctionString = [' Channel data (' num2str(sum(iBad)) ' of ' num2str(length(iBad)) ') has been corrected for ' header.instrument_mode ' deployment and DEPTH values > ' num2str(depth_offset) 'm.'];
-            for i = 1:nChannels
-                vName = ['CH' num2str(i)];
-                channel_data(iBad,i)= channel_data(iBad,i) * IMM(i);
-            end
-        end
+        dimensions{idx}.comment = ['Time stamp corresponds to the start of the measurement which lasts ' num2str(meta.instrument_burst_samples) ' samples.'];
     end
-end
-
-% Convert MS8EN/MS9 uW/cm^2/nm data to W/m^2/nm
-channel_data = channel_data ./ 100.0;
-
-% for MS8EN
-% lambda = [425, 455, 485, 515, 555, 615, 660, 695];
-% for MS9 about
-% lambda = [410.4, 438.6, 491.1, 511.8, 550.2, 589.8, 635.6, 659.4, 700.6]
-
-lambda = lambda(:);
-
-% derive PAR from MS8EN sampled wavelengths using method from
-% Wojciech Klonowski @ Insitu Marine Optics
-nChannels = length(lambda);
-nSamples = size(channel_data,1);
-
-% new spacing between 400 - 700 nm.
-new_lambdas = 400:1:700;
-nNewChannels = size(new_lambdas,2);
-
-% IMO: convert to photons per second by dividing by h*c / lambda.
-% factor 1e-9 converts nm to m.
-% IMO: convert to microMoles per second by dividing by
-% Avogadro's constant * 1e6
-% IMO: interpolate multispectral micromoles per sec to high res 1nm
-% %IDL% micromolespersec_ipol=interpol(micromolespersec,lambda,new_lambda)
-% IMO: now calculate the integral of micromolespersec_ipol. I would
-% think MATLAB has some sort of INT_TABULATED or Simpson or
-% Trapezoidal functions.
-% %IDL% PAR=int_tabulated(new_lambda,micromolespersec_ipol)
-
-h = 6.62607015e-34; % plancks constant, J s
-c = 2.99792458e+08; % speed of light, m s^-1
-avo = 6.02214076e+23; % Avogadro's constant, mol^-1
-denom = h*c*avo; % J m mol-1
-
-channel_data = (channel_data .*  lambda' .* 1e-9) ./ denom; % mol s^-1
-
-interpolated_channels=nan([nSamples, nNewChannels]);
-for i = 1:nSamples
-    interpolated_channels(i,:) = interp1(lambda, channel_data(i, :), new_lambdas, 'linear', 'extrap');
-end
-
-new_par = nan([nSamples, 1]);
-for i = 1:nSamples
-    new_par(i) = trapz(new_lambdas, interpolated_channels(i,:));
-end
-
-% data -> moles m^-2 s^-1
-% data * 1e6 -> umoles m^-2 s^-1
-vname = 'PAR_2';
-data.(vname) = new_par * 1e6;
-name.(vname) = 'PAR';
-comment.(vname) = ['PAR calculated by integrating irradiance over 400 to 700nm in 1nm steps.' correctionString];
-units.(vname) = 'umole m-2 s-1';
-
-end
-
-%%
-function [header, data, units, comment] = readIMOsensor(fid)
-% parse IMO sensor log file. Can only be one sensor per file.
-
-header = struct;
-data = struct;
-comment = struct;
-units = struct;
-
-% IMO-MS8
-% Sensor Type, Serial Number, Date, Time, Counts, PAR, Tilt, Int Temp
-line = strtrim(fgetl(fid));
-frewind(fid);
-
-cols = split(line, ',');
-nCols = numel(cols) - 4; % number of data columns
-serialStr = char(cols(2));
-
-instStr = '';
-sensorVariableNames = {};
-if strfind(line, '$IMNTU')
-    instStr = 'IMNTU';
-    formatStr = ['$' instStr];
-    sensorVariableNames = {'DATE', 'TIME', 'COUNTS_DARK', 'COUNTS_NTU', 'TURB', 'TILT', 'LED_TEMP'};
-    sensorVariableUnits = {'1', '1', 'count', 'count', '1', 'degree', 'degrees_Celsius'};
-    sensorVariableComments = {'', '', '', '', '', '', ''};
-    header.instrument_model = 'IMNTU';
-elseif strfind(line, '$MS8EN')
-    instStr = 'MS8EN';
-    formatStr = ['$' instStr];
-    sensorVariableNames = {'DATE', 'TIME', 'CH1', 'CH2', 'CH3', 'CH4', 'CH5', 'CH6', 'CH7', 'CH8','TILT', 'INTERNAL_TEMP'};
-    sensorVariableUnits = {'1', '1', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'uW cm-2', 'degree', 'degrees_Celsius'};
-    sensorVariableComments = {'', '', '', '', '', '', '' ,  '', '', '', '', ''};
-    header.instrument_model = 'MS8EN';
-elseif strfind(line, 'IMO-DL3')
-    instStr = 'IMO-DL3';
-    formatStr = instStr;
-    %Device Id, Serial Number, Vin Counts, Pressure Counts, Temp Counts, Vin (V), Depth (m), Temperature (C)
-    sensorVariableNames = {'DATE', 'TIME', 'COUNTS_VIN', 'COUNTS_PRES', 'COUNTS_TEMP', 'VIN', 'DEPTH', 'TEMP'};
-    sensorVariableUnits = {'1', '1', 'count', 'count', 'count', 'V', 'm', 'degrees_Celsius'};
-    sensorVariableComments = {'', '', '', '', '', '', '', ''};
-    header.instrument_model = 'DL3';
-else
-    error('Uknown IMO sensor');
-end
-
-header.instrument_serial_num = char(cols(2));
-formatStr = [formatStr ',%*d'];
-
-iChecksum = strfind(line, '*');
-if iChecksum
-    formatStr = [formatStr ',%[^*]*%s'];
-else
-    formatStr = [formatStr ',%s'];
-end
-
-frewind(fid);
-allLines = textscan(fid,formatStr);
-dataLines = allLines{1};
-if iChecksum
-    checksums = uint8(hex2dec(allLines{2}));
     
-    cs = zeros([numel(checksums) 1], 'uint8');
-    for i=1:numel(checksums)
-        line = [instStr ',' serialStr ',' char(dataLines{i})];
-        for j = 1:length(line)
-            cs(i) = bitxor(cs(i), uint8(line(j)));
-        end
-    end
-    iGoodChecksums = cs==checksums;
-    dataLines = dataLines(iGoodChecksums);
-    clear('cs');
-    clear('checksums');
+    idx = getVar(dimensions, 'WAVELENGTHS');
+    dimensions{idx}.data = dimensions{idx}.typeCastFunc(data.WAVELENGTHS);
+    dimensions{idx}.units = 'nm';
+    dimensions{idx}.comment = 'Wavelengths nm.';
+else
+    dimensions = IMOS.gen_dimensions('timeSeries');
+    idx = getVar(dimensions, 'TIME');
+    dimensions{idx}.data = time;
+    dimensions{idx}.comment = ['Time stamp corresponds to the start of the measurement which lasts ' num2str(meta.instrument_average_interval) ' seconds.'];
 end
-clear('allLines');
 
-%dataLines = textscan(dataLines, 'Delimiter', ',');
+% define toolbox struct.
+vars0d = IMOS.featuretype_variables('timeSeries'); %basic vars from timeSeries
 
-splitData = split(dataLines, ',');
-data.TIME = datenum([char(splitData(:,1)) char(splitData(:,2))],'ddmmyyyyHHMMSS.FFF');
-comment.TIME = 'TIME';
+coords1d = 'TIME LATITUDE LONGITUDE NOMINAL_DEPTH';
+vars1d = IMOS.gen_variables(dimensions,ts_vars,{},fields2cell(data,ts_vars),'coordinates',coords1d);
 
-switch instStr
-    case 'IMNTU'
-        for i=3:7
-            vName = char(sensorVariableNames{i});
-            vUnit = char(sensorVariableUnits{i});
-            vComment = char(sensorVariableComments{i});
-            data.(vName) = str2double(splitData(:,i));
-            comment.(vName) = vComment;
-            units.(vName) = vUnit;
-        end
-        
-    case 'MS8EN'
-        for i=3:12
-            vName = char(sensorVariableNames{i});
-            vUnit = char(sensorVariableUnits{i});
-            vComment = char(sensorVariableComments{i});
-            data.(vName) = str2double(splitData(:,i));
-            comment.(vName) = vComment;
-            units.(vName) = vUnit;
-        end
-        
-        % PAR calculated
-        % put all channel data into one array
-        wavelengths = [425, 455, 485, 515, 555, 615, 660, 695];
-        
-        nChannels = length(wavelengths);
-        nSamples = size(data.CH1,1);
-        tmpData = zeros([nSamples, nChannels]);
-        for i = 1:nChannels
-            vName = ['CH' num2str(i)];
-            tmpData(:,i)= data.(vName);
-        end
-        
-        % Convert MS8EN/MS9 uW/cm^2/nm data to W/m^2/nm
-        tmpData = tmpData ./ 100.0;
-        PAR = calcPAR(tmpData, wavelengths);
-        vName = 'PAR';
-        data.(vName) = PAR.data;
-        comment.(vName) = [PAR.comment ' For a typical solar spectrum the in-air MS8 derived PAR has an RMS error of 0.015%'] ;
-        units.(vName) = PAR.units;
-        
-        if false
-        % derive PAR from MS8EN sampled wavelengths using method from
-        % Wojciech Klonowski @ Insitu Marine Optics
-        lambda = [425, 455, 485, 515, 555, 615, 660, 695];
-        nChannels = 8;
-        % new spacing between 400 - 700 nm.
-        newLambda = 400:1:700;
-        nNewChannels = size(newLambda,2);
-        nSamples = size(data.CH1,1);
-        avo=6.022140857e+17; % Avogadro's constant * 1e6
-        
-        % Convert MS8EN data to W/m^2/nm
-        tmpData = [data.CH1 data.CH2 data.CH3 data.CH4 data.CH5 data.CH6 data.CH7 data.CH8] / 100;
+if isMultispec
+    coords2d_multispec = 'TIME LATITUDE LONGITUDE NOMINAL_DEPTH WAVELENGTHS';
+    vars2d_multispec = IMOS.gen_variables(dimensions,multispec_vars,{},fields2cell(data,multispec_vars),'coordinates',coords2d_multispec);
+end
 
-        % IMO: convert to photons per second by dividing by h*c / lambda. 
-        % factor 1e-9 converts nm to m.
-        h=6.626070040e-34; %plancks constant
-        c=2.99792458e+08; %3.00e+08;
-        tmpData = tmpData ./ ((h*c) ./ (lambda*1e-9));
-        % IMO: convert to microMoles per second by dividing by 
-        % Avogadro's constant * 1e6
-        tmpData = tmpData / avo;
-        
-        % IMO: interpolate multispectral micromolespersec to high res 1nm
-        % %IDL% micromolespersec_ipol=interpol(micromolespersec,lambda,new_lambda)
-        newData=nan([nSamples, nNewChannels]);
-        for i = 1:nSamples
-            newData(i,:) = interp1(lambda, tmpData(i, :), newLambda, 'linear', 'extrap');
-        end
-        
-        % IMO: now calculate the integral of micromolespersec_ipol. I would
-        % think MATLAB has some sort of INT_TABULATED or Simpson or 
-        % Trapezoidal functions.
-        % %IDL% PAR=int_tabulated(new_lambda,micromolespersec_ipol)
-        PAR = nan([nSamples, 1]);
-        for i = 1:nSamples
-            PAR(i) = trapz(newLambda, newData(i,:));
-        end
-        
-        vName = 'PAR';
-        vUnit = 'umole m-2 s-1';
-        vComment = 'For a typical solar spectrum the in-air MS8 derived PAR has an RMS error of 0.015%';
-        data.(vName) = PAR;
-        comment.(vName) = vComment;
-        units.(vName) = vUnit;
-        end
-        
-    case 'IMO-DL3'
-        for i=3:8
-            vName = char(sensorVariableNames{i});
-            vUnit = char(sensorVariableUnits{i});
-            vComment = char(sensorVariableComments{i});
-            data.(vName) = str2double(splitData(:,i));
-            comment.(vName) = vComment;
-            units.(vName) = vUnit;
-        end
+sample_data.meta = meta;
+sample_data.dimensions = dimensions;
+if isMultispec
+    sample_data.variables = [vars0d, vars1d, vars2d_multispec];
+else
+    sample_data.variables = [vars0d, vars1d];
+end
+
+indexes = IMOS.find(sample_data.variables,xattrs.keys);
+for vind = indexes
+    iname = sample_data.variables{vind}.name;
+    sample_data.variables{vind} = combineStructFields(sample_data.variables{vind},xattrs(iname));
 end
 
 end
+
+
 
