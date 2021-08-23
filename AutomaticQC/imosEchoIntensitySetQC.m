@@ -71,15 +71,21 @@ end
 nbeams = numel(absic_vars);
 flag_vars = IMOS.adcp.echo_intensity_variables(sample_data);
 
-switch nbeams
-    case 3
-        non_flag_vars = {'PERG1', 'PERG2', 'PERG3', 'CMAG1', 'CMAG2', 'CMAG3'};
-        flag_vars = setdiff(flag_vars, non_flag_vars);
-    case 4
-        non_flag_vars = {'PERG1', 'PERG2', 'PERG3', 'PERG4', 'CMAG1', 'CMAG2', 'CMAG3', 'CMAG4'};
-        flag_vars = setdiff(flag_vars, non_flag_vars);
-end
+% switch nbeams
+%     case 3
+%         non_flag_vars = {'PGD1', 'PGD2', 'PGD3', 'PERG1', 'PERG2', 'PERG3', 'CMAG1', 'CMAG2', 'CMAG3'};
+%         flag_vars = setdiff(flag_vars, non_flag_vars);
+%     case 4
+%         non_flag_vars = {'PGD1', 'PGD2', 'PGD3', 'PGD4', 'PERG1', 'PERG2', 'PERG3', 'PERG4', 'CMAG1', 'CMAG2', 'CMAG3', 'CMAG4'};
+%         flag_vars = setdiff(flag_vars, non_flag_vars);
+% end
 
+% construct non flagged var list
+non_flag_var_names = {'PGD', 'PERG', 'CMAG'};
+non_flag_vars = arrayfun(@(k) arrayfun(@(x) [char(x) num2str(k)], non_flag_var_names, 'UniformOutput', false), 1:nbeams, 'UniformOutput', false);
+non_flag_vars = [non_flag_vars{:}];
+flag_vars = setdiff(flag_vars, non_flag_vars);
+        
 % Now compute threshold and apply mask.
 % The order is:
 % 1.Compute threshold, 2. Bound detections by index or depth, 3. propagate detections further away in the beam.

@@ -945,7 +945,7 @@ set(hHelpWiki, 'callBack', @openWikiPage);
         iParamsToBeRemoved(iHEIGHT) = true;
         
         % we get rid of ADCP diagnostic parameters
-        for i=1:4
+        for i=1:5
             iStr = num2str(i);
             iABSI = strcmpi(['ABSI' iStr], paramsName);
             iParamsToBeRemoved(iABSI) = true;
@@ -955,6 +955,8 @@ set(hHelpWiki, 'callBack', @openWikiPage);
             iParamsToBeRemoved(iCORR) = true;
             iPERG = strcmpi(['PERG' iStr], paramsName);
             iParamsToBeRemoved(iPERG) = true;
+            iPGD = strcmpi(['PGD' iStr], paramsName);
+            iParamsToBeRemoved(iPGD) = true;
         end
     end
 

@@ -48,8 +48,9 @@ idVcur = 0;
 idWcur = 0;
 idCspd = 0;
 idCdir = 0;
-idCMAG = cell(4, 1);
-for j=1:4
+num_beams = sample_data.meta.adcp_info.number_of_beams;
+idCMAG = cell(num_beams, 1);
+for j=1:num_beams
     idCMAG{j}  = 0;
 end
 lenVar = length(sample_data.variables);
@@ -61,7 +62,7 @@ for i=1:lenVar
     if strcmpi(paramName, 'WCUR'),      idWcur = i; end
     if strcmpi(paramName, 'CSPD'),      idCspd = i; end
     if strncmpi(paramName, 'CDIR', 4),  idCdir = i; end
-    for j=1:4
+    for j=1:num_beams
         cc = int2str(j);
         if strcmpi(paramName, ['CMAG' cc]), idCMAG{j} = i; end
     end
@@ -69,7 +70,7 @@ end
 
 % check if the data is compatible with the QC algorithm
 idMandatory = (idUcur | idVcur | idWcur | idCspd | idCdir);
-for j=1:4
+for j=1:num_beams
     idMandatory = idMandatory & idCMAG{j};
 end
 if ~idMandatory, return; end
@@ -89,8 +90,22 @@ rawFlag         = imosQCFlag('raw',             qcSet, 'flag');
 sizeData = size(sample_data.variables{idCMAG{1}}.data);
 
 % read in filter parameters
-propFile = fullfile('AutomaticQC', 'imosCorrMagVelocitySetQC.txt');
-cmag     = str2double(readProperty('cmag',   propFile));
+%propFile = fullfile('AutomaticQC', 'imosCorrMagVelocitySetQC.txt');
+%cmag     = str2double(readProperty('cmag',   propFile));
+propFile = fullfile('AutomaticQC', 'imosCorrMagVelocitySetQC.ini');
+ini = IniConfig();
+ini.ReadFile(propFile);
+instrument_make = sample_data.meta.instrument_make;
+instrument_model = sample_data.meta.instrument_model;
+% try and key value based on instrument_make, then instrument_model, 
+% else use default value
+[cmag, status] = ini.GetValues(instrument_make, 'cmag', 64);
+if ~status
+    [cmag, status] = ini.GetValues(instrument_model, 'cmag', 64);
+end
+if ~status
+    warning('No cmag found in imosCorrMagVelocitySetQC.ini, using default');
+end
 
 % read dataset QC parameters if exist and override previous 
 % parameters file
@@ -105,14 +120,12 @@ sizeCur = size(sample_data.variables{idUcur}.flags);
 flags = ones(sizeCur, 'int8')*rawFlag;
 
 % Run QC
-isub1 = sample_data.variables{idCMAG{1}}.data > cmag;
-isub2 = sample_data.variables{idCMAG{2}}.data > cmag;
-isub3 = sample_data.variables{idCMAG{3}}.data > cmag;
-isub4 = sample_data.variables{idCMAG{4}}.data > cmag;
-% test nbins bins
-isub_all = isub1+isub2+isub3+isub4;
-clear isub1 isub2 isub3 isub4;
+isub_all = zeros(size(sample_data.variables{idCMAG{1}}.data), 'int8');
+for k = 1:num_beams
+    isub_all = isub_all + cast(sample_data.variables{idCMAG{k}}.data > cmag, 'int8');
+end
 
+% TODO : determine what this test means if have RTI 3 beam instrument.
 % assign pass(1) or fail(0) values
 % Where 2 or more beams pass, then the cmag test is passed
 iPass = isub_all >= 2;

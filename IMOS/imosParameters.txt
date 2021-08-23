@@ -218,3 +218,9 @@ VLP,                1, northward_sea_water_velocity_low_pass,                   
 VHP,                1, northward_sea_water_velocity_high_pass,                                                              m s-1,         ,              true north,                        V, 999999.0, -10.0,    10.0,     float
 % from LISST ABS
 PARTICLE_CONCENTRATION, 0, particle_concentration, mg l-1, , , E, -9990.0, 0.0,    200000.0,     float
+% from Rowe Technologies
+PGD1,               0, percentage_of_good_pings_beam_1,                                                  percent,       ,              ,                                  E, 999999.0, 0.0,      100.0,    float
+PGD2,               0, percentage_of_good_pings_beam_2,                                                   percent,       ,              ,                                  E, 999999.0, 0.0,      100.0,    float
+PGD3,               0, percentage_of_good_pings_beam_3,                                   percent,       ,              ,                                  E, 999999.0, 0.0,      100.0,    float
+PGD4,               0, percentage_of_good_pings_beam_4,                                                   percent,       ,              ,                                  E, 999999.0, 0.0,      100.0,    float
+PGD5,               0, percentage_of_good_pings_beam_5,                                                   percent,       ,              ,                                  E, 999999.0, 0.0,      100.0,    float
