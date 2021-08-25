@@ -34,55 +34,40 @@ function [sample_data, varChecked, paramsLog] = imosCorrMagVelocitySetQC( sample
 % If not, see <https://www.gnu.org/licenses/gpl-3.0.en.html>.
 %
 narginchk(1, 2);
-if ~isstruct(sample_data), error('sample_data must be a struct'); end
 
 % auto logical in input to enable running under batch processing
 if nargin<2, auto=false; end
 
 varChecked = {};
-paramsLog  = [];
+paramsLog = [];
+currentQCtest = mfilename;
+if ~isstruct(sample_data), error('sample_data must be a struct'); end
+
+[valid, reason] = IMOS.validate_dataset(sample_data, currentQCtest);
+
+if ~valid
+    %TODO: we may need to include a global verbose flag to avoid pollution here.
+    unwrapped_msg = ['Skipping %s. Reasons: ' cell2str(reason,'')];
+    dispmsg(unwrapped_msg,sample_data.toolbox_input_file)
+    return
+end
+
+avail_variables = IMOS.get(sample_data.variables, 'name');
+cmag_counter = sum(contains(avail_variables, 'CMAG'));
+cmag_vars = cell(1, cmag_counter);
 
 % get all necessary dimensions and variables id in sample_data struct
-idUcur = 0;
-idVcur = 0;
-idWcur = 0;
-idCspd = 0;
-idCdir = 0;
+idUcur = getVar(sample_data.variables, 'UCUR');
+idVcur = getVar(sample_data.variables, 'VCUR');
+idWcur = getVar(sample_data.variables, 'WCUR');
+idCspd = getVar(sample_data.variables, 'CSPD');
+idCdir = getVar(sample_data.variables, 'CDIR');
 
-% check if the data is compatible with the QC algorithm
-% test split to first test for current variables, then
-% correlation magnitude, of which the may be more/less than
-% assume 4 for RDI workhorse instrument.
-lenVar = length(sample_data.variables);
-for i=1:lenVar
-    paramName = sample_data.variables{i}.name;
-    
-    if strncmpi(paramName, 'UCUR', 4),  idUcur = i; end
-    if strncmpi(paramName, 'VCUR', 4),  idVcur = i; end
-    if strcmpi(paramName, 'WCUR'),      idWcur = i; end
-    if strcmpi(paramName, 'CSPD'),      idCspd = i; end
-    if strncmpi(paramName, 'CDIR', 4),  idCdir = i; end
-end
-idMandatory = (idUcur | idVcur | idWcur | idCspd | idCdir);
-if ~idMandatory, return; end
-
-% test for correlation magnitude
 num_beams = sample_data.meta.adcp_info.number_of_beams;
-idCMAG = cell(num_beams, 1);
-for j=1:num_beams
-    idCMAG{j}  = 0;
+idCMAG = cell(cmag_counter, 1);
+for j=1:cmag_counter
+    idCMAG{j}  = getVar(sample_data.variables, ['CMAG' int2str(j)]);
 end
-for i=1:lenVar
-    paramName = sample_data.variables{i}.name;
-    for j=1:num_beams
-        cc = int2str(j);
-        if strcmpi(paramName, ['CMAG' cc]), idCMAG{j} = i; end
-    end
-end
-for j=1:num_beams
-    idMandatory = idMandatory & idCMAG{j};
-end
-if ~idMandatory, return; end
 
 % let's get the associated vertical dimension
 idVertDim = sample_data.variables{idCMAG{1}}.dimensions(2);
