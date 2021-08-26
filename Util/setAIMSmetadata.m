@@ -25,9 +25,16 @@ function metadataStr = setAIMSmetadata(site,metadataField)
 % SCR : RV Falkor cruise FK150410 (AIMS 6204) at Scott Reef and surrounds
 
 %%
+% Is this site an IMOS related one : CTDs can have a site label that is 
+% not a physical site with lat/lon but is usually starts with site name, 
+% so first do a hardcoded comparison with known AIMS IMOS sites. Else test 
+% if site is an IMOS one by looking at it's associated db ResearchActivity.
+imos_sites_prefix = {'NRS', 'GBR', 'NWS', 'ITF', 'KIM', 'PIL', 'TAN'};
 dbsite = executeQuery( 'Sites', 'Site', site);
-% if the Research Activity start with IMOS then tada it's IMOS
-isIMOS = ~isempty(regexp(dbsite.ResearchActivity, '^IMOS'));
+isIMOS = startsWith(site, imos_sites_prefix);
+if ~isIMOS
+    isIMOS = isfield(dbsite, 'ResearchActivity') && ~isempty(regexp(dbsite.ResearchActivity, '^IMOS'));
+end
 
 try
     fnh = str2func(['getAIMSmetadata_' metadataField]);
@@ -86,14 +93,14 @@ end
 %%
 function metadataStr = getAIMSmetadata_institution(site, dbsite, isIMOS)
 
-if isIMOS
-    if contains(site, {'NRS'})
-        metadataStr = 'ANMN-NRS';
-    else
-        metadataStr = 'ANMN-QLD';
-    end
+if contains(site, {'NRS'})
+    metadataStr = 'ANMN-NRS';
 else
-    metadataStr = 'AIMS-QLD';
+    if isIMOS
+        metadataStr = 'ANMN-QLD';
+    else
+        metadataStr = 'AIMS-QLD';
+    end
 end
 
 end
@@ -361,8 +368,6 @@ end
 %%
 function metadataStr = getAIMSmetadata_local_time_zone(site, dbsite, isIMOS)
 
-warning('Use of getAIMSmetadata_local_time_zone is problematic. Check that is covers your site.');
-
 if identifySite(site,{'GBR','NRSYON'})
     metadataStr = '+10';
 elseif identifySite(site,{'ITF','NRSDAR','NWSLYN'})
@@ -370,6 +375,7 @@ elseif identifySite(site,{'ITF','NRSDAR','NWSLYN'})
 elseif identifySite(site,{'PIL', 'KIM', 'NIN', 'SCR', 'TAN', 'CAM','^NWS'})
     metadataStr = '+8';
 else
+    warning('Use of getAIMSmetadata_local_time_zone is problematic. Setting default +10. Check that is correct for your site.');
     metadataStr = '+10';
 end
 

@@ -77,11 +77,11 @@ for i=1:lenDep
     end
 end
 
-% it is possible that some queries produced an empty results, remove these
-iNoSite = cellfun(@isempty, sites);
-sites = sites(~iNoSite);
-sites = [sites{:}];
-ctds = ctds(~iNoSite);
+% % it is possible that some queries produced an empty results, remove these
+% iNoSite = cellfun(@isempty, sites);
+% sites = sites(~iNoSite);
+% sites = [sites{:}];
+% ctds = ctds(~iNoSite);
 
 end
 
