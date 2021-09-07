@@ -104,3 +104,4 @@ WETLABS, PARS, ECOTriplet
 
 
 Rowe Technologies, SeaSEVEN 600/1200, rti
+ONSET, HOBO_U20_001-02, hoboU2x
