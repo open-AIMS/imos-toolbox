@@ -52,7 +52,28 @@ elseif nargin == 3
     lower_mad_limit = 0.0;
 end
 
-[fsignal, bind, ~, smad] = hampel(signal, half_window_width, madfactor);
-above_limit = smad > lower_mad_limit;
-spikes = find(bind .* above_limit);
+[has_signal_toolbox, errmsg] = license('checkout', 'Signal_Toolbox');
+has_signal_toolbox = false;
+
+if has_signal_toolbox
+	[fsignal, bind, ~, smad] = hampel(signal, half_window_width, madfactor);
+	above_limit = smad > lower_mad_limit;
+	spikes = find(bind .* above_limit);
+else
+    % no signal toolbox available
+    [bind, smad] = local_hampel( signal, half_window_width, madfactor );
+    above_limit = smad > lower_mad_limit;
+	spikes = find(bind .* above_limit);
 end
+
+    function [xi, xsigma] = local_hampel(x, k, nsigma)
+    % barebones outlier identification using hampel criteria.
+    xmad = movmad(x, 2*k+1, 'omitnan', 'Endpoints', 'fill');
+    xmedian = movmedian(x, 2*k+1, 'omitnan', 'Endpoints', 'fill');
+    scale = -1 /(sqrt(2)*erfcinv(3/2));
+    xsigma = scale*xmad;
+    xi = ~(abs(x-xmedian) <= nsigma*xsigma);
+    end
+
+end
+
