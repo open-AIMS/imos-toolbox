@@ -5,7 +5,7 @@ classdef  dimensions
 		profile = profile_dims();
 		ad_profile = ad_profile_dims();
 		adcp = adcp_dims();
-        multispec = multispec_dims();
+		adcp_enu = adcp_enu_dims();
 	end
 end
 
@@ -32,8 +32,7 @@ dimensions = timeseries_dims();
 dimensions{2} = struct('name','DIST_ALONG_BEAMS','typeCastFunc',getIMOSType('DIST_ALONG_BEAMS'),'data',[]);
 end
 
-function [dimensions] = multispec_dims()
+function [dimensions] = adcp_enu_dims()
 dimensions = timeseries_dims();
-%dimensions{2} = struct('name','WAVELENGTHS','typeCastFunc',getIMOSType('WAVELENGTHS'),'data',[]);
-dimensions{2} = struct('name','WAVELENGTHS','typeCastFunc',@single,'data',[]);
+dimensions{2} = struct('name','HEIGHT_ABOVE_SENSOR','typeCastFunc',getIMOSType('HEIGHT_ABOVE_SENSOR'),'data',[]);
 end
