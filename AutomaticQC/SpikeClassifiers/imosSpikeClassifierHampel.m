@@ -53,7 +53,6 @@ elseif nargin == 3
 end
 
 [has_signal_toolbox, errmsg] = license('checkout', 'Signal_Toolbox');
-has_signal_toolbox = false;
 
 if has_signal_toolbox
 	[fsignal, bind, ~, smad] = hampel(signal, half_window_width, madfactor);
