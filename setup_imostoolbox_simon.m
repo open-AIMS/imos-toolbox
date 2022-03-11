@@ -62,7 +62,7 @@ IUCLdir=fullfile(AODNbaseDir,'imos-user-code-library','MATLAB_R2011');
 %
 defaultPath = '';
 defaultAddOET=true; % add openearth tools
-defaultAddNCT=false; % add nctoolbox, used by imos user code library
+defaultAddNCT=true; % add nctoolbox, used by imos user code library
 
 %% user should not need to edit anything further
 [imosToolboxDir, name, ext] = fileparts(mfilename('fullpath'));
