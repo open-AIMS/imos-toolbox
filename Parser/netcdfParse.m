@@ -66,7 +66,7 @@ function sample_data = netcdfParse( filename, mode )
       % Aargh, Datenum cannot handle a trailing 'Z',
       % even though it's ISO8601 compliant. Assuming
       % knowledge of the date format here (dropping the last character).
-      newTime = 0;
+      newTime = globals.(timeAtts{k});
       try
         newTime = datenum(globals.(timeAtts{k}), dateFmt(1:end-1));
 
