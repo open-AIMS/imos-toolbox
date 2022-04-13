@@ -125,7 +125,7 @@ reAddPaths(EPdir,'AIMS easyplot',true);
 %reAddPaths(fullfile(AMdir,'aims_proc'),'AIMS aims_proc',true);
 % nan safe routines used by aims_vpca
 % but from R2018b all (?) stats routines nansafe
-reAddPaths(fullfile(AMdir,'NaN-3.6.0'),'AIMS NaN toolbox',false);
+reAddPaths(fullfile(AMdir,'NaN-3.6.1'),'AIMS NaN toolbox',false);
 % IGRF
 %reAddPaths(fullfile(AMdir,'igrf'),'IGRF toolbox',true);
 
@@ -199,7 +199,7 @@ function thePath = genpath_clean( topDir )
 
 b=genpath(topDir);
 s = strread(b, '%s','delimiter', pathsep);  % read path as cell
-rpattern='(\.svn|\.git|\.hg)';
+rpattern='(\.svn|\.git|\.hg\private)';
 ii=cellfun(@isempty,regexp(s,rpattern,'match','once'));
 s=s(ii); %cell array without .git etc
 thePath=sprintf(['%s' pathsep],s{:}); %make string seperated by pathsep
