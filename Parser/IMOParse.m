@@ -108,10 +108,10 @@ try
     fid = fopen(filename, 'rt');
     line = strtrim(fgetl(fid));
     frewind(fid);
-    if strcmpi(line, 'In-situ Marine Optics')
+    if strcmpi(line, 'In-situ Marine Optics') || contains(line, {'MS8', 'MS9'})
         % most likely a .TXT format DL3 file
         [procHeader, data, xattrs] = IMO.readIMODL3(fid);
-    elseif strcmp(line(1), '$') || strfind(line, 'IMO-DL3')
+    elseif strcmp(line(1), '$') || contains(line, 'IMO-DL3')
         % most likely a .log format MS8/NTU/PAR file
         [procHeader, data, xattrs] = IMO.readIMOsensor(fid);
     else
@@ -189,12 +189,11 @@ end
 [multispec_vars, ts_vars, isMultispec] = IMO.import_mappings(procHeader, data);
 
 if isMultispec
-    dimensions = IMOS.gen_dimensions('multispec');
+    dimensions = IMOS.gen_dimensions('timeSeries', 2, {'TIME', 'WAVELENGTHS'}, {@double, @single }, {time, []});
     idx = getVar(dimensions, 'TIME');
-    dimensions{idx}.data = time;
     if isfield(meta, 'instrument_average_interval')
         dimensions{idx}.comment = ['Time stamp corresponds to the start of the measurement which lasts ' num2str(meta.instrument_average_interval) ' seconds.'];
-    else
+    elseif isfield(meta, 'instrument_burst_samples')
         dimensions{idx}.comment = ['Time stamp corresponds to the start of the measurement which lasts ' num2str(meta.instrument_burst_samples) ' samples.'];
     end
     
@@ -203,10 +202,11 @@ if isMultispec
     dimensions{idx}.units = 'nm';
     dimensions{idx}.comment = 'Wavelengths nm.';
 else
-    dimensions = IMOS.gen_dimensions('timeSeries');
+    dimensions = IMOS.gen_dimensions('timeSeries', 1, {'TIME'}, {@double}, {time});
     idx = getVar(dimensions, 'TIME');
-    dimensions{idx}.data = time;
-    dimensions{idx}.comment = ['Time stamp corresponds to the start of the measurement which lasts ' num2str(meta.instrument_average_interval) ' seconds.'];
+    if isfield(meta, 'instrument_average_interval') && ~isempty(meta.instrument_average_interval)
+        dimensions{idx}.comment = ['Time stamp corresponds to the start of the measurement which lasts ' num2str(meta.instrument_average_interval) ' seconds.'];
+    end
 end
 
 % define toolbox struct.

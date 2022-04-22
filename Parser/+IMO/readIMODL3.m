@@ -3,6 +3,7 @@ function [header, data, xattrs] = readIMODL3(fid)
 % parse IMO DL3 TXT file
 
 header = struct;
+header.instrument_utc_offset = 0;
 data = struct;
 xattrs = containers.Map('KeyType','char','ValueType','any');
 
@@ -16,46 +17,62 @@ catch e
 end
 
 tf = contains(allLines, '-------------------------------');
-ind = find(tf);
-if isempty(ind)
-    error('IMO DL3 TXT format not handled.')
+has_header = false;
+if any(tf)
+    has_header = true;
 end
-headerlines = allLines(1:ind);
-dataLines = allLines(ind+1:end);
 
-% split up header lines into currently know sections
-
-% instrument info, assume this is always the first section
-ind_end = find(contains(headerlines, '---'));
-header.instrument_info = headerlines(1:ind_end(1)-1);
-
-% instrument configuration
-ind_conf = find(contains(headerlines, '---CONFIGURATION---'));
-ind_end = find(contains(headerlines(ind_conf+1:end), '---'));
-header.instrument_configuration = headerlines(ind_conf:ind_conf+ind_end(1)-1);
-
-% instrument calibration
-ind_cal = find(contains(headerlines, '---CALIBRATION CONFIGURATION---'));
-ind_end = find(contains(headerlines(ind_cal+1:end), '---'));
-header.instrument_calibration = headerlines(ind_cal:ind_cal+ind_end(1)-1);
-
-% output format, not in every IMO TXT file
-ind_format = find(contains(headerlines, '---OUTPUT FORMAT---'));
-if isempty(ind_format)
-    header.output_format = {};
-    warning('No OUTPUT FORMAT section found. Attempting best guess at data layout.');
+if has_header
+    ind = find(tf);
+    headerlines = allLines(1:ind);
+    dataLines = allLines(ind+1:end);
 else
-    ind_end = find(contains(headerlines(ind_format+1:end), '---'));
-    header.output_format = headerlines(ind_format:ind_format+ind_end(1)-1);
+    warning('IMO DL3 TXT format does not have standard header.');
+    dataLines = allLines;
 end
 
-header = IMO.extract_instrument_info(header);
-header = IMO.extract_instrument_configuration(header);
-header = IMO.extract_instrument_calibration(header);
+if has_header
+    % split up header lines into currently know sections
+
+    % instrument info, assume this is always the first section
+    ind_end = find(contains(headerlines, '---'));
+    header.instrument_info = headerlines(1:ind_end(1)-1);
+
+    % instrument configuration
+    ind_conf = find(contains(headerlines, '---CONFIGURATION---'));
+    ind_end = find(contains(headerlines(ind_conf+1:end), '---'));
+    header.instrument_configuration = headerlines(ind_conf:ind_conf+ind_end(1)-1);
+
+    % instrument calibration
+    ind_cal = find(contains(headerlines, '---CALIBRATION CONFIGURATION---'));
+    ind_end = find(contains(headerlines(ind_cal+1:end), '---'));
+    header.instrument_calibration = headerlines(ind_cal:ind_cal+ind_end(1)-1);
+
+    % output format, not in every IMO TXT file
+    ind_format = find(contains(headerlines, '---OUTPUT FORMAT---'));
+    if isempty(ind_format)
+        header.output_format = {};
+        warning('No OUTPUT FORMAT section found. Attempting best guess at data layout.');
+    else
+        ind_end = find(contains(headerlines(ind_format+1:end), '---'));
+        header.output_format = headerlines(ind_format:ind_format+ind_end(1)-1);
+    end
+
+    header = IMO.extract_instrument_info(header);
+    header = IMO.extract_instrument_configuration(header);
+    header = IMO.extract_instrument_calibration(header);
+else
+    header.instrument_make = 'In-Situ Marine Optics';
+end
 
 % data
 splitData = split(dataLines, ',');
+splitData = strtrim(splitData);
 [nrows, ncols] = size(splitData);
+if ~has_header
+    header.instrument_model = splitData{1,1};
+    header.instrument_serial_number = splitData{1,2};
+end
 
 % Use the OUTPUT FORMAT section to map variable to column index, 
 % else make best guess based on previously examined files
@@ -107,7 +124,11 @@ else
     error('Unknown data layout.')
 end
 
-data.TIME = datenum([char(splitData(:,M('Date'))) char(splitData(:,M('Time')))],'dd/mm/yyyyHH:MM:SS.FFF');
+if contains(splitData(1,M('Date')), '/') && contains(splitData(1,M('Time')), ':')
+    data.TIME = datenum(join([splitData(:,M('Date')), splitData(:,M('Time'))]),'dd/mm/yyyy HH:MM:SS.FFF');
+else
+    data.TIME = datenum(join([splitData(:,M('Date')), splitData(:,M('Time'))]),'ddmmyyyy HHMMSS.FFF');
+end
 data.TIME = data.TIME - header.instrument_utc_offset/24.0; % convert to UTC
 xattrs('TIME') = struct('comment', 'TIME (UTC)');
 
@@ -162,13 +183,22 @@ end
 
 if isKey(M,'Ch1')
     number_of_spectral_channels = sum(contains(keys(M), 'Ch'));
-    wavelengths = str2double(split(header.instrument_wavelengths, ','));
+    if has_header
+        wavelengths = str2double(split(header.instrument_wavelengths, ','));
+    else
+        header.instrument_wavelengths = char(join(repmat({'NaN'}, [number_of_spectral_channels, 1]), ', '));
+        wavelengths = nan([number_of_spectral_channels, 1]);
+    end
     vName = 'WAVELENGTHS';
     data.(vName) = wavelengths;
     xattrs(vName) = struct('units', 'nm', 'comment', 'Multispectral wavelengths.');
     
-    isIRRADIANCE = strcmp(header.instrument_detector_type, 'IRRADIANCE');
-    
+    if has_header
+        isIRRADIANCE = strcmp(header.instrument_detector_type, 'IRRADIANCE');
+    else
+        isIRRADIANCE = false;
+        header.instrument_detector_type = 'MULTISPEC';
+    end
     switch header.instrument_detector_type
         case 'IRRADIANCE'
             vName = 'IRRADIANCE';
@@ -179,7 +209,7 @@ if isKey(M,'Ch1')
             warning(['Unknown DETECTOR type : ' header.instrument_detector_type]);
     end
     
-    wavelengths = str2double(split(header.instrument_wavelengths, ','));
+    %wavelengths = str2double(split(header.instrument_wavelengths, ','));
     number_of_spectral_channels = numel(wavelengths);
     data.(vName) = nan([numel(data.TIME), number_of_spectral_channels]);
     for k = 1:number_of_spectral_channels
