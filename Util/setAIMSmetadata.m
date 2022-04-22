@@ -33,7 +33,7 @@ imos_sites_prefix = {'NRS', 'GBR', 'NWS', 'ITF', 'KIM', 'PIL', 'TAN'};
 dbsite = executeQuery( 'Sites', 'Site', site);
 isIMOS = startsWith(site, imos_sites_prefix);
 if ~isIMOS
-    isIMOS = isfield(dbsite, 'ResearchActivity') && ~isempty(regexp(dbsite.ResearchActivity, '^IMOS'));
+    isIMOS = isfield(dbsite, 'ResearchActivity') && ~isempty(dbsite.ResearchActivity) && ~isempty(regexp(dbsite.ResearchActivity, '^IMOS'));
 end
 
 try
