@@ -29,6 +29,7 @@ IMO, NTU, IMO
 IMO, MS9, IMO
 InterOcean, S4, InterOceanS4Parse
 InterOcean, S4 Current Meter, InterOceanS4Parse
+JCU, Marotte HS, Marotte
 NORTEK, ADCP - AQUAPRO, aquadoppProfiler
 NORTEK, ADCP - AWAC, awac
 NORTEK, ADCP - CONTINENTAL, continental
@@ -39,9 +40,11 @@ NORTEK, Signature 500, signature
 Nortek, Aquadopp DW, aquadoppVelocity
 Nortek, ADCP 190kHz, continental
 ONSET, HOBO_U22_001, hoboU22
+ONSET, HOBO_U20_001-02, hoboU2x
 RBR, DR1050P, DR1050
 RBR, TWR-2050, XR
 RBR, XR-420, XR
+RBR, RBRsoloLicor, XR
 RDI, ADCP - QUARTERMASTER,  workhorse
 RDI, ADCP - WORKHORSE,  workhorse
 RDI, ADCP - WORKHORSE QUARTERMASTER, workhorse
@@ -59,6 +62,7 @@ RDI, WHLS150-I-2, workhorse
 RDI, WHS300-I-UG306, workhorse
 RDI, WHS600, workhorse
 REEFNET, SENSUS ULTRA, sensusUltra
+Rowe Technologies, SeaSEVEN 600/1200, rti
 SEABIRD, CTD - SBE19Plus, SBE19
 SEABIRD, SBE19plus V2, SBE19
 SEABIRD, SBE19plus V2, SBE19
@@ -87,6 +91,7 @@ SEABIRD, SBE39 - TEMPERATURE RECORDER, SBE39
 SEABIRD, SBE39PLUS P - TEMPERATURE & PRESSURE RECORDER, SBE19
 SEABIRD, SBE39Plus - TIDE GAUGE, SBE19
 SEABIRD, SBE56 - TEMPERATURE RECORDER, SBE56
+Seabird, SBE56, SBE56
 Seabird, SBE39 [600m] temp & press., SBE39
 Seabird, SBE39 [600m] temp only, SBE39
 Sea-Bird Electronics, SBE19plusV2, SBE19
@@ -103,5 +108,4 @@ WETLABS, ECO-FLNTUSB, ECOTriplet
 WETLABS, PARS, ECOTriplet
 
 
-Rowe Technologies, SeaSEVEN 600/1200, rti
-ONSET, HOBO_U20_001-02, hoboU2x
+
