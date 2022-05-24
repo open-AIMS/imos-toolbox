@@ -4,6 +4,7 @@
 %toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
 toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
 %toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
+%toolbox.ddb = "C:\Projects\_vvandongenvogels\gbrf_bleaching\OceanDB_Bleaching.mdb"
 
 % or full connection details to other kind of deployment database :
 % class name of JDBC database driver
@@ -85,9 +86,9 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % last selected values for start dialog
-startDialog.dataDir.timeSeries = C:\Projects\_darwin\Proj_003164_RTGove_Drimmie_Arm\PAR_Logging\Field_Data\Data
+startDialog.dataDir.timeSeries = C:\Projects\_fmcallister\NRSYON_issue
 startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
-startDialog.fieldTrip.timeSeries = 007371
+startDialog.fieldTrip.timeSeries = 007695
 startDialog.fieldTrip.profile = 006690
 startDialog.lowDate.timeSeries = 0
 startDialog.lowDate.profile = 0
@@ -98,7 +99,7 @@ startDialog.highDate.profile = 737060
 importManager.manualDir =
 
 % last selected directory for file export
-exportDialog.defaultDir = C:\Projects\_darwin\Proj_003164_RTGove_Drimmie_Arm\PAR_Logging\Field_Data\Data\Processed
+exportDialog.defaultDir = C:\Projects\_fmcallister\NRSYON_issue\Processed
 
 % prompt user to select parser if an appropriate one
 % cannot be found (if false, the data is not imported)
