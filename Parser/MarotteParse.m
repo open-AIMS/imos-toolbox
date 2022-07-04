@@ -73,7 +73,7 @@ end
 
 % only one file supported currently
 filename = filename{1};
-metadata_filename = strrep(filename, '.csv', '.dev');
+metadata_filename = regexprep(filename, '\.csv', '.dev', 'ignorecase');
 
 sample_data = [];
 
