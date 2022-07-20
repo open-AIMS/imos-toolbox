@@ -52,6 +52,7 @@ idVcur = 0;
 idWcur = 0;
 idCspd = 0;
 idCdir = 0;
+if ~isfield(sample_data.meta, 'adcp_info'), return; end
 num_beams = sample_data.meta.adcp_info.number_of_beams;
 idPERG = cell(num_beams, 1);
 for j=1:num_beams
