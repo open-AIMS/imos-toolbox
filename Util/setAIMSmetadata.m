@@ -36,8 +36,9 @@ if ~isIMOS
     isIMOS = isfield(dbsite, 'ResearchActivity') && ~isempty(dbsite.ResearchActivity) && ~isempty(regexp(dbsite.ResearchActivity, '^IMOS'));
 end
 
+fnh = str2func(['getAIMSmetadata_' metadataField]);
+
 try
-    fnh = str2func(['getAIMSmetadata_' metadataField]);
     metadataStr = fnh(site, dbsite, isIMOS);
 catch e
     disp(e);
