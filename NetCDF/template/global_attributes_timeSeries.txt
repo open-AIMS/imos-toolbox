@@ -53,7 +53,7 @@ N, geospatial_vertical_max =
 S, geospatial_vertical_positive = down
 
 % when
-N, local_time_zone         = 
+N, local_time_zone         = [mat (-1)*str2double(readProperty('[ddb TimeZone]', ['Preprocessing' filesep 'timeOffsetPP.txt']))]
 
 % these fields are automatically populated upon import
 D, time_deployment_start        = 

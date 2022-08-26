@@ -215,11 +215,17 @@ function template = parseNetCDFTemplate ( file, sample_data, k )
       % underscore from the name start, and put it at the name end. We can 
       % reverse this process when the NetCDF file is exported.
       if name(1) == '_', name = [name(2:end) '_']; end
-      template.(name) = parseAttributeValue(val, sample_data, k);
-      
-      % cast to correct type
-      template.(name) = castAtt(template.(name), type, qcType, dateFmt);
+      try
+          template.(name) = parseAttributeValue(val, sample_data, k);
 
+          % cast to correct type
+          template.(name) = castAtt(template.(name), type, qcType, dateFmt);
+      catch
+          template.(name) = 'UNKNOWN';
+      end
+      if contains(char(template.(name)), 'Java exception')
+          template.(name) = 'UNKNOWN';
+      end
       % get the next line
       line = fgetl(fid);
     end
