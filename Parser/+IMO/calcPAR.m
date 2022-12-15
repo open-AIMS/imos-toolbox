@@ -107,12 +107,12 @@ end
 % data -> moles m^-2 s^-1
 % data * 1e6 -> umoles m^-2 s^-1
 if isfield(data, 'PAR')
-    vname = 'PAR_2';
+    vname = 'PAR2';
 else
     vname = 'PAR';
 end
 data.(vname) = new_par * 1e6;
-xattrs(vname) = struct('name', 'PAR',...
+xattrs(vname) = struct('name', vname,...
     'comment', ['Derived PAR calculated by integrating irradiance over 400 to 700nm in 1nm steps.' correctionString],...
     'units', 'umole m-2 s-1');
 
