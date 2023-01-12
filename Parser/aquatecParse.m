@@ -36,7 +36,7 @@ function sample_data = aquatecParse( filename, mode )
 %
 
 %
-% Copyright (C) 2017, Australian Ocean Data Network (AODN) and Integrated 
+% Copyright (C) 2017, Australian Ocean Data Network (AODN) and Integrated
 % Marine Observing System (IMOS).
 %
 % This program is free software: you can redistribute it and/or modify
@@ -94,8 +94,8 @@ try
     
     % read the rest of the filename into 'data'
     % - we've already got the first line
-    data = char(fread(fid, inf, 'char')');
-    data = [line data];
+    rawdata = char(fread(fid, inf, 'char')');
+    rawdata = [line rawdata];
     
     fclose(fid);
 catch e
@@ -114,7 +114,7 @@ model    = strtrim(strrep(model, 'Temperature', ''));
 firmware = getValues({'VERSION'},    keys, meta);
 serial   = getValues({'LOGGER'},     keys, meta);
 serial   = textscan(serial{1}, '%s', 1, 'Delimiter', ',');
-    
+
 sample_data.toolbox_input_file        = filename;
 sample_data.meta.instrument_make      = 'Aquatec';
 sample_data.meta.instrument_model     = ['Aqualogger ' model{1}];
@@ -129,13 +129,106 @@ regime = getValues({'REGIME'}, keys, meta);
 regime = textscan(regime{1}, '%s', 'Delimiter', ',');
 regime = deblank( regime{1});
 
+%
+% figure out what data (temperature, pressure) is in the filename
+%
+heading = getValues({'HEADING'}, keys, meta);
+heading = textscan(heading{1}, '%s', 'Delimiter', ',');
+heading = deblank (heading{1});
+units = getValues({'UNITS'}, keys, meta);
+units = strtrim(strsplit(units{1}, ','));
+
+numFields = length(heading);
+% indices to raw data, engineering data is raw column + 1
+timeIdx   = find(ismember(heading, 'Timecode'));
+tempIdx   = find(ismember(heading, 'Ext temperature'));
+presIdx   = find(ismember(heading, 'Pressure'));
+batteryIdx = find(ismember(heading, 'Battery voltage'));
+depthIdx = find(ismember(heading, 'Depth'));
+
+% try to determine timecode format string based on two (currently) known 
+% csv versions
+isV3csv = str2num(sample_data.meta.instrument_firmware) <= 3;
+isV4csv = str2num(sample_data.meta.instrument_firmware) == 4;
+
+if isV3csv
+    % attempt to guess datetime format, based on wiki example and one
+    % example from Aquatec
+    
+    startTime = char(getValues({'START TIME'}, keys, meta));
+    % simple test if system date format chosen with AM/PM string, fail early
+    if contains(startTime, 'AM') || contains(startTime, 'PM')
+        error('Version 3 CSV : Unknown datetime format. Please reexport bin file with dd/mm/yyyy HH:MM:SS date format.');
+    end
+    
+    format = '%f%f%f%f%f%f';
+    delims = {':', '/'};
+    timedata = textscan(startTime, format, 'Delimiter', delims);
+    % if old format as documented on IMOS wiki '23:00:01 24/06/2008'
+    % but really have no idea of actual format as version 3 csv timecode
+    % isn't documented.
+    if timedata{6} > 61
+        datetimeFormat = 'HH:MM:SS dd/mm/yyyy';
+        timecodeYearIdx   = 6;
+        timecodeMonthIdx   = 5;
+        timecodeDayIdx    = 4;
+        timecodeSecondIdx = 3;
+        timecodeMinuteIdx = 2;
+        timecodeHourIdx   = 1;
+    elseif timedata{3} > 61
+        datetimeFormat = 'dd/mm/yyyy HH:MM:SS';
+        timecodeYearIdx   = 3;
+        timecodeMonthIdx  = 2;
+        timecodeDayIdx    = 1;
+        timecodeSecondIdx = 6;
+        timecodeMinuteIdx = 5;
+        timecodeHourIdx   = 4;
+    else
+        error('Version 3 CSV : Unknown datetime format. Please reexport bin file with dd/mm/yyyy HH:MM:SS date format.');
+    end
+    
+elseif isV4csv
+    % ideally the user has unselected "Use system date format" and choosen
+    % one of two options, but if user has used system date format highly
+    % likely this will fail
+    
+    timecodeString = strsplit(units{1},',');
+    timecodeString = timecodeString{1};
+    % simple test if system date format chosen with AM/PM, fail early
+    if contains(timecodeString, 'AM') || contains(timecodeString, 'PM')
+        error('Version 4 CSV : Unknown datetime format. Please reexport bin file with dd/mm/yyyy HH:MM:SS or mm/dd/yyyy HH:MM:SS date format.');
+    end
+    
+    if contains(timecodeString, 'dd/MM/yyy')
+        datetimeFormat = 'dd/mm/yyyy HH:MM:SS';
+        timecodeYearIdx   = 3;
+        timecodeMonthIdx  = 2;
+        timecodeDayIdx    = 1;
+        timecodeSecondIdx = 6;
+        timecodeMinuteIdx = 5;
+        timecodeHourIdx   = 4;
+    elseif contains(timecodeString, 'MM/dd/yyy')
+        datetimeFormat = 'mm/dd/yyyy HH:MM:SS';
+        timecodeYearIdx   = 3;
+        timecodeMonthIdx  = 1;
+        timecodeDayIdx    = 2;
+        timecodeSecondIdx = 6;
+        timecodeMinuteIdx = 5;
+        timecodeHourIdx   = 4;
+    else
+        error('Version 4 CSV : Unknown datetime format. Please reexport bin file with dd/mm/yyyy HH:MM:SS or mm/dd/yyyy HH:MM:SS date format.');
+    end
+else
+    error('Unknown CSV version.');
+end
+
 % if continuous mode was used, we need to save the start and stop
 % times so we can interpolate sample times and sample interval
 startTime = getValues({'START TIME'}, keys, meta);
-startTime = datenum(startTime{1}, 'HH:MM:SS dd/mm/yyyy');
+startTime = datenum(startTime{1}, datetimeFormat);
 
 stopTime = getValues({'STOP TIME'}, keys, meta);
-stopTime = datenum(stopTime{1}, 'HH:MM:SS dd/mm/yyyy');
+stopTime = datenum(stopTime{1}, datetimeFormat);
 
 % turn sample interval into serial date units
 sampleInterval  = textscan(regime{2}, '%f%s');
@@ -155,11 +248,10 @@ samplesPerBurst = 1;
 % if the logger was using burst mode, we need to save the number
 % of samples per burst so we know how many to average over
 if strcmp(isBurst, 'Burst Mode')
-    
     isBurst         = true;
     samplesPerBurst = str2double(regime{3});
-    
-else isBurst = false;
+else
+    isBurst = false;
 end
 
 % If the data is internally averaged during the burst sampling then there
@@ -172,85 +264,90 @@ else
     isAveraged=false;
 end
 
-%
-% figure out what data (temperature, pressure) is in the filename
-%
-heading = getValues({'HEADING'}, keys, meta);
-heading = textscan(heading{1}, '%s', 'Delimiter', ',');
-heading = deblank (heading{1});
-
-numFields = length(heading);
-timeIdx   = find(ismember(heading, 'Timecode'));
-tempIdx   = find(ismember(heading, 'Ext temperature'));
-presIdx   = find(ismember(heading, 'Pressure'));
-
-% figure out the textscan format to use for reading
-% in the data at most 8 fields are read in (6 fields
-% for time y,m,d,H,M,S, and fields for temp/pressure)
-format = '%*s';
-delims = ',';
-for k = 1:numFields
-    
-    % I'm assuming that the index order is: time < temp < pres
-    if ~isempty(timeIdx) &&  k == timeIdx
-        format = [format '%f%f%f%f%f%f'];
-        delims = [delims ': /'];
-    elseif ~isempty(tempIdx) && (k == tempIdx+1), format = [format '%f'];
-    elseif ~isempty(presIdx) && (k == presIdx+1), format = [format '%f'];
-    else                                          format = [format '%*s'];
-    end
+% construct a format string
+format = cell([1,numFields+1]);
+format(:) = {'%f'};
+format{1} = '%*s'; % 'DATA' string
+if ~isempty(timeIdx)
+    format{timeIdx+1} = '%s';
 end
+format = [format{:}];
+delims = ',';
 
-temp = [];
-pres = [];
+rawdata = textscan(rawdata, format, 'Delimiter', delims);
 
-data = textscan(data, format, 'Delimiter', delims);
-
+data = struct;
 % if the filename contains timestamps, use them
 if ~isempty(timeIdx)
-    % we remove any data with a bad timestamp
-    iBadTimeStamp = (data{6} == 0) | (data{5} == 0) | (data{4} == 0);
+    format = '%f%f%f%f%f%f';
+    delims = {':' '/'};
+    timedata = textscan(strjoin(rawdata{timeIdx},'\n'), format, 'Delimiter', delims);
+    
+    iBadTimeStamp = (timedata{timecodeYearIdx} == 0) | ...
+        ((timedata{timecodeMonthIdx} < 1) | (timedata{timecodeMonthIdx} > 12)) | ...
+        (timedata{timecodeDayIdx} == 0 );
     if any(iBadTimeStamp)
         disp(['Info : ' num2str(sum(iBadTimeStamp)) ' bad TIME values (and their corresponding measurements) had to be discarded in ' filename '.']);
-        for i=1:length(data)
-            data{i}(iBadTimeStamp) = [];
+        for i=1:length(rawdata)
+            rawdata{i}(iBadTimeStamp) = [];
         end
     end
-        
-    time = datenum(data{6}, data{5}, data{4}, data{1}, data{2}, data{3});
+    data.TIME = datenum(timedata{timecodeYearIdx}, timedata{timecodeMonthIdx}, timedata{timecodeDayIdx}, timedata{timecodeHourIdx}, timedata{timecodeMinuteIdx}, timedata{timecodeSecondIdx});
 else
     % otherwise generate timestamps from
     % the start time and sample interval
-    time = startTime:sampleInterval:stopTime;
+    data.TIME = startTime:sampleInterval:stopTime;
 end
 
 % get temperature if present
 if ~isempty(tempIdx)
+    temp = rawdata{tempIdx+1};
     
-    if ~isempty(timeIdx), tempIdx = timeIdx + 6;
-    else                  tempIdx = 1;
+    % handle degC, degF, degK
+    tempUnits = matlab.lang.makeValidName(units{tempIdx+1});
+    if strcmp(tempUnits, 'x_C')
+        data.TEMP = temp;
+    elseif strcmp(tempUnits, 'x_F')
+        data.TEMP = toCelsius(temp, 'fahrenheit');
+    elseif strcmp(tempUnits, 'x_K')
+        data.TEMP = toCelsius(temp, 'kelvin');
+    else
+        error(['Unknown temperature units : ' tempUnits]);
     end
-    
-    temp = data{tempIdx};
 end
 
 % get pressure if present
 if ~isempty(presIdx)
-    
-    if     ~isempty(tempIdx), presIdx = tempIdx + 1;
-    elseif ~isempty(timeIdx), presIdx = timeIdx + 6;
-    else                      presIdx = 1;
-    end
-    
-    pres = data{presIdx};
+    % Aqualogger measures absolute pressure (seawater + atmospheric)
+    pres = rawdata{presIdx+1};
     
     % we set the 65535 values to NaN
-    iNaN = pres == 65535;
+    iNaN = pres >= 65535;
     pres(iNaN) = NaN;
     
-    %Convert to dbar from bar
-    %Added by BDM 08/03/2010
-    pres=pres.*10;
+    presUnits = strtrim(units{presIdx+1});
+    % handle bar,dbar,mbar,psi,Pa,kPa -> dbar
+    if strcmp(presUnits, 'bar')
+        presConv = 10.0;
+    elseif strcmp(presUnits, 'dbar')
+        presConv = 1.0;
+    elseif strcmp(presUnits, 'mbar')
+        presConv = 0.01;
+    elseif strcmp(presUnits, 'psi') % 1 psi = 0.68948 dBar
+        presConv = 0.68948;
+    elseif strcmp(presUnits, 'kPa')
+        presConv = 0.01;
+    elseif strcmp(presUnits, 'Pa')
+        presConv = 0.0001;
+    else
+        error(['Unknown pressure units : ' presUnits]);
+    end
+    data.PRES = pres*presConv;
+end
+
+% get battery voltage if present
+if ~isempty(batteryIdx)
+    data.BAT_VOLT = rawdata{batteryIdx+1};
 end
 
 %
@@ -260,35 +357,37 @@ if isBurst
     % Only average bursts if not already internally averaged
     % (BDM - 08/03/2010)
     if ~isAveraged
-        newTemp = [];
-        newPres = [];
+        numBursts = length(data.TIME) / samplesPerBurst;
+        newdata = struct;
+        vNames = fieldnames(data);
+        for i = 1:length(vNames)
+            v = char(vNames{i});
+            newdata.(v) = NaN([numBursts, 1]);
+        end
         
-        numBursts = length(time) / samplesPerBurst;
-        newTime = NaN(numBursts, 1);
+        vNames = setdiff(fieldnames(data), 'TIME');
+        vNames = {vNames{:}};
         for k = 1:numBursts
-            
             % get indices for the current burst
             burstIdx = 1 + (k-1)*samplesPerBurst;
             burstIdx = burstIdx:(burstIdx+samplesPerBurst-1);
             
             % time is the mean of the burst timestamps
-            burstTime = mean(time(burstIdx));
+            newdata.TIME(k) = mean(data.TIME(burstIdx));
             
-            newTime(k, 1) = burstTime;
-            
-            % temp/pres are means of the burst samples
-            if ~isempty(temp), newTemp(k, 1) = mean(temp(burstIdx)); end
-            if ~isempty(pres), newPres(k, 1) = mean(pres(burstIdx)); end
+            % temp/pres etc are means of the burst samples
+            for vName = vNames
+                v = char(vName);
+                newdata.(v)(k) = mean(data.(v)(burstIdx));
+            end
         end
         
-        time = newTime;
-        temp = newTemp;
-        pres = newPres;        
+        data = newdata;
     end
 end
 
 if isnan(sample_data.meta.instrument_sample_interval) || sample_data.meta.instrument_sample_interval <= 0
-    sample_data.meta.instrument_sample_interval = median(diff(time*24*3600));
+    sample_data.meta.instrument_sample_interval = median(diff(TIME*24*3600));
 end
 
 %
@@ -298,7 +397,7 @@ end
 % to be CF compliant
 sample_data.dimensions{1}.name          = 'TIME';
 sample_data.dimensions{1}.typeCastFunc  = str2func(netcdf3ToMatlabType(imosParameters(sample_data.dimensions{1}.name, 'type')));
-sample_data.dimensions{1}.data          = sample_data.dimensions{1}.typeCastFunc(time);
+sample_data.dimensions{1}.data          = sample_data.dimensions{1}.typeCastFunc(data.TIME);
 
 sample_data.variables{end+1}.name         = 'TIMESERIES';
 sample_data.variables{end}.typeCastFunc   = str2func(netcdf3ToMatlabType(imosParameters(sample_data.variables{end}.name, 'type')));
@@ -317,27 +416,38 @@ sample_data.variables{end}.typeCastFunc   = str2func(netcdf3ToMatlabType(imosPar
 sample_data.variables{end}.dimensions     = [];
 sample_data.variables{end}.data           = sample_data.variables{end}.typeCastFunc(NaN);
 
-if isempty(timeIdx), error('time column is missing'); end
+% we have already generated time for missing timeIdx case, why test now?
+%if isempty(timeIdx), error('time column is missing'); end
 
 coordinates = 'TIME LATITUDE LONGITUDE NOMINAL_DEPTH';
 
 % add a temperature variable if present
-if ~isempty(tempIdx)
+if ~isempty(tempIdx) && any(~isnan(data.TEMP))
     sample_data.variables{end+1}.name       = 'TEMP';
     sample_data.variables{end}.typeCastFunc = str2func(netcdf3ToMatlabType(imosParameters(sample_data.variables{end}.name, 'type')));
     sample_data.variables{end}.dimensions   = 1;
-    sample_data.variables{end}.data         = sample_data.variables{end}.typeCastFunc(temp);
+    sample_data.variables{end}.data         = sample_data.variables{end}.typeCastFunc(data.TEMP);
     sample_data.variables{end}.coordinates  = coordinates;
 end
 
 % add a pressure variable if present
-if ~isempty(presIdx) && any(~isnan(pres))
+if ~isempty(presIdx) && any(~isnan(data.PRES))
     sample_data.variables{end+1}.name       = 'PRES';
     sample_data.variables{end}.typeCastFunc = str2func(netcdf3ToMatlabType(imosParameters(sample_data.variables{end}.name, 'type')));
     sample_data.variables{end}.dimensions   = 1;
-    sample_data.variables{end}.data         = sample_data.variables{end}.typeCastFunc(pres);
+    sample_data.variables{end}.data         = sample_data.variables{end}.typeCastFunc(data.PRES);
     sample_data.variables{end}.coordinates  = coordinates;
+    
+    % add a battery variable if present
+    if ~isempty(batteryIdx) && any(~isnan(data.BAT_VOLT))
+        sample_data.variables{end+1}.name       = 'BAT_VOLT';
+        sample_data.variables{end}.typeCastFunc = str2func(netcdf3ToMatlabType(imosParameters(sample_data.variables{end}.name, 'type')));
+        sample_data.variables{end}.dimensions   = 1;
+        sample_data.variables{end}.data         = sample_data.variables{end}.typeCastFunc(data.BAT_VOLT);
+        sample_data.variables{end}.coordinates  = coordinates;
+    end
 end
+
 end
 
 function [match, nomatch] = getValues(key, keys, values)

@@ -37,12 +37,12 @@ function [fieldTrip ctds sites dataDir] = getCTDs(auto)
 % If not, see <https://www.gnu.org/licenses/gpl-3.0.en.html>.
 %
 ctds  = struct;
-sites = struct;
+
 
 % prompt the user to select a field trip and
 % directory which contains raw data files
 if ~auto
-    [fieldTrip dataDir] = startDialog('profile');
+    [fieldTrip, dataDir] = startDialog('profile');
     % if automatic, just get the defaults from toolboxProperties.txt
 else
     dataDir   = readProperty('startDialog.dataDir.profile');
@@ -75,3 +75,6 @@ for i=1:lenDep
         if ~isempty(tempVal), sites(i) = tempVal; end
     end
 end
+
+end
+

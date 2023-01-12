@@ -10,10 +10,11 @@ data
 dist
 data/*
 dist/*
-Geomag/sample_coords.txt
-Geomag/sample_out_IGRF13.txt
+/Geomag/sample_out_IGRF12.txt
+/Geomag/sample_coords.txt
 .python-version
 .standalone_canonical_version
 .build.py@*
 *.nc
 tmp/test_*
+setup_imostoolbox_*.m

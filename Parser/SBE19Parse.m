@@ -106,10 +106,12 @@ function sample_data = SBE19Parse( filename, mode )
     sample_data.meta.instrument_serial_no = '';
   end
   
-  time = genTimestamps(instHeader, data);
+  time = genTimestamps(instHeader, procHeader, data);
   
   if isfield(instHeader, 'sampleInterval')
     sample_data.meta.instrument_sample_interval = instHeader.sampleInterval;
+  elseif isfield(procHeader, 'sampleInterval')
+      sample_data.meta.instrument_sample_interval = procHeader.sampleInterval;
   else
     sample_data.meta.instrument_sample_interval = median(diff(time*24*3600));
   end
@@ -614,7 +616,9 @@ function header = parseProcessedHeader(headerLines)
   volt1Expr = 'sensor \d+ = Extrnl Volt  1  (.+)';
   volt2Expr = 'sensor \d+ = Extrnl Volt  2  (.+)';
   binExpr   = 'binavg_binsize = (\d+)';
-  
+  % sbe39plus converted cnv has sample interval in header section
+  intervalExpr = 'interval = (\w+): (\d*\.?\d*)';
+
   for k = 1:length(headerLines)
     
     % try name expr
@@ -669,10 +673,18 @@ function header = parseProcessedHeader(headerLines)
       header.binSize = str2double(tkns{1}{1});
       continue;
     end
+    
+    % sample interval expr
+    tkns = regexp(headerLines{k}, intervalExpr, 'tokens');
+    if ~isempty(tkns)
+      header.sampleInterval = str2double(tkns{1}{2});
+      header.sampleIntervalUnits = tkns{1}{1};
+      continue; 
+    end
   end
 end
 
-function time = genTimestamps(instHeader, data)
+function time = genTimestamps(instHeader, procHeader, data)
 %GENTIMESTAMPS Generates timestamps for the data. Horribly ugly. I shouldn't 
 % have to have a function like this, but the .cnv files do not necessarily 
 % provide timestamps for each sample.
@@ -681,7 +693,17 @@ function time = genTimestamps(instHeader, data)
   % time may have been present in the sample 
   % data - if so, we don't have to do any work
   if isfield(data, 'TIME')
-      time = data.TIME;
+      % except cnv created from SBE39plus which has timeJ variable but only
+      % to 6 decimal places (0.0864 second resolution) which can cause the
+      % seconds value to alternate shift by one second.
+      if strcmp(instHeader.instrument_model, 'SBE39plus')
+        start    = procHeader.startTime;
+        interval = procHeader.sampleInterval;
+        nSamples = procHeader.nValues;
+        time = (start + ((0:(nSamples - 1)) * interval / 86400.0))';
+      else
+        time = data.TIME;
+      end
       return;
   end
   

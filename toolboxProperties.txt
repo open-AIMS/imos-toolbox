@@ -1,21 +1,33 @@
 % filename or ODBC DSN of MS-ACCESS deployment database
 % ex. : /home/ggalibert/OceanDB.mdb or imos-ddb
-toolbox.ddb =
+%toolbox.ddb = "C:\OceanDB\OceanDB2016.mdb"
+%toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
+toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
+%toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
+% Bleaching
+%toolbox.ddb = "C:\Projects\_vvandongenvogels\gbrf_bleaching\OceanDB_Bleaching.mdb"
+% EcoRRAP
+%toolbox.ddb = "C:\Projects\EcoRRAP\OceanographicDatabase\OceanDB_ECORRaP - Master.mdb"
+% manual file import
+%toolbox.ddb =
 
 % or full connection details to other kind of deployment database :
 % class name of JDBC database driver
 % ex. : net.ucanaccess.jdbc.UcanaccessDriver
+%toolbox.ddb.driver = net.ucanaccess.jdbc.UcanaccessDriver
 toolbox.ddb.driver =
 
 % database connection string, must include user and password if required by the database
 % ex. : "jdbc:ucanaccess:///home/ggalibert/OceanDB.mdb;jackcessOpener=org.imos.ddb.CryptCodecOpener"
+%toolbox.ddb.connection = "jdbc:ucanaccess://c:/OceanDB/OceanDB2016.mdb;jackcessOpener=org.imos.ddb.CryptCodecOpenerRW;memory=false"
 toolbox.ddb.connection =
 
 % user's login and password to database
 toolbox.ddb.user =
 toolbox.ddb.password =
 
-% toolbox execution mode. Values can be 'timeSeries' or 'profile'.
+% toolbox execution mode. Values can be 'timeSeries' and 'profile'. 
+% If no value is set then default mode is 'timeSeries'
 toolbox.mode = timeSeries
 
 % directory which contains netcdf templates
@@ -35,9 +47,9 @@ toolbox.qc_set = 1
 % [matched instrument maker/model], [display_name]
 toolbox.instrumentAliases = GUI/instrumentAliases.txt
 
-%Instrument detail level display options. This set the instrument metadata
-details. If instrumentAliases entries are found, [maker model] is substitute
-to the respective entry in toolbox.instrumentAliases
+% Instrument detail level display options. This set the instrument metadata
+% details. If instrumentAliases entries are found, [maker model] is substitute
+% to the respective entry in toolbox.instrumentAliases
 % name-only - [maker model]
 % short - [maker model depth]
 % medium - [maker model serial_number depth filename]
@@ -68,7 +80,7 @@ preprocessManager.preprocessDefaultChain.timeSeries = depthPP salinityPP oxygenP
 preprocessManager.preprocessDefaultChain.profile = depthPP salinityPP oxygenPP
 
 % last selected set of preprocessing routines
-preprocessManager.preprocessChain.timeSeries = depthPP salinityPP oxygenPP absiDecibelBasicPP adcpNortekVelocityEnu2BeamPP adcpBinMappingPP adcpNortekVelocityBeam2EnuPP magneticDeclinationPP velocityMagDirPP
+preprocessManager.preprocessChain.timeSeries = timeOffsetPP timeMetaOffsetPP depthPP salinityPP oxygenPP absiDecibelBasicPP adcpNortekVelocityEnu2BeamPP adcpBinMappingPP adcpNortekVelocityBeam2EnuPP magneticDeclinationPP velocityMagDirPP
 preprocessManager.preprocessChain.profile = depthPP salinityPP oxygenPP
 
 % file status dialog formatting styles
@@ -79,20 +91,20 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % last selected values for start dialog
-startDialog.dataDir.timeSeries =
-startDialog.dataDir.profile =
-startDialog.fieldTrip.timeSeries =
-startDialog.fieldTrip.profile =
-startDialog.lowDate.timeSeries =
-startDialog.lowDate.profile =
-startDialog.highDate.timeSeries =
-startDialog.highDate.profile =
+startDialog.dataDir.timeSeries = C:\Projects\20221021_Trip7881\Data\NWSLYN-2204
+startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
+startDialog.fieldTrip.timeSeries = 007881
+startDialog.fieldTrip.profile = 006690
+startDialog.lowDate.timeSeries = 0
+startDialog.lowDate.profile = 0
+startDialog.highDate.timeSeries = 796006.9802
+startDialog.highDate.profile = 737060
 
 % last selected directory for manual data import
-importManager.manualDir =
+importManager.manualDir = C:\Projects\_sjurriaans\D5A_nortek_vector_8151\
 
 % last selected directory for file export
-exportDialog.defaultDir =
+exportDialog.defaultDir = C:\Projects\EcoRRAP\Oceanographic_instruments\Data\202210_7903_Moore_Reef\Data\ONMO_FR2D
 
 % prompt user to select parser if an appropriate one
 % cannot be found (if false, the data is not imported)
@@ -110,8 +122,16 @@ visualQC.fastScatter = true
 % default nonspecialized scalar colormap and number of colour steps
 % jet | parula | viridis
 visualQC.defaultColormap = parula
+% jet | parula | viridis| cmap_distinguishable_colors | cmap_maxdistcolor_osaucs 
+visualQC.defaultColormap1D = cmap_distinguishable_colors
+% jet | parula | viridis
+visualQC.defaultColormap2D = parula
 visualQC.ncolors = 64
 
 % simple zbuffering of markers if using fallback fastScatterMesh plot (fastScatter = false)
 % 'ascending', 'descending', 'triangle', 'vee', 'flat', 'parabolic', 'hamming', 'hann'
 visualQC.zbuffer = triangle
+
+% select monitor size (which sets plots size) by smallest (min) or largest (max)
+% min | max
+monitor.selectSizeBy = min

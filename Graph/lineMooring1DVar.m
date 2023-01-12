@@ -148,6 +148,8 @@ for i=1:lenSampleData
             fileName = genIMOSFileName(sample_data{iSort(i)}, '.png');
             visible = 'on';
             if saveToFile, visible = 'off'; end
+            visible = 'on';
+            if saveToFile, visible = 'off'; end
             hFigMooringVar = figure(...
                 'Name',             title, ...
                 'NumberTitle',      'off', ...
@@ -182,7 +184,7 @@ for i=1:lenSampleData
             set(panH,'ActionPostCallback',{@zoomDateTick, hAxMooringVar});
             
             try
-                defaultColormapFh = str2func(readProperty('visualQC.defaultColormap'));
+                defaultColormapFh = str2func(readProperty('visualQC.defaultColormap1D'));
                 cMap = colormap(hAxMooringVar, defaultColormapFh(lenSampleData));
             catch e
                 cMap = colormap(hAxMooringVar, parula(lenSampleData));

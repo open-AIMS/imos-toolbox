@@ -284,7 +284,11 @@ switch name
     case {'accM'}
       name = 'ACCELERATION';
       comment = '';
-      
+
+    case {'lisstABS0x2DPC'} % LISST-ABS, Particle Concentration. [Cu]
+        name = 'PARTICLE_CONCENTRATION';
+        comment = '';
+        
     otherwise 
       name = '';
       data = [];

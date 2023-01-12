@@ -10,24 +10,51 @@ monitorRect = get(0,'MonitorPosition');
 
 switch computer
     case {'PCWIN', 'PCWIN64'}
-        % we need to convert from:
-        % [xmin2,ymin2,xmax2,ymax2;
-        %  xmin1,ymin1,xmax1,ymax1]
-        % The last row corresponds to device 1. The monitor labeled as device 1 in the Windows control
-        % panel remains the reference monitor that defines the position of the
-        % origin. The values for minimum and maximum are relative to the origin.
-        xMin = monitorRect(:, 1);
-        yMin = monitorRect(:, 2);
-        xMax = monitorRect(:, 3);
-        yMax = monitorRect(:, 4);
-        
-        width = xMax - xMin + 1;
-        height = yMax - yMin + 1;
-        
-        heightFullRect = max(yMax) - min(yMin) + 1;
-        
-        left = xMin - 1;
-        bottom = heightFullRect - (yMin - 1 + height);
+        % Original code below no longer seems valid but just in case
+        if verLessThan('matlab', '9.5.0') % version < R2018b
+            % we need to convert from:
+            % [xmin2,ymin2,xmax2,ymax2;
+            %  xmin1,ymin1,xmax1,ymax1]
+            % The last row corresponds to device 1. The monitor labeled as device 1 in the Windows control
+            % panel remains the reference monitor that defines the position of the
+            % origin. The values for minimum and maximum are relative to the origin.
+            xMin = monitorRect(:, 1);
+            yMin = monitorRect(:, 2);
+            xMax = monitorRect(:, 3);
+            yMax = monitorRect(:, 4);
+            
+            width = xMax - xMin + 1;
+            height = yMax - yMin + 1;
+            
+            heightFullRect = max(yMax) - min(yMin) + 1;
+            
+            left = xMin - 1;
+            bottom = heightFullRect - (yMin - 1 + height);
+        else
+            % get(0,'MonitorPosition') returns 
+            % Width and height of displays, returned as an n-by-4 matrix, 
+            % where n is the number of displays. Each row corresponds to 
+            % one display and is a four-element vector of the form 
+            % [x y width height]. For example, if there are two displays, 
+            % then the matrix has this form:
+            %
+            % [x1 y1 width1 height1
+            %  x2 y2 width2 height2]
+            
+            x = monitorRect(:, 1);
+            y = monitorRect(:, 2);
+            w = monitorRect(:, 3);
+            h = monitorRect(:, 4);
+            
+            % width/height offsets off 5%
+            woffset = 0.05 * w;
+            hoffset = 0.05 * h;
+            
+            left = x + woffset;
+            bottom = y + hoffset;
+            width = w - 2*woffset;
+            height = h - 2*hoffset;
+        end
         
     case 'GLNXA64'
         % we need to convert from:

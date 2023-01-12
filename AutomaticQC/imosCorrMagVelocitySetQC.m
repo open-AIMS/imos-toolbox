@@ -34,45 +34,40 @@ function [sample_data, varChecked, paramsLog] = imosCorrMagVelocitySetQC( sample
 % If not, see <https://www.gnu.org/licenses/gpl-3.0.en.html>.
 %
 narginchk(1, 2);
-if ~isstruct(sample_data), error('sample_data must be a struct'); end
 
 % auto logical in input to enable running under batch processing
 if nargin<2, auto=false; end
 
 varChecked = {};
-paramsLog  = [];
+paramsLog = [];
+currentQCtest = mfilename;
+if ~isstruct(sample_data), error('sample_data must be a struct'); end
+
+[valid, reason] = IMOS.validate_dataset(sample_data, currentQCtest);
+
+if ~valid
+    %TODO: we may need to include a global verbose flag to avoid pollution here.
+    unwrapped_msg = ['Skipping %s. Reasons: ' cell2str(reason,'')];
+    dispmsg(unwrapped_msg,sample_data.toolbox_input_file)
+    return
+end
+
+avail_variables = IMOS.get(sample_data.variables, 'name');
+cmag_counter = sum(contains(avail_variables, 'CMAG'));
+cmag_vars = cell(1, cmag_counter);
 
 % get all necessary dimensions and variables id in sample_data struct
-idUcur = 0;
-idVcur = 0;
-idWcur = 0;
-idCspd = 0;
-idCdir = 0;
-idCMAG = cell(4, 1);
-for j=1:4
-    idCMAG{j}  = 0;
-end
-lenVar = length(sample_data.variables);
-for i=1:lenVar
-    paramName = sample_data.variables{i}.name;
-    
-    if strncmpi(paramName, 'UCUR', 4),  idUcur = i; end
-    if strncmpi(paramName, 'VCUR', 4),  idVcur = i; end
-    if strcmpi(paramName, 'WCUR'),      idWcur = i; end
-    if strcmpi(paramName, 'CSPD'),      idCspd = i; end
-    if strncmpi(paramName, 'CDIR', 4),  idCdir = i; end
-    for j=1:4
-        cc = int2str(j);
-        if strcmpi(paramName, ['CMAG' cc]), idCMAG{j} = i; end
-    end
-end
+idUcur = getVar(sample_data.variables, 'UCUR');
+idVcur = getVar(sample_data.variables, 'VCUR');
+idWcur = getVar(sample_data.variables, 'WCUR');
+idCspd = getVar(sample_data.variables, 'CSPD');
+idCdir = getVar(sample_data.variables, 'CDIR');
 
-% check if the data is compatible with the QC algorithm
-idMandatory = (idUcur | idVcur | idWcur | idCspd | idCdir);
-for j=1:4
-    idMandatory = idMandatory & idCMAG{j};
+num_beams = sample_data.meta.adcp_info.number_of_beams;
+idCMAG = cell(cmag_counter, 1);
+for j=1:cmag_counter
+    idCMAG{j}  = getVar(sample_data.variables, ['CMAG' int2str(j)]);
 end
-if ~idMandatory, return; end
 
 % let's get the associated vertical dimension
 idVertDim = sample_data.variables{idCMAG{1}}.dimensions(2);
@@ -89,8 +84,22 @@ rawFlag         = imosQCFlag('raw',             qcSet, 'flag');
 sizeData = size(sample_data.variables{idCMAG{1}}.data);
 
 % read in filter parameters
-propFile = fullfile('AutomaticQC', 'imosCorrMagVelocitySetQC.txt');
-cmag     = str2double(readProperty('cmag',   propFile));
+%propFile = fullfile('AutomaticQC', 'imosCorrMagVelocitySetQC.txt');
+%cmag     = str2double(readProperty('cmag',   propFile));
+propFile = fullfile('AutomaticQC', 'imosCorrMagVelocitySetQC.ini');
+ini = IniConfig();
+ini.ReadFile(propFile);
+instrument_make = sample_data.meta.instrument_make;
+instrument_model = sample_data.meta.instrument_model;
+% try and key value based on instrument_make, then instrument_model, 
+% else use default value
+[cmag, status] = ini.GetValues(instrument_make, 'cmag', 64);
+if ~status
+    [cmag, status] = ini.GetValues(instrument_model, 'cmag', 64);
+end
+if ~status
+    warning('No cmag found in imosCorrMagVelocitySetQC.ini, using default');
+end
 
 % read dataset QC parameters if exist and override previous 
 % parameters file
@@ -105,14 +114,12 @@ sizeCur = size(sample_data.variables{idUcur}.flags);
 flags = ones(sizeCur, 'int8')*rawFlag;
 
 % Run QC
-isub1 = sample_data.variables{idCMAG{1}}.data > cmag;
-isub2 = sample_data.variables{idCMAG{2}}.data > cmag;
-isub3 = sample_data.variables{idCMAG{3}}.data > cmag;
-isub4 = sample_data.variables{idCMAG{4}}.data > cmag;
-% test nbins bins
-isub_all = isub1+isub2+isub3+isub4;
-clear isub1 isub2 isub3 isub4;
+isub_all = zeros(size(sample_data.variables{idCMAG{1}}.data), 'int8');
+for k = 1:num_beams
+    isub_all = isub_all + cast(sample_data.variables{idCMAG{k}}.data > cmag, 'int8');
+end
 
+% TODO : determine what this test means if have RTI 3 beam instrument.
 % assign pass(1) or fail(0) values
 % Where 2 or more beams pass, then the cmag test is passed
 iPass = isub_all >= 2;

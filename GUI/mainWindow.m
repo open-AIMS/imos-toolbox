@@ -101,6 +101,10 @@ fig = figure(...
     'NumberTitle', 'off',...
     'Tag',         'mainWindow');
 
+%
+set(groot,'defaultFigureCreateFcn',@(fig,~)addToolbarExplorationButtons(fig))
+%set(groot,'defaultAxesCreateFcn',@(ax,~)set(ax.Toolbar,'Visible','off'))
+
 % sample data selection menu
 sampleMenu = uicontrol(...
     'Style',  'popupmenu',...
@@ -255,7 +259,9 @@ zoominb     = findobj(buttons, 'TooltipString', 'Zoom In');
 zoomoutb    = findobj(buttons, 'TooltipString', 'Zoom Out');
 panb        = findobj(buttons, 'TooltipString', 'Pan');
 datacursorb = findobj(buttons, 'TooltipString', 'Data Cursor');
-
+if isempty(datacursorb)
+    datacursorb = findobj(buttons, 'TooltipString', 'Data Tips');
+end
 buttons(buttons == tb)            = [];
 buttons(buttons == savefigb)      = [];
 if verLessThan('matlab', '9.5')
@@ -287,7 +293,7 @@ else
         'HandleVisibility', 'off', ...
         'OnCallback', @onZoomIn, ...
         'OffCallback', 'zoom(''off'')');
-    [img,map,alpha] = imread(fullfile(matlabroot,'mcr','toolbox','matlab','icons','tool_zoom_in.png'));
+    [img,map,alpha] = imread(fullfile(matlab_toolbox_root(),'matlab','icons','tool_zoom_in.png'));
     img = double(img)/double(intmax(class(img)));
     img(repmat(alpha==0,[1 1 3])) = NaN;
     zoominb.CData = img;
@@ -297,20 +303,31 @@ else
         'HandleVisibility', 'off', ...
         'OnCallback', @onZoomOut, ...
         'OffCallback', 'zoom(''off'')');
-    [img,map,alpha] = imread(fullfile(matlabroot,'mcr','toolbox','matlab','icons','tool_zoom_out.png'));
+    [img,map,alpha] = imread(fullfile(matlab_toolbox_root(),'matlab','icons','tool_zoom_out.png'));
     img = double(img)/double(intmax(class(img)));
     img(repmat(alpha==0,[1 1 3])) = NaN;
     zoomoutb.CData = img;
     
-    hPan = uitoggletool(tb, ...
+    panb = uitoggletool(tb, ...
         'TooltipString',  'Pan (Ctrl+a)',...
         'HandleVisibility', 'off', ...
-        'OnCallback', 'pan(''on'')', ...
+        'OnCallback', @onPan, ...
         'OffCallback', 'pan(''off'')');
-    [img,map,alpha] = imread(fullfile(matlabroot,'mcr','toolbox','matlab','icons','tool_hand.png'));
+    [img,map,alpha] = imread(fullfile(matlab_toolbox_root(),'matlab','icons','tool_hand.png'));
     img = double(img)/double(intmax(class(img)));
     img(repmat(alpha==0,[1 1 3])) = NaN;
-    hPan.CData = img;
+    panb.CData = img;
+
+            %'OnCallback', 'datacursormode(''on'')', ...
+    datacursorb = uitoggletool(tb, ...
+        'TooltipString',  'Data Tips',...
+        'HandleVisibility', 'off', ...
+        'OnCallback', @datacursorbOnCallback, ...
+        'OffCallback', 'datacursormode(''off'')');
+    [img,map,alpha] = imread(fullfile(matlab_toolbox_root(),'matlab','icons','tool_data_cursor.png'));
+    img = double(img)/double(intmax(class(img)));
+    img(repmat(alpha==0,[1 1 3])) = NaN;
+    datacursorb.CData = img;
 end
 
 %set uimenu
@@ -928,7 +945,7 @@ set(hHelpWiki, 'callBack', @openWikiPage);
         iParamsToBeRemoved(iHEIGHT) = true;
         
         % we get rid of ADCP diagnostic parameters
-        for i=1:4
+        for i=1:5
             iStr = num2str(i);
             iABSI = strcmpi(['ABSI' iStr], paramsName);
             iParamsToBeRemoved(iABSI) = true;
@@ -938,6 +955,8 @@ set(hHelpWiki, 'callBack', @openWikiPage);
             iParamsToBeRemoved(iCORR) = true;
             iPERG = strcmpi(['PERG' iStr], paramsName);
             iParamsToBeRemoved(iPERG) = true;
+            iPGD = strcmpi(['PGD' iStr], paramsName);
+            iParamsToBeRemoved(iPGD) = true;
         end
     end
 
@@ -1175,16 +1194,47 @@ set(hHelpWiki, 'callBack', @openWikiPage);
     end
 
 %%
+    function onPan(source, ev)
+        zoomoutb.State = 'off';
+        zoominb.State = 'off';
+        datacursorb.State = 'off';
+        pan(fig, 'on');
+    end
+
     function onZoomIn(source, ev)
-            z = zoom;
-            z.Enable = 'on';
-            z.Direction = 'in';
+        zoomoutb.State = 'off';
+        panb.State = 'off';
+        datacursorb.State = 'off';
+        z = zoom;
+        z.Enable = 'on';
+        z.Direction = 'in';
     end
 
     function onZoomOut(source, ev)
-            z = zoom;
-            z.Enable = 'on';
-            z.Direction = 'out';
+        zoominb.State = 'off';
+        panb.State = 'off';
+        datacursorb.State = 'off';
+        z = zoom;
+        z.Enable = 'on';
+        z.Direction = 'out';
     end
 
+    function datacursorbOnCallback(source, ev)
+        zoominb.State = 'off';
+        zoomoutb.State = 'off';
+        panb.State = 'off';
+        dcm_obj = datacursormode(source.Parent.Parent);
+        set(dcm_obj, 'Enable', 'on');
+        set(dcm_obj, 'Interpreter', 'none');
+    end
+
+
+%%
+    function matlabtoolboxroot = matlab_toolbox_root()
+       if exist(fullfile(matlabroot,'mcr','toolbox'))
+           matlabtoolboxroot = fullfile(matlabroot,'mcr','toolbox');
+       else
+           matlabtoolboxroot = fullfile(matlabroot,'toolbox');
+       end
+    end
 end

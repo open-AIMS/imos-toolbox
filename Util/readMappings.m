@@ -40,7 +40,7 @@ raw_read = raw_read{1};
 fclose(nf);
 
 try
-    mappings = containers.Map(strip(raw_read(1:2:end)), strip(raw_read(2:2:end)), 'UniformValues', false);
+    mappings = containers.Map(upper(strip(raw_read(1:2:end))), strip(raw_read(2:2:end)), 'UniformValues', false);
 catch
     error('Mapping file %s is incomplete.', file);
 end

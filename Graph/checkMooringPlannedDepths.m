@@ -180,6 +180,8 @@ instrumentDesc = [{'Make Model (nominal depth - instrument SN)'}; instrumentDesc
 fileName = genIMOSFileName(sample_data{1}, '.png');
 visible = 'on';
 if saveToFile, visible = 'off'; end
+visible = 'on';
+if saveToFile, visible = 'off'; end
 hFigPress = figure(...
     'Name',             title, ...
     'NumberTitle',      'off', ...
@@ -284,8 +286,8 @@ end
 if saveToFile
     % look for difference with nominal depth in the first quarter
     % of the deployment
-    timeStart = min(min(timeVar)) + 1;
-    timeQuarter = timeStart + (max(max(timeVar)) - timeStart)/4;
+    timeStart = min(min(timeVar(timeVar~=0))) + 1;
+    timeQuarter = timeStart + (max(max(timeVar(timeVar~=0))) - timeStart)/4;
     yLim = get(hAxPress, 'YLim');
     x = [timeStart, timeQuarter, timeQuarter, timeStart, timeStart];
     y = [yLim(1),    yLim(1),     yLim(2),     yLim(2),    yLim(1)];

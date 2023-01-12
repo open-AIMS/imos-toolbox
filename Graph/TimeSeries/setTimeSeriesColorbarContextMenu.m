@@ -95,7 +95,7 @@ switch upper(var.name(1:4))
         uimenu(mainItem2, 'Label', 'direction [0; 360] (default)',  'Callback', {@cbCLimRange, ax, 'direction [0; 360]', var.data});
         uimenu(mainItem2, 'Label', 'manual',                        'Callback', {@cbCLimRange, ax, 'manual', var.data});
         
-    case 'PERG' % percentages
+    case {'PGD', 'PERG'} % percentages
         colormap(ax, parula);
         cbCLimRange('', '', ax, 'percent [0; 100]', var.data);
         

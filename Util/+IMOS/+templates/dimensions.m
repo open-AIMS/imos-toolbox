@@ -6,6 +6,8 @@ classdef  dimensions
 		ad_profile = ad_profile_dims();
 		adcp = adcp_dims();
 		adcp_enu = adcp_enu_dims();
+		imo_multispec= imo_multispec_dims();
+		wirewalker_rsk2d = wirewalker_rsk2d_dims();
 	end
 end
 
@@ -35,4 +37,14 @@ end
 function [dimensions] = adcp_enu_dims()
 dimensions = timeseries_dims();
 dimensions{2} = struct('name','HEIGHT_ABOVE_SENSOR','typeCastFunc',getIMOSType('HEIGHT_ABOVE_SENSOR'),'data',[]);
+end
+
+function [dimensions] = imo_multispec_dims()
+dimensions = timeseries_dims();
+dimensions{2} = struct('name', 'WAVELENGTHS', 'typeCastFunc', getIMOSType('WAVELENGTHS'), 'data', []);
+end
+
+function [dimensions] = wirewalker_rsk2d_dims()
+dimensions = timeseries_dims();
+dimensions{2} = struct('name','PRES_REL','typeCastFunc',getIMOSType('PRES_REL'),'data',[]);
 end

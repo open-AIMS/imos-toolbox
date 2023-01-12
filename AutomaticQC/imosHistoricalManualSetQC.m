@@ -70,7 +70,16 @@ for i=1:nmqc
     flag    = mqc(i).flag;
     comment = mqc(i).comment;
     
-    sample_data.variables{idVar}.flags(dataIdx) = flag;
+    if idVar ~= 0
+        sample_data.variables{idVar}.flags(dataIdx) = flag;
+    else
+        disp('Issue applying mqc for');
+        disp(['MQC variable: '  mqc(i).nameVar]);
+        disp(['Instrument: ' sample_data.meta.instrument_model]);
+        disp(['File: ' sample_data.toolbox_input_file]);
+        continue;
+    end
+
     if ~isempty(comment)
         if ~isfield(sample_data.variables{idVar}, 'ancillary_comment')
             sample_data.variables{idVar}.ancillary_comment = comment;

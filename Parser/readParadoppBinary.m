@@ -98,8 +98,13 @@ awacSize = [NaN; 24; NaN];
 prologIds  = [96; 97;  98;  99; 101; 106];
 prologSize = [80; 48; NaN; NaN; NaN; NaN]; % Wave fourier coefficient spectrum (id99) is actually not fixed length of 816!
 
-knownIds   = [genericIds;  continentalIds;  aquadoppVelocityIds;  aquadoppProfilerIds;  awacIds;  prologIds];
-knownSizes = [genericSize; continentalSize; aquadoppVelocitySize; aquadoppProfilerSize; awacSize; prologSize];
+%
+% Nortek Vector with IMU (ids 113) not handled yet
+vectorIds = [18; 16; 17; 7; 113];
+vectorSize = [42; NaN; 28; NaN; NaN];
+
+knownIds   = [genericIds;  continentalIds;  aquadoppVelocityIds;  aquadoppProfilerIds;  awacIds;  prologIds; vectorIds];
+knownSizes = [genericSize; continentalSize; aquadoppVelocitySize; aquadoppProfilerSize; awacSize; prologSize; vectorSize];
 
 noSizeIds  = [16; 54; 81]; % a few sectors do not include their size in their data
 noSizeSize = [24; 24; 22]; % yet for these sectors the size is known
@@ -560,13 +565,18 @@ WrapMode       = data(:, 47:48);  % uint16
 clockDeploy    = readClockData(data(:, 49:54));
 DiagInterval   = bytecast(reshape(data(:, 55:58)', [], 1), 'L', 'uint32', cpuEndianness);
 block2         = data(:, 59:74); % uint16
-% bytes 74-75 are spare
 VelAdjTable    = 0; % 180 bytes; not sure what to do with them
 Comments       = data(:, 257:436);
 Comments(Comments == 0) = 32; % replace 0 by 32: code for whitespace
 Comments       = char(Comments);
 block3         = data(:, 437:464); % uint16
+% bytes 74-75 are spare1
+Spare1 =  bytecast(reshape(data(:, 75:76)', [], 1), 'L', 'uint8', cpuEndianness);
+% bytes 454-455 are spare1
+Spare2 =  bytecast(reshape(data(:, 455:456)', [], 1), 'L', 'uint8', cpuEndianness);
 % bytes 464-493 are spare
+Spare3 =  bytecast(reshape(data(:, 465:510)', [], 1), 'L', 'uint8', cpuEndianness);
+
 QualConst      = 0; % 16 bytes
 Checksum       = data(:, 511:512); % uint16
 
@@ -666,6 +676,9 @@ if nRecords > 1
     AnaOutScale    = num2cell(AnaOutScale);
     CorrThresh     = num2cell(CorrThresh);
     TiLag2         = num2cell(TiLag2);
+    Spare1         = num2cell(Spare1);
+    Spare2         = num2cell(Spare2);
+    Spare3         = num2cell(Spare3);
 end
 
 DeployName = strtrim(DeployName);
@@ -719,7 +732,11 @@ sect = struct('Sync', Sync, ...
     'B1_2', B1_2, ...
     'AnaOutScale', AnaOutScale, ...
     'CorrThresh', CorrThresh, ...
-    'TiLag2', TiLag2);
+    'TiLag2', TiLag2, ...
+    'Spare1', Spare1, ...
+    'Spare2', Spare2, ...
+    'Spare3', Spare3 ...
+    );
 
 end
 
@@ -973,7 +990,6 @@ sect = struct('Sync', Sync, ...
     'Time', Time, ...
     'NRecords', NRecords, ...
     'Checksum', Checksum, ...
-    'Size', Size, ...
     'Noise1', Noise1, ...
     'Noise2', Noise2, ...
     'Noise3', Noise3, ...
@@ -1032,7 +1048,6 @@ if nRecords > 1
     VelB3 = num2cell(VelB3);
     PressureLSW = num2cell(PressureLSW);
     Analn1 = num2cell(Analn1);
-    Checksum = num2cell(Checksum);
     Analn2LSB = num2cell(Analn2LSB);
     Count = num2cell(Count);
     PressureMSB = num2cell(PressureMSB);
@@ -1053,7 +1068,6 @@ sect = struct('Sync', Sync, ...
     'VelB3', VelB3, ...
     'PressureLSW', PressureLSW, ...
     'Analn1', Analn1, ...
-    'Checksum', Checksum, ...
     'Analn2LSB', Analn2LSB, ...
     'Count', Count, ...
     'PressureMSB', PressureMSB, ...
@@ -1113,7 +1127,6 @@ if nRecords > 1
     Status = num2cell(Status);
     Analn = num2cell(Analn);
     Checksum = num2cell(Checksum);
-    Size = num2cell(Size);
     Battery = num2cell(Battery);
     SoundSpeed = num2cell(SoundSpeed);
     Heading = num2cell(Heading);
@@ -1130,7 +1143,6 @@ sect = struct('Sync', Sync, ...
     'Status', Status, ...
     'Analn', Analn, ...
     'Checksum', Checksum, ...
-    'Size', Size, ...
     'Battery', Battery, ...
     'SoundSpeed', SoundSpeed, ...
     'Heading', Heading, ...
@@ -2369,13 +2381,79 @@ function sect = readVectorProbeCheck(data, cpuEndianness)
 %READVECTORPROBECHECK Reads an Vector Probe Check section.
 % Id=0x07, Vector and Vectrino Probe Check Data
 % SYSTEM INTEGRATOR MANUAL (Dec 2014) pg 38
-% The structure of the probe check is the same for both Vectrino and Vector. 
-% The difference is that a Vector has 3 beams and 300 samples, while the 
+% The structure of the probe check is the same for both Vectrino and Vector.
+% The difference is that a Vector has 3 beams and 300 samples, while the
 % Vectrino has 4 beams and 500 samples
 
 sect = [];
 
-fprintf('%s\n', 'Warning : readVectorProbeCheck not implemented yet.');
+nRecords = size(data, 1);
+
+Sync   = data(:, 1);
+Id     = data(:, 2);
+Size   = bytecast(reshape(data(:, 3:4)', [], 1), 'L', 'uint16', cpuEndianness);
+
+Samples = bytecast(reshape(data(:, 5:6)', [], 1), 'L', 'uint16', cpuEndianness);
+
+% number of beams
+nBeams = NaN;
+nSamples = Samples(1);
+amp1Off = 8;
+if nSamples == 300
+    nBeams = 3;
+    csOff = amp1Off + 900;
+elseif nSamples == 500
+    nBeams = 4;
+    csOff = amp1Off + 1500;
+else
+    error('Unknown number of beams for Vector/Vectrino data');
+end
+
+blocks = data(:, amp1Off:csOff-1); % uint8
+blocks = bytecast(reshape(blocks', [], 1), 'L', 'uint8', cpuEndianness);
+blocks = reshape(blocks, nSamples, nBeams, nRecords);
+Amp1        = squeeze(blocks(:, 1, :));
+Amp2        = squeeze(blocks(:, 2, :));
+Amp3        = squeeze(blocks(:, 3, :));
+if nBeams == 4
+    Amp4        = squeeze(blocks(:, 4, :));
+end
+
+Checksum = bytecast(reshape(data(:, csOff:csOff+1)', [], 1), 'L', 'uint16', cpuEndianness);
+
+if nRecords > 1
+    Sync = num2cell(Sync);
+    Id = num2cell(Id);
+    Size = num2cell(Size);
+    Amp1 = mat2cell(Amp1, nSamples, ones(1, nRecords))';
+    Amp2 = mat2cell(Amp2, nSamples, ones(1, nRecords))';
+    Amp3 = mat2cell(Amp3, nSamples, ones(1, nRecords))';
+    if nBeams == 4
+        Amp4 = mat2cel(Amp4, nSamples, ones(1, nRecords))';
+    end
+    Checksum = num2cell(Checksum);
+end
+
+if nBeams == 3
+    sect = struct('Sync', Sync, ...
+        'Id', Id, ...
+        'Size', Size, ...
+        'Samples', Samples, ...
+        'Amp1', Amp1, ...
+        'Amp2', Amp2, ...
+        'Amp3', Amp3, ...
+        'Checksum', Checksum);
+else
+    sect = struct('Sync', Sync, ...
+        'Id', Id, ...
+        'Size', Size, ...
+        'Samples', Samples, ...
+        'Amp1', Amp1, ...
+        'Amp2', Amp2, ...
+        'Amp3', Amp3, ...
+        'Amp4', Amp4, ...
+        'Checksum', Checksum);
+end
 
 end
 

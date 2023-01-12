@@ -451,7 +451,8 @@ if __name__ == "__main__":
         print(f"Calling `{java_call}`")
         if not args['--dry-run']:
             rstatus = run(java_call)
-            if rstatus.returncode is not 0:
+            #if rstatus.returncode is not 0:
+            if rstatus.returncode != 0:
                 raise Exception(f"`{java_call}` command failed. Stderr is: {rstatus.stderr}")
             else:
                 if not rstatus.stdout:

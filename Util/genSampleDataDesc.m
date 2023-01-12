@@ -29,7 +29,7 @@ end
 
 simple_call_no_user_config = isempty(user_detailLevel) && nargin < 2;
 simple_call_with_user_config = ~isempty(user_detailLevel) && nargin < 2;
-full_call_with_user_config = ~isempty(user_detailLevel) && nargin > 1;
+full_call_with_user_config = nargin > 1 && ~isempty(detailLevel);
 
 if simple_call_no_user_config
     detailLevel = 'full';
@@ -37,11 +37,11 @@ elseif simple_call_with_user_config
     detailLevel = user_detailLevel;
 elseif full_call_with_user_config
     %disambiguation towards shorter detailed levels
-    scores = containers.Map({'name-only','short','medium','full','id'},{1,2,3,4,5});
+    scores = containers.Map({'name-only','short','medium','id','full'},{1,2,3,4,5});
     try
         user_score = scores(user_detailLevel);
         call_score = scores(detailLevel);
-        [found,ind] = inCell(scores.values,max(user_score,call_score));
+        [found, ind] = inCell(scores.values, min(user_score, call_score));
         if found
             names = scores.keys;
             detailLevel = names{ind};
@@ -110,7 +110,7 @@ instrument_entry = [maker ' ' model ];
 if ~isempty(alias_file)
     try
         map = readMappings(alias_file);
-        instrument_entry = map(instrument_entry);
+        instrument_entry = map(upper(instrument_entry));
     catch
     end
 end

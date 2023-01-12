@@ -66,7 +66,7 @@ function sample_data = netcdfParse( filename, mode )
       % Aargh, Datenum cannot handle a trailing 'Z',
       % even though it's ISO8601 compliant. Assuming
       % knowledge of the date format here (dropping the last character).
-      newTime = 0;
+      newTime = globals.(timeAtts{k});
       try
         newTime = datenum(globals.(timeAtts{k}), dateFmt(1:end-1));
 
@@ -218,6 +218,10 @@ function sample_data = netcdfParse( filename, mode )
       sample_data.meta.instrument_serial_no = sample_data.instrument_serial_number;
   end
 
+  if isfield(sample_data, 'instrument_serial_number')
+      sample_data.meta.instrument_serial_no = sample_data.instrument_serial_number;
+  end
+  
   if isfield(sample_data, 'instrument_beam_angle')
       sample_data.meta.beam_angle = sample_data.instrument_beam_angle;
   end
@@ -243,6 +247,15 @@ function sample_data = netcdfParse( filename, mode )
       sample_data.meta.instrument_average_interval = sample_data.instrument_average_interval;
   end
 
+  if isfield(sample_data, 'instrument_burst_duration')
+      sample_data.meta.instrument_burst_duration = sample_data.instrument_burst_duration;
+  end
+
+  if isfield(sample_data, 'instrument_burst_interval')
+      sample_data.meta.instrument_burst_interval = sample_data.instrument_burst_interval;
+  end
+
+  
   if isfield(sample_data, 'featureType')
       sample_data.meta.featureType = sample_data.featureType;
   end

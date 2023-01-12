@@ -235,10 +235,10 @@ function sample_data = readXR620( filename, mode )
                       data.(vars{k}) = data.(vars{k})/10;
                       
                       %Temperature (Celsius degree)
-                  case {'Temp', 'temp02', 'temp12'}, name = 'TEMP';
+                  case {'Temp', 'temp02', 'temp12', 'temp18'}, name = 'TEMP';
                       
                       %Pressure (dBar)
-                  case {'Pres', 'pres20', 'pres21'}, name = 'PRES';
+                  case {'Pres', 'pres20', 'pres21', 'pres26'}, name = 'PRES';
                       
                       %Relative Pressure (dBar)
                   case {'pres08'}, name = 'PRES_REL';
@@ -284,7 +284,9 @@ function sample_data = readXR620( filename, mode )
                       
                       % Oxyguard dissolved O2 concentration (ml/l)
                   case 'dO2C', name = 'DOX';
-
+                      
+                      % PAR (uMol/m2/s)
+                  case 'par_02', name = 'PAR';
               end
               
               if ~isempty(name)
@@ -346,10 +348,13 @@ function sample_data = readXR620( filename, mode )
                       data.(fields{k}) = data.(fields{k})/10;
                       
                       %Temperature (Celsius degree)
-                  case {'Temp', 'temp02', 'temp12'}, name = 'TEMP';
+                  case {'Temp', 'temp02', 'temp12', 'temp18'}, name = 'TEMP';
                       
                       %Pressure (dBar)
-                  case {'Pres', 'pres08'}, name = 'PRES';
+                  case {'Pres', 'pres20', 'pres21', 'pres26'}, name = 'PRES';
+                      
+                      %Relative Pressure (dBar)
+                  case {'pres08'}, name = 'PRES_REL';
                       
                       %Fluorometry-chlorophyl (ug/l) = (mg.m-3)
                   case 'FlC'
@@ -390,9 +395,13 @@ function sample_data = readXR620( filename, mode )
                       % Oxyguard dissolved O2 (%)
                   case 'D_O2', name = 'DOXS';
                       
-                      % Oxyguard dissolved O2 concentration (ml/l)
+                      % Oxyguard dissolved O2 concentration (uMol/m2/s)
                   case 'dO2C', name = 'DOX';
+                      
+                      % PAR (umol/m2/s)
+                  case 'par_02', name = 'PAR';
 
+                      
               end
               
               if ~isempty(name)
@@ -461,7 +470,12 @@ function header = readHeader(fid)
       switch m
           % instrument information
           case 1
-              header.model    = tkns{1}{1};
+              modelstring = matlab.lang.makeValidName(char(unicode2native(tkns{1}{1}, 'US-ASCII')), 'ReplacementStyle','hex');
+              % known model string unicode replacements
+              modelstring = regexprep(modelstring, '0x1A$', '3'); % subscripted 3
+              modelstring = regexprep(modelstring, '^TR0x2D', 'TR-'); % 'TR-'
+              modelstring = regexprep(modelstring, '^TDR0x2D', 'TDR-'); % 'TDR-'
+              header.model = modelstring;
           case 2
               header.firmware = tkns{1}{1};
           case 3
@@ -570,17 +584,24 @@ function data = readData(fid, header)
       data.(cols{k}) = samples{k}; 
   end
   
+  timeOffset = datenum('00:00:00', 'HH:MM:SS');
   if length(data.Date{1}) == 8 
-      data.time = datenum(data.Date, 'yy/mm/dd') + datenum(data.Time, 'HH:MM:SS.FFF') - datenum('00:00:00', 'HH:MM:SS');
+      data.time = datenum(data.Date, 'yy/mm/dd') + datenum(data.Time, 'HH:MM:SS.FFF') - timeOffset;
   else
+      nDash = strfind(data.Date{1}, '-');
       if isempty(strfind(data.Date{1}, '-'))
-          data.time = datenum(data.Date, 'yyyy/mmm/dd') + datenum(data.Time, 'HH:MM:SS.FFF') - datenum('00:00:00', 'HH:MM:SS');
+          data.time = datenum(data.Date, 'yyyy/mmm/dd') + datenum(data.Time, 'HH:MM:SS.FFF') - timeOffset;
       else
           % Ruskin version number <= 1.12 date format 'dd-mmm-yyyy'
           % Ruskin version number 1.13 date format 'yyyy-mm-dd'
           % can either do some simple date format test or see if datenum
           % can figure it out
-          data.time = datenum(data.Date) + datenum(data.Time, 'HH:MM:SS.FFF') - datenum('00:00:00', 'HH:MM:SS');
+          if nDash(1) == 5
+              fmt = 'yyyy-mm-dd';
+          else
+              fmt = 'dd-mmm-yyyy';
+          end
+          data.time = datenum(data.Date, fmt) + datenum(data.Time, 'HH:MM:SS.FFF') - timeOffset;
       end
   end
   

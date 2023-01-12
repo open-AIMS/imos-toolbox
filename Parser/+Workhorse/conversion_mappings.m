@@ -1,5 +1,5 @@
-function [cmap] = conversion_mappings(sensors, name_extension, xmit_voltage_scale, frame_of_reference)
-%function [cmap] = conversion_mappings(sensors, name_extension,xmit_voltage_scale, frame_of_reference)
+function [cmap] = conversion_mappings(sensors, name_extension, xmit_voltage_scale, xmit_current_scale, frame_of_reference)
+%function [cmap] = conversion_mappings(sensors, name_extension,xmit_voltage_scale, xmit_current_scale, frame_of_reference)
 %
 % Load the Conversion mappings for workhorse ADCP
 %
@@ -8,6 +8,7 @@ function [cmap] = conversion_mappings(sensors, name_extension, xmit_voltage_scal
 % sensors [struct] - A structure with sensors switches.
 % name_extension [char] - The variable name extension for velocity and Heading.
 % xmit_voltage_scale [double] - The transmit voltage scales. See adcp_info structure.
+% xmit_current_scale [double] - The transmit current scales. See adcp_info structure.
 % frame_of_reference [char] - The frame of reference ['earth' | 'beam']
 %
 % Outputs:
@@ -46,13 +47,14 @@ function [cmap] = conversion_mappings(sensors, name_extension, xmit_voltage_scal
 % assert(all(structfun(@isfunctionhandle,cmap)))
 % assert(cmap.('VCUR')(1000)==1) % mm/s -> m/s
 %
-narginchk(4, 4);
+narginchk(5, 5);
 cmap = struct();
 
 mms_to_ms = @(x)(0.001 * x); % mm/s -> m/s
 cdeg_to_deg = @(x)(0.01 * x); % 0.01 deg -> deg
 decapascal_to_decibar = @(x)(0.001 * x); %decapascal -> decibar
 xmitcounts_to_volt = @(x)(1e-6 * xmit_voltage_scale * x);
+xmitcounts_to_amps = @(x)(1e-6 * xmit_current_scale * x);
 
 switch frame_of_reference
     case 'earth'
@@ -88,5 +90,6 @@ if sensors.Heading
 end
 
 cmap.('TX_VOLT') = xmitcounts_to_volt;
+cmap.('TX_CURRENT') = xmitcounts_to_amps;
 
 end

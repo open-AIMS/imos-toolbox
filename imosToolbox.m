@@ -40,6 +40,10 @@ function imosToolbox(auto, varargin)
 toolboxVersion = ['2.6.15 - ' computer];
 
 if nargin == 0, auto = 'manual'; end
+if nargin == 1 && strcmp(auto, 'version')
+    flagStr = toolboxVersion;
+    return
+end
 
 if strcmpi(auto, 'version')
     disp(toolboxVersion);
@@ -82,3 +86,5 @@ switch auto
   case 'auto',    autoIMOSToolbox(toolboxVersion, varargin{:});
   otherwise,      flowManager(toolboxVersion);
 end
+
+clear('executeDDBQuery');

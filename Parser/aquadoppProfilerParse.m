@@ -379,3 +379,14 @@ for i=1:nVars
     sample_data.variables{i}.data         = sample_data.variables{i}.typeCastFunc(vars{i, 3});
 end
 clear vars;
+
+%
+% if wave data files are present, read them in
+%
+waveData = readAWACWaveAscii(filename);
+
+% no wave data, no problem
+if isempty(waveData), return; end
+
+% add wave data to existing sample_data
+sample_data = addAWACWaveToSample(sample_data, waveData, filename);

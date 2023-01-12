@@ -52,9 +52,18 @@ idVcur = 0;
 idWcur = 0;
 idCspd = 0;
 idCdir = 0;
-idPERG = cell(4, 1);
-for j=1:4
+if ~isfield(sample_data.meta, 'adcp_info'), return; end
+num_beams = sample_data.meta.adcp_info.number_of_beams;
+idPERG = cell(num_beams, 1);
+for j=1:num_beams
     idPERG{j}  = 0;
+end
+% what type of percent good variable
+hasPERG = true;
+PERG_name = 'PERG';
+if getVar(sample_data.variables, 'PGD1')
+    hasPERG = true;
+    PERG_name = 'PDG';
 end
 lenVar = length(sample_data.variables);
 for i=1:lenVar
@@ -65,15 +74,15 @@ for i=1:lenVar
     if strcmpi(paramName, 'WCUR'),      idWcur = i; end
     if strcmpi(paramName, 'CSPD'),      idCspd = i; end
     if strncmpi(paramName, 'CDIR', 4),  idCdir = i; end
-    for j=1:4
+    for j=1:num_beams
         cc = int2str(j);
-        if strcmpi(paramName, ['PERG' cc]), idPERG{j} = i; end
+        if strcmpi(paramName, [PERG_name cc]), idPERG{j} = i; end
     end
 end
 
 % check if the data is compatible with the QC algorithm
 idMandatory = (idUcur | idVcur | idWcur | idCspd | idCdir);
-for j=1:4
+for j=1:num_beams
     idMandatory = idMandatory & idPERG{j};
 end
 if ~idMandatory, return; end
@@ -85,8 +94,8 @@ rawFlag         = imosQCFlag('raw',             qcSet, 'flag');
 
 %Pull out percent good
 sizeData = size(sample_data.variables{idPERG{1}}.data);
-pg = nan(4, sizeData(1), sizeData(2));
-for j=1:4;
+pg = nan(num_beams, sizeData(1), sizeData(2));
+for j=1:num_beams
     pg(j, :, :) = sample_data.variables{idPERG{j}}.data;
 end
 
@@ -107,11 +116,18 @@ sizeCur = size(sample_data.variables{idUcur}.flags);
 flags = ones(sizeCur, 'int8')*rawFlag;
 
 % Run QC
-% in earth coordinate (!=beam coordinate) configuration, pg(1) is
-% percent good of measurements with 3 beam solution and pg(4) is
-% percent good of measurements with 4 beam solution.
-iPass = pg(1, :, :) + pg(4, :, :) > pgood;
-iFail = ~iPass;
+if PERG_name
+    % RDI
+    % in earth coordinate (!=beam coordinate) configuration, pg(1) is
+    % percent good of measurements with 3 beam solution and pg(4) is
+    % percent good of measurements with 4 beam solution.
+    iPass = pg(1, :, :) + pg(4, :, :) > pgood;
+    iFail = ~iPass;
+else
+    % RTI
+    iPass = squeeze(sum(pg, 1)) > pgood;
+    iFail = ~iPass;
+end
 
 % Run QC filter (iFail) on velocity data
 flags(iFail) = badFlag;

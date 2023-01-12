@@ -90,7 +90,7 @@ function sample_data = magneticDeclinationPP( sample_data, qcLevel, auto )
             sample_data{i}.instrument_nominal_depth = str2double(answer(1));
             sample_data{i}.geospatial_lat_min = str2double(answer(2));
             sample_data{i}.geospatial_lon_min = str2double(answer(3));
-            continue;
+            %continue;
         end
         % geomag only support computation for height above sea level
         % ranging [-1000;600000]

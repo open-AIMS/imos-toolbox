@@ -167,6 +167,10 @@ if sensors.Heading
     imap.(['HEADING' name_extension]) = {'variableLeader', 'heading'};
 end
 
+ts_vars = [ts_vars, 'TX_CURRENT'];
+imap.('TX_CURRENT') = {'variableLeader', 'adcChannel0'};
+
 ts_vars = [ts_vars, 'TX_VOLT'];
 imap.('TX_VOLT') = {'variableLeader', 'adcChannel1'};
+
 end
