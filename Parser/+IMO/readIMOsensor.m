@@ -118,7 +118,7 @@ switch instStr
         if ~isfield(header, 'instrument_wavelengths')
             header.instrument_wavelengths = strjoin(arrayfun(@num2str, wavelengths, 'UniformOutput', false), ',');
         end
-        [data, xattrs] = calcPAR(data, xattrs, header);
+        [data, xattrs] = IMO.calcPAR(data, xattrs, header);
         xattrsPAR = xattrs('PAR');
         xattrsPAR.comment = [xattrsPAR.comment ' For a typical solar spectrum the in-air MS8 derived PAR has an RMS error of 0.015%'];
         xattrs('PAR') = xattrsPAR;

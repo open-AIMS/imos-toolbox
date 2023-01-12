@@ -19,10 +19,10 @@ nChannels = length(lambda);
 hasIRRADIANCE = isfield(data, 'IRRADIANCE');
 hasCH1 = isfield(data, 'CH1');
 if hasIRRADIANCE
-   channel_data = data.IRRADIANCE;
-   nSamples = size(channel_data, 1);
+    channel_data = data.IRRADIANCE;
+    nSamples = size(channel_data, 1);
 elseif hasCH1
-    % older style 
+    % older style
     nSamples = size(data.CH1,1);
     channel_data = zeros([nSamples, nChannels]);
     for i = 1:nChannels
