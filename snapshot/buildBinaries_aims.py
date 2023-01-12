@@ -59,8 +59,8 @@ if compiled is not 0:
 #
 print('\n--building Matlab binaries')
 matlabExe='\"C:/Program Files/MATLAB/R2018b/bin\matlab.exe\"'
-matlabOpts = '-nodisplay -wait -logfile "%s"' % compilerLog
-matlabCmd = 'addpath(\'Util\'); try, imosCompile(\'%s\'); exit(); catch e, disp(e.message); end;' % version
+matlabOpts = '-nosplash -wait -logfile "%s"' % compilerLog
+matlabCmd = 'try, imosCompile(); exit(); catch e, disp(e.message); end;'
 #os.system('cd %s && matlab %s -r "%s"' % (exportDir, matlabOpts, matlabCmd))
 os.system('cd %s && %s %s -r "%s"' % (exportDir, matlabExe, matlabOpts, matlabCmd))
 
