@@ -86,3 +86,5 @@ switch auto
   case 'auto',    autoIMOSToolbox(toolboxVersion, varargin{:});
   otherwise,      flowManager(toolboxVersion);
 end
+
+clear('executeDDBQuery');
