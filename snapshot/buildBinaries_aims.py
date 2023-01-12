@@ -20,13 +20,13 @@ lt = time.localtime()
 
 project = 'imos-toolbox'
 
-version    = 'AIMS-2.6.5'
+version    = 'AIMS-2.6.15-merge'
 
 #url        = 'https://github.com/aodn/%s.git' % project
-url = 'file:///D:/Projects/aims-gitlab/%s/.git' % project
+url = 'file:///C:/Projects/aims-gitlab/%s/.git' % project
 exportDir  = 'export'
 
-antExe = 'D:/opt/apache-ant-1.10.6//bin/ant.bat'
+antExe = 'C:/opt/apache-ant-1.10.12//bin/ant.bat'
 os.environ["ANT_HOME"] = 'D:/opt/apache-ant-1.10.6'
 
 compilerLog = '.\%s\log.txt' % exportDir
