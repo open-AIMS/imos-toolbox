@@ -7,6 +7,7 @@ classdef  dimensions
 		adcp = adcp_dims();
 		adcp_enu = adcp_enu_dims();
 		imo_multispec= imo_multispec_dims();
+		wirewalker_rsk2d = wirewalker_rsk2d_dims();
 	end
 end
 
@@ -41,4 +42,9 @@ end
 function [dimensions] = imo_multispec_dims()
 dimensions = timeseries_dims();
 dimensions{2} = struct('name', 'WAVELENGTHS', 'typeCastFunc', getIMOSType('WAVELENGTHS'), 'data', []);
+end
+
+function [dimensions] = wirewalker_rsk2d_dims()
+dimensions = timeseries_dims();
+dimensions{2} = struct('name','PRES_REL','typeCastFunc',getIMOSType('PRES_REL'),'data',[]);
 end
