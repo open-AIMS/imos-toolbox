@@ -411,7 +411,7 @@ function filename = exportNetCDF( sample_data, dest, mode )
           data(isnan(data)) = vars{m}.FillValue_;
       end
       
-      data = typeCastFunction(data);
+      data = squeeze(typeCastFunction(data));
       if isnumeric(data)
           netcdf.putVar(fid, vid, data);
       elseif ischar(data)
