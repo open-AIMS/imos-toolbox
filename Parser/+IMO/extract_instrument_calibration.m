@@ -36,7 +36,7 @@ for v = {'WAVELENGTHS' 'FWHM' 'DARKSLOPE' 'DARKYINT' 'GAIN' 'TEMPCO' 'IMM'}
     vname = char(v);
     ind = find(contains(instrument_calibration, [vname ' =']));
     if ~isempty(ind)
-        token = regexp(instrument_calibration{ind}, [ vname '\s+=\s+\[(\S+)\]' ], 'tokens');
+        token = regexp(instrument_calibration{ind}, [ vname '\s+=\s+\]?(\S+)\]?' ], 'tokens');
         header.(['instrument_' vname]) = token{1}{1};
     end
 end

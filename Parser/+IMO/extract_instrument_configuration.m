@@ -20,11 +20,14 @@ end
 
 % instrument mode
 ind = find(contains(instrument_configuration, 'IN-WATER'));
-if isempty(ind)
-    header.instrument_mode = 'AIR_MODE';
-else
-    header.instrument_mode = 'WATER_MODE';
+if ~contains(header.instrument_model, 'NTU')
+    if isempty(ind)
+        header.instrument_mode = 'AIR_MODE';
+    else
+        header.instrument_mode = 'WATER_MODE';
+    end
 end
+
 
 % detector type, eg
 % DETECTOR = IRRADIANCE
@@ -37,7 +40,7 @@ header.instrument_detector_type = token{1}{1};
 idx = contains(instrument_configuration, 'DETECTOR OUTPUT =');
 token = regexp(instrument_configuration{idx}, 'DETECTOR OUTPUT =\s+(.*)', 'tokens');
 % if not IRR or RAD then error as cannot handle RAW
-if ~contains(token{1}{1}, {'IRR', 'RAD', 'ENG (ASCII)'})
+if ~isempty(token) && ~contains(token{1}{1}, {'IRR', 'RAD', 'ENG (ASCII)'})
     error(['Cannot handle DETECTOR OUTPUT = ' token{1}{1}]');
 end
 
