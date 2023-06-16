@@ -174,6 +174,11 @@ if isKey(M,'IntegrationTime')
     xattrs('INTEGRATION_TIME') = struct('units', 'milliseconds');
 end
 
+if isKey(M,'NTU')
+    data.TURB = str2double(splitData(:,M('NTU'))); % umole m^-2 s^-1
+    xattrs('TURB') = struct('comment', [header.instrument_model ' instrument derived NTU from internally stored 4 point Formazin NTU calibration.']);
+end
+
 % instrument calculated PAR
 if isKey(M,'Par')
     data.PAR = str2double(splitData(:,M('Par'))); % umole m^-2 s^-1
@@ -182,7 +187,8 @@ if isKey(M,'Par')
 end
 
 if isKey(M,'Ch1')
-    number_of_spectral_channels = sum(contains(keys(M), 'Ch'));
+    channel_prefix = 'Ch';
+    number_of_spectral_channels = sum(contains(keys(M), channel_prefix));
     if has_header
         wavelengths = str2double(split(header.instrument_wavelengths, ','));
     else
@@ -213,7 +219,7 @@ if isKey(M,'Ch1')
     number_of_spectral_channels = numel(wavelengths);
     data.(vName) = nan([numel(data.TIME), number_of_spectral_channels]);
     for k = 1:number_of_spectral_channels
-        key = ['Ch' num2str(k)];
+        key = [channel_prefix num2str(k)];
         data.(vName)(:,k) = str2double(splitData(:,M(key)));
     end
     
