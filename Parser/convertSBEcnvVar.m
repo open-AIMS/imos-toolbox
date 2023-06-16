@@ -95,7 +95,7 @@ switch name
         comment = '';
       
     % temperature (deg C)
-    case {'t090C', 'tv290C', 't090'}
+    case {'t090C', 'tv268C', 'tv290C', 't090'}
       name = 'TEMP';
       comment = '';
       
