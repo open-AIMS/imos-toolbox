@@ -230,5 +230,5 @@ RADIANCE,			0, imo_radiance,	uW cm-2 nm-1 sr-1,			,	,                           
 MULTISPEC,			0, imo_multispec,	uW cm-2 nm-1,				,	,                                  E, 999999.0, 0.0,	1000.0,    float
 PERCENT_SIGNAL,		0, imo_percent_signal, percent,					,	,                                  E, 999999.0, 0.0,	100.0,    float
 TILT,               0, platform_tilt_angle, degree,					,	,                                  E, 999999.0, 0.0,	180.0,    float
-INSTRUMENT_TEMP,	0, imo_instrument_temperature, degrees_Celsius,	,	,                                  E, 999999.0, 0.0,	100.0,    float
-INTEGRATION_TIME,	0, imo_integration_time,	ms,			,	,                                  E, 999999.0, 0.0,      1000.0,    float
+INSTRUMENT_TEMP,	0, instrument_temperature, degrees_Celsius,	,	,                                  E, 999999.0, 0.0,	100.0,    float
+INTEGRATION_TIME,	0, integration_time,	ms,			,	,                                  E, 999999.0, 0.0,      1000.0,    float
