@@ -29,7 +29,7 @@ function metadataStr = setAIMSmetadata(site,metadataField)
 % not a physical site with lat/lon but is usually starts with site name, 
 % so first do a hardcoded comparison with known AIMS IMOS sites. Else test 
 % if site is an IMOS one by looking at it's associated db ResearchActivity.
-imos_sites_prefix = {'NRS', 'GBR', 'NWS', 'ITF', 'KIM', 'PIL', 'TAN'};
+imos_sites_prefix = {'NRS', 'GBR', 'NWS', 'ITF', 'KIM', 'PIL', 'TAN', 'WW-'};
 dbsite = executeQuery( 'Sites', 'Site', site);
 isIMOS = startsWith(site, imos_sites_prefix);
 if ~isIMOS
