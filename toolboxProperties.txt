@@ -2,12 +2,18 @@
 % ex. : /home/ggalibert/OceanDB.mdb or imos-ddb
 %toolbox.ddb = "C:\OceanDB\OceanDB2016.mdb"
 %toolbox.ddb = "\\pearl\ocean\OceanographyDatabase\BackEnd\OceanDB2016_be.mdb"
-toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
+%toolbox.ddb = "C:\OceanDB_be\OceanDB2016_be.mdb"
 %toolbox.ddb = "/export/ocean/OceanographyDatabase/BackEnd/OceanDB2016_be.mdb"
+
 % Bleaching
 %toolbox.ddb = "C:\Projects\_vvandongenvogels\gbrf_bleaching\OceanDB_Bleaching.mdb"
+
 % EcoRRAP
-%toolbox.ddb = "C:\Projects\EcoRRAP\OceanographicDatabase\OceanDB_ECORRaP - Master.mdb"
+toolbox.ddb = "C:\Projects\EcoRRAP\OceanographicDatabase\OceanDB_ECORRaP - Master.mdb"
+
+% Profiling Moorings Test
+%toolbox.ddb = "C:\Projects\imos\Profiling Moorings\OceanDB\OceanDB2016_be.mdb"
+
 % manual file import
 %toolbox.ddb =
 
@@ -68,7 +74,7 @@ autoQCManager.autoQCDefaultChain.timeSeries = imosImpossibleDateQC imosImpossibl
 autoQCManager.autoQCDefaultChain.profile = imosImpossibleDateQC imosImpossibleLocationSetQC imosInOutWaterQC imosGlobalRangeQC imosImpossibleDepthQC imosSalinityFromPTQC imosHistoricalManualSetQC
 
 % last selected set of auto QC routines
-autoQCManager.autoQCChain.timeSeries = imosImpossibleDateQC imosImpossibleLocationSetQC imosInOutWaterQC imosGlobalRangeQC imosImpossibleDepthQC imosSalinityFromPTQC imosSideLobeVelocitySetQC imosTiltVelocitySetQC imosHorizontalVelocitySetQC imosVerticalVelocityQC imosCorrMagVelocitySetQC imosHistoricalManualSetQC
+autoQCManager.autoQCChain.timeSeries = imosImpossibleDateQC imosImpossibleLocationSetQC imosInOutWaterQC imosGlobalRangeQC imosImpossibleDepthQC imosSalinityFromPTQC imosSurfaceDetectionByDepthSetQC imosSideLobeVelocitySetQC imosTiltVelocitySetQC imosHorizontalVelocitySetQC imosVerticalVelocityQC imosCorrMagVelocitySetQC imosHistoricalManualSetQC
 autoQCManager.autoQCChain.profile = imosImpossibleDateQC imosImpossibleLocationSetQC imosInOutWaterQC imosGlobalRangeQC imosImpossibleDepthQC imosSalinityFromPTQC imosHistoricalManualSetQC
 
 % prompt for preprocessing (if false,
@@ -80,7 +86,7 @@ preprocessManager.preprocessDefaultChain.timeSeries = depthPP salinityPP oxygenP
 preprocessManager.preprocessDefaultChain.profile = depthPP salinityPP oxygenPP
 
 % last selected set of preprocessing routines
-preprocessManager.preprocessChain.timeSeries = timeOffsetPP timeMetaOffsetPP depthPP salinityPP oxygenPP absiDecibelBasicPP adcpNortekVelocityEnu2BeamPP adcpBinMappingPP adcpNortekVelocityBeam2EnuPP magneticDeclinationPP velocityMagDirPP
+preprocessManager.preprocessChain.timeSeries = timeOffsetPP timeMetaOffsetPP depthPP salinityPP absiDecibelBasicPP adcpNortekVelocityEnu2BeamPP adcpBinMappingPP adcpNortekVelocityBeam2EnuPP magneticDeclinationPP velocityMagDirPP
 preprocessManager.preprocessChain.profile = depthPP salinityPP oxygenPP
 
 % file status dialog formatting styles
@@ -91,9 +97,9 @@ dataFileStatusDialog.noFileFormat          = bold
 dataFileStatusDialog.multipleFileFormat    = italic
 
 % last selected values for start dialog
-startDialog.dataDir.timeSeries = C:\Projects\20221021_Trip7881\Data\NWSLYN-2204
+startDialog.dataDir.timeSeries = C:\Projects\EcoRRAP\Oceanographic_instruments\Data\202303_7976_Torres_strait\Data\ONLI_FR1D
 startDialog.dataDir.profile = D:\Projects\Tantabiddi\data\035_20170517_Trip6690\data\TAN100-1701
-startDialog.fieldTrip.timeSeries = 007881
+startDialog.fieldTrip.timeSeries = 007976
 startDialog.fieldTrip.profile = 006690
 startDialog.lowDate.timeSeries = 0
 startDialog.lowDate.profile = 0
@@ -104,7 +110,7 @@ startDialog.highDate.profile = 737060
 importManager.manualDir = C:\Projects\_sjurriaans\D5A_nortek_vector_8151\
 
 % last selected directory for file export
-exportDialog.defaultDir = C:\Projects\EcoRRAP\Oceanographic_instruments\Data\202210_7903_Moore_Reef\Data\ONMO_FR2D
+exportDialog.defaultDir = C:\Projects\EcoRRAP\Oceanographic_instruments\Data\202303_7976_Torres_strait\Data\ONLI_FR1D\exported
 
 % prompt user to select parser if an appropriate one
 % cannot be found (if false, the data is not imported)
