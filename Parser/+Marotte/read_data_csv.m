@@ -1,10 +1,16 @@
-%%
-function [header, data, xattrs] = readCSV(filename, deviceInfo)
-% parse JCU Marotte CSV file
+function [data, xattrs] = read_data_csv(filename, deviceInfo, magExt)
 
 header = struct;
 data = struct;
 xattrs = containers.Map('KeyType','char','ValueType','any');
+xattrs('TIME') = struct('comment', 'TIME');
+
+is_csv = ~isempty(regexp(filename, '\.csv$'));
+
+magExt = '';
+if strcmpi(deviceInfo.magnetic_offset_compensation, 'NO')
+    magExt = '_MAG';
+end
 
 try
     fid = fopen(filename, 'rt');
@@ -15,6 +21,7 @@ catch e
     if fid ~= -1, fclose(fid); end
     rethrow(e);
 end
+
 
 tf = contains(allLines, 'datetime');
 ind = find(tf);
@@ -48,14 +55,8 @@ splitData = split(dataLines, ',');
 
 M = Marotte.extract_column_map(headerline);
 
-magExt = '';
-if strcmpi(deviceInfo.magnetic_offset_compensation, 'NO')
-    magExt = '_MAG';
-end
-
 data.TIME = NaN([nrows, 1]);
 data.TIME = datenum(splitData(:,M('Datetime')), 'yyyy-mm-dd HH:MM:SS.FFF');
-xattrs('TIME') = struct('comment', 'TIME');
 
 if isKey(M,'Speed')
     data.CSPD = NaN([nrows, 1]);
@@ -65,7 +66,7 @@ end
 
 if isKey(M,'Direction')
     data.(['CDIR' magExt]) = NaN([nrows, 1]);
-    data.(['CDIR' magExt]) = str2double(splitData(:,M('Direction')));
+    data.(['CDIR' magExt]) = str2doubles(splitData(:,M('Direction')));
     xattrs(['CDIR' magExt]) = struct('comment', 'degrees CW from North', 'units', 'degrees');
 end
 
@@ -89,7 +90,7 @@ end
 
 if isKey(M,'Batt')
     data.BAT_VOLT = NaN([nrows, 1]);
-    data.BAT_VOLT = str2double(splitData(:,M('Batt')));
+    data.BAT_VOLT = str2doubles(splitData(:,M('Batt')));
     xattrs('BAT_VOLT') = struct('comment', 'Voltage (V)', 'units', 'V');
 end
 

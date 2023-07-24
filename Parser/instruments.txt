@@ -115,3 +115,5 @@ WETLABS, PARS, ECOTriplet
 LI-COR, LI-192, XR
 RDI, WORKHORSE SENTINEL-600, workhorse
 
+Nortek, Aquadopp_1Mhz, aquadoppProfiler
+Nortek, Aquadopp_2Mhz, aquadoppProfiler

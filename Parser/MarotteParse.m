@@ -73,7 +73,8 @@ end
 
 % only one file supported currently
 filename = filename{1};
-metadata_filename = regexprep(filename, '\.csv', '.dev', 'ignorecase');
+is_csv = ~isempty(regexp(filename, '\.csv$'));
+metadata_filename = regexprep(filename, '(\.csv|\.mat)$', '.dev', 'ignorecase');
 
 sample_data = [];
 
@@ -83,8 +84,8 @@ if ~exist(metadata_filename, 'file'), error('processing metadata file must have 
 % data as header to csv file
 deviceInfo = Marotte.readProcessingMetadata(metadata_filename);
 
-[header, data, xattrs] = Marotte.readCSV(filename, deviceInfo);
-  
+[data, xattrs] = Marotte.readData(filename, deviceInfo);
+
 deviceInfo.toolbox_input_file = filename;
 
 % create sample data struct,
