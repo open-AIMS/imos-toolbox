@@ -93,7 +93,7 @@ classdef OceanContour
                 errormsg('build_magnetic_variables: first argument is not a logical')
             end
 
-            if custom_magnetic_declination
+            if ~custom_magnetic_declination
                 %TODO: This is probably unecessary
                 %I believe OceanContourDouble-check if OceanContour will change variable names if custom magnetic declination is used.
                 dispmsg('%s: Assigning non ENU Velocities to ENU variables. Verify the magnetic declination angles.')
@@ -191,7 +191,8 @@ classdef OceanContour
             attmap.('converted_to_enu') = 'DataInfo_transformsAndCorrections_addENU';            
             attmap.('nBeams') = OceanContour.build_instrument_name(group_name, 'nBeams');
             attmap.('activeBeams') = OceanContour.build_instrument_name(group_name, 'activeBeams'); %no previous name
-            attmap.('magDec') = 'Instrument_user_decl';
+            attmap.('magDec_User') = 'Instrument_user_decl';
+            attmap.('magDec_DataInfo') = 'DataInfo_transformsAndCorrections_magneticDeclination';
             attmap.('binMapping') = 'DataInfo_transformsAndCorrections_binMapping';            
 
             if strcmpi(ftype, 'mat')
@@ -335,7 +336,9 @@ classdef OceanContour
                 end
 
             end
-
+            
+            varmap.('data_mask') = 'DataMask';
+            varmap.('status') = 'Status';
             varmap.('TEMP') = 'WaterTemperature';
             varmap.('PRES_REL') = 'Pressure';
             varmap.('SSPD') = 'SpeedOfSound';
@@ -500,7 +503,7 @@ classdef OceanContour
 
                 dataset_groups = netcdf.inqGrps(data_group);
                 get_group_name = @(x)(netcdf.inqGrpName(x));
-
+                
             else
                 OceanContour.verify_mat_groups(matdata);
                 file_metadata = matdata.Config;
@@ -546,8 +549,18 @@ classdef OceanContour
                     errormsg('Only 4 Beam ADCP are supported. %s got %d nBeams', filename, meta.nBeams)
                 end
 
-                meta.magDec = get_att('magDec');
-                custom_magnetic_declination = logical(meta.magDec);
+                magDec_User = get_att('magDec_User');
+                magDec_DataInfo = get_att('magDec_DataInfo');
+                has_magdec_user = logical(magDec_User);
+                has_magdec_oceancontour = logical(magDec_DataInfo);
+                meta.magDec = 0.0;
+                custom_magnetic_declination = has_magdec_user | has_magdec_oceancontour;
+                if has_magdec_oceancontour
+                    meta.magDec = magDec_DataInfo;
+                elseif has_magdec_user
+                    meta.magDec = magDec_User;
+                end
+                
                 try
                     meta.binMapping = get_att('binMapping');
                     binmapped = logical(meta.binMapping);
@@ -583,7 +596,7 @@ classdef OceanContour
                 meta.instrument_model = get_att('instrument_model');
 
                 if is_netcdf
-                    inst_serial_numbers = get_var('instrument_serial_no');    
+                    inst_serial_numbers = get_var('instrument_serial_no');
                     if numel(unique(inst_serial_numbers)) > 1
                         dispmsg('Multi instrument serial numbers found in %s. Assuming the most frequent is the right one...', filename)    
                         inst_serial_no = mode(inst_serial_numbers);
@@ -679,9 +692,20 @@ classdef OceanContour
                         dimensions = IMOS.gen_dimensions('adcp');
                 end
                 
+                status_data = get_var('status');
+                adcpOrientations = arrayfun(@(x) bin2dec(num2str(bitget(x, 28:-1:26, 'uint32'))), status_data);
+                adcpOrientation = mode(adcpOrientations); % hopefully the most frequent value reflects the orientation when deployed
+                % we assume adcpOrientation == 4 by default "ZUP"
+                meta.adcp_orientation = 'ZUP';
+                adcp_orientation_conversion  = 1;
+                if adcpOrientation == 5
+                    meta.adcp_orientation = 'ZDOWN';
+                    adcp_orientation_conversion  = -1;
+                end
+                
                 dimensions{1}.data = time;
                 dimensions{1}.comment = 'time imported from matlabTimeStamp variable';
-                dimensions{2}.data = z;
+                dimensions{2}.data = z * adcp_orientation_conversion ;
                 dimensions{2}.comment = 'height imported from VelocityENU_Range';
 
                 switch meta.coordinate_system
@@ -703,11 +727,18 @@ classdef OceanContour
                 twodim_vcoords = [dimensions{1}.name ' LATITUDE LONGITUDE ' dimensions{2}.name];
                 twodim_vtypes = IMOS.cellfun(@getIMOSType, twodim_vnames);
                 [twodim_vdata, failed_items] = IMOS.cellfun(get_var, twodim_vnames);
-
                 if ~isempty(failed_items)
                     OceanContour.warning_failed(failed_items, filename)
                 end
-
+                
+                try
+                    twodim_vdatamask = get_var('data_mask');
+                catch
+                    twodim_vdatamask = [];
+                end
+                has_data_mask = ~isempty(twodim_vdatamask);
+                meta.twodim_vdatamask = twodim_vdatamask;
+                
                 %TODO: Implement unit conversions monads.
                 variables = [...
                             IMOS.featuretype_variables('timeSeries'), ...
@@ -724,6 +755,10 @@ classdef OceanContour
                 dataset.variables = variables;
 
                 sample_data{k} = dataset;
+            end
+            
+            if is_netcdf
+                netcdf.close(ncid);
             end
         end
 
