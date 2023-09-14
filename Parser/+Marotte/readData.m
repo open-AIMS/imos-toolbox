@@ -6,7 +6,7 @@ function [data, xattrs] = readData(filename, deviceInfo)
 xattrs = containers.Map('KeyType','char','ValueType','any');
 xattrs('TIME') = struct('comment', 'TIME');
 
-is_csv = ~isempty(regexp(filename, '\.csv$'));
+is_csv = ~isempty(regexp(filename, '\.csv$','once'));
 
 magExt = '';
 if strcmpi(deviceInfo.magnetic_offset_compensation, 'NO')
