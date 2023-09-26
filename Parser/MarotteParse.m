@@ -76,7 +76,7 @@ filename = filename{1};
 is_csv = ~isempty(regexp(filename, '\.csv$'));
 metadata_filename = regexprep(filename, '(\.csv|\.mat)$', '.dev', 'ignorecase');
 
-sample_data = [];
+sample_data = struct();
 
 if ~exist(metadata_filename, 'file'), error('processing metadata file must have the same name as the data file with .csv'); end
 
@@ -150,7 +150,7 @@ end
 
 %%
 vNames = fieldnames(data);
-exclude_var_names = 'TIME';
+exclude_var_names = {'TIME', 'meta'};
 idx = ~ismember(vNames, exclude_var_names);
 vNames = vNames(idx);
 ts_vars = vNames;
@@ -177,7 +177,42 @@ for vind = indexes
     sample_data.variables{vind} = combineStructFields(sample_data.variables{vind},xattrs(iname));
 end
 
+% below code not ready for production
+add_resampled_velocity = meta.instrument_sample_interval < 10;
+if add_resampled_velocity & false
+    data_vel = Marotte.resample_raw_data(data, true); % will automatically resample to 10min interval
+
+    % turn sample data into a cell array
+    temp{1} = sample_data;
+    sample_data = temp;
+    clear temp;
+
+    dimensions = IMOS.gen_dimensions('timeSeries', 1, {'TIME'}, {@double}, data_vel.TIME);
+    idx = getVar(dimensions, 'TIME');
+    dimensions{idx}.data = data_vel.TIME;
+
+    vars0d = IMOS.featuretype_variables('timeSeries'); %basic vars from timeSeries
+    
+    coords1d = 'TIME LATITUDE LONGITUDE NOMINAL_DEPTH';
+    vars1d = IMOS.gen_variables(dimensions, ts_vars, {}, fields2cell(data_vel, ts_vars), 'coordinates', coords1d);
+
+    sample_data{2}.toolbox_input_file = sample_data{1}.toolbox_input_file;
+    meta_new = meta;
+    meta_new.instrument_sample_interval = mean(diff(data_vel.TIME*24*3600));
+    sample_data{2}.meta = meta_new;
+
+    sample_data{2}.dimensions = dimensions;
+    sample_data{2}.variables = [vars0d, vars1d];
+    
+    indexes = IMOS.find(sample_data{2}.variables, xattrs.keys);
+    for vind = indexes
+        iname = sample_data{2}.variables{vind}.name;
+        sample_data{2}.variables{vind} = combineStructFields(sample_data{2}.variables{vind}, xattrs(iname));
+    end
 end
+
+end
+
 
 
 
