@@ -89,7 +89,7 @@ function [returnVars, flagVal, commentText] = addFlagDialog( variable, kVar, def
     'Visible',     'on',...
     'MenuBar',     'none',...
     'Resize',      'off',...
-    'WindowStyle', 'Modal',...
+    'WindowStyle', 'normal',...
     'NumberTitle', 'off');
 
   % flag list
@@ -103,8 +103,10 @@ function [returnVars, flagVal, commentText] = addFlagDialog( variable, kVar, def
       'Value', listOpt);
   
   % create a panel for the list of variables
-  setPanel = uipanel(...
-      'BorderType', 'none');
+  setPanel = uipanel('Parent', f);
+  setPanel.BorderType = 'none';
+  setPanel.Scrollable = 'on';
+  setScrollPanel = attachScrollPanelTo(setPanel);
   
   % create a panel for the comment
   commentPanel = uipanel(...
@@ -118,14 +120,16 @@ function [returnVars, flagVal, commentText] = addFlagDialog( variable, kVar, def
   set(f,             'Units', 'normalized');
   set(optList,       'Units', 'normalized');
   set(setPanel,      'Units', 'normalized');
+  set(setScrollPanel,'Units', 'normalized');
   set(commentPanel,  'Units', 'normalized');
   set(cancelButton,  'Units', 'normalized');
   set(confirmButton, 'Units', 'normalized');
 
 %   set(f,             'Position', [0.34, 0.46, 0.28, 0.2]);
-  set(f,             'Position', [0.34, 0.46, 0.28, 0.4]);
+  set(f,             'Position', [0.2, 0.25, 0.75, 0.6]);
   set(optList,       'Position', [0.0,  0.9,  1.0,  0.1]);
-  set(setPanel,      'Position', [0.0,  0.5,  1.0,  0.4]);
+  %set(setPanel,      'Position', [0.0,  0.5,  1.0,  0.4]);
+  set(setScrollPanel, 'Position', [0.0,  0.5,  1.0,  0.4]);
   set(commentPanel,  'Position', [0.0,  0.1,  1.0,  0.4]);
   set(cancelButton,  'Position', [0.0,  0.0,  0.5,  0.1]);
   set(confirmButton, 'Position', [0.5,  0.0,  0.5,  0.1]);
@@ -141,8 +145,9 @@ function [returnVars, flagVal, commentText] = addFlagDialog( variable, kVar, def
       );
   
   nVars = length(kVars);
+  if false
   numRows = ceil(nVars / 2);
-  vHeight = 0.7 / numRows;
+  vHeight = min(0.7 / numRows, 0.1);
   varCheckboxes = nan(1, nVars);
   iVars = false(1, nVars);
   for k = 1:nVars
@@ -157,7 +162,7 @@ function [returnVars, flagVal, commentText] = addFlagDialog( variable, kVar, def
       % figure out vertical start position of this variable's row
       vStart = vHeight * mod(k, numRows);
       if vStart == 0, vStart = vHeight * numRows; end
-      vStart = 0.9 - vStart;
+      vStart = 0.95 - vStart;
       
       hStart = 0.15;
       
@@ -175,7 +180,72 @@ function [returnVars, flagVal, commentText] = addFlagDialog( variable, kVar, def
           'Position', pos ...
           );
   end
+  end
   
+  numCols = 3;
+  numRows = ceil(nVars / numCols);
+  vHeight = min(0.7 / numRows, 0.1);
+  hOrigin = 0.15;
+  hWidth = (1.0 - hOrigin)/numCols;
+
+%   for k = 1:nVars
+%       iRow = mod(k-1, numRows) + 1;
+%       iCol = div(k-1, numRows) + 1;
+%       disp([nameVars{k} '    k: ' num2str(k) ' iRow: ' num2str(iRow) ' iCol: ' num2str(iCol)]);
+%       hStart = hOrigin + hWidth*div(k-1, numRows);
+%       vStart = 0.975 - vHeight * (mod(k-1, numRows)+1);
+%       disp([hStart, vStart]);
+%   end
+  
+  varCheckboxes = nan(1, nVars);
+  iVars = false(1, nVars);
+  for k = 1:nVars
+       % default selected variable is the currently QC'd one
+      if strcmpi(nameVars{k}, variable{kVar}.name)
+          value = 1;
+          iVars(k) = true;
+      else
+          value = 0;
+      end
+      
+      % figure out vertical start position of this variable's row
+      vStart = 0.975 - vHeight * (mod(k-1, numRows)+1);
+      
+      % figure out horizontal start position of this variable's row
+      hStart = hOrigin + hWidth*div(k-1, numRows);
+      
+      pos = [hStart, vStart, hWidth, vHeight];
+      
+      varCheckboxes(k) = uicontrol(...
+          'Parent',   setPanel, ...
+          'Style',    'checkbox', ...
+          'String',   nameVars{k}, ...
+          'Value',    value, ...
+          'UserData', k, ...
+          'Units',    'normalized', ...
+          'Position', pos ...
+          );
+  end
+  
+  if false
+      for k = 1:nVars
+          % default selected variable is the currently QC'd one
+          if strcmpi(nameVars{k}, variable{kVar}.name)
+              value = 1;
+              iVars(k) = true;
+          else
+              value = 0;
+          end
+          
+          varCheckboxes(k) = uicontrol(...
+              'Parent',   setVbox, ...
+              'Style',    'checkbox', ...
+              'String',   nameVars{k}, ...
+              'Value',    value, ...
+              'UserData', k);
+      end
+  end
+
   set(varCheckboxes, 'Callback', @varCheckboxCallback);
 
   uicontrol(...
@@ -222,6 +292,7 @@ function [returnVars, flagVal, commentText] = addFlagDialog( variable, kVar, def
   set(f,             'Units', 'pixels');
   set(optList,       'Units', 'pixels');
   set(setPanel,      'Units', 'pixels');
+  set(setScrollPanel,      'Units', 'pixels');
   set(commentPanel,  'Units', 'pixels');
   set(cancelButton,  'Units', 'pixels');
   set(confirmButton, 'Units', 'pixels');

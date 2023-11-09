@@ -161,26 +161,34 @@ visiBadCb = uicontrol(...
 sidePanel = uipanel(...
     'Parent',     fig,...
     'BorderType', 'none');
+% sidePanel = uipanel('Parent', fig);
+% sidePanel.BorderType = 'none';
 
 % buttons panel
 butPanel = uipanel(...
     'Parent',     sidePanel,...
     'BorderType', 'none');
+% butPanel = uipanel('Parent', sidePanel);
+% butPanel.BorderType = 'none';
 
 % state buttons
 lenStates = length(states);
-stateButtons = nan(lenStates, 1);
+%stateButtons = nan(lenStates, 1);
+stateButtons = gobjects(lenStates, 1);
 for k = 1:lenStates
     stateButtons(k) = uicontrol(...
         'Parent', butPanel,...
         'Style',  'pushbutton',...
         'String', states{k});
+    %     stateButtons(k) = uibutton(butPanel, 'push',...
+    %         'Text', states{k});
 end
 
 % variable selection panel - created in createVarPanel
 varPanel = uipanel(...
     'Parent',     sidePanel,...
     'BorderType', 'none');
+varScrollPanel = attachScrollPanelTo(varPanel);
 
 % main display
 mainPanel = uipanel(...
@@ -194,6 +202,7 @@ set(fig,              'Units', 'normalized');
 set(sidePanel,        'Units', 'normalized');
 set(mainPanel,        'Units', 'normalized');
 set(butPanel,         'Units', 'normalized');
+set(varScrollPanel,   'Units', 'normalized');
 set(varPanel,         'Units', 'normalized');
 set(sampleMenu,       'Units', 'normalized');
 set(graphMenu,        'Units', 'normalized');
@@ -228,8 +237,8 @@ set(visiFlagCb,         'Position', posUi2(fig, 100, 100, 11:15,  76:100, 0));
 set(visiBadCb,          'Position', posUi2(fig, 100, 100, 11:15,  51:75,  0));
 
 % varPanel and butPanel are positioned relative to sidePanel
-set(butPanel, 'Position', posUi2(sidePanel, 10, 1, 1:5,  1, 0));
-set(varPanel, 'Position', posUi2(sidePanel, 10, 1, 6:10, 1, 0));
+set(butPanel, 'Position', posUi2(sidePanel, 10, 1, 1:3,  1, 0));
+set(varScrollPanel, 'Position', posUi2(sidePanel, 10, 1, 4:10, 1, 0));
 
 % set state buttons position relative to butPanel
 n = length(stateButtons);
@@ -1065,6 +1074,9 @@ set(hHelpWiki, 'callBack', @openWikiPage);
             case 'timeSeries'
                 % we don't want to plot TIMESERIES, PROFILE, TRAJECTORY, LATITUDE, LONGITUDE, NOMINAL_DEPTH
                 p = getVar(sam.variables, 'NOMINAL_DEPTH');
+                if p == 0 
+                    p = getVar(sam.variables, 'LONGITUDE');
+                end
         end
         
         % create checkboxes for new data set. The order in which the checkboxes
