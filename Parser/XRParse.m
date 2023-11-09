@@ -1,4 +1,4 @@
-function sample_data = XRParse_local( filename, mode )
+function sample_data = XRParse( filename, mode )
 %XRPARSE Parses a data file retrieved from an RBR XR420 or XR620 depth
 % logger.
 %
