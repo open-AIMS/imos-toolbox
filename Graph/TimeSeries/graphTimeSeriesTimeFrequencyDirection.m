@@ -1,4 +1,4 @@
-function [h labels] = graphTimeSeriesTimeFrequencyDirection( ax, sample_data, var, color, xTickProp )
+function [h labels] = graphTimeSeriesTimeFrequencyDirection( ax, sample_data, varname, color, xTickProp )
 %GRAPHTIMESERIESTIMEFREQUENCYDIRECTION Plots the given data using pcolor.
 %
 % This function is used for plotting time/frequency/direction data for one 
@@ -9,7 +9,7 @@ function [h labels] = graphTimeSeriesTimeFrequencyDirection( ax, sample_data, va
 % Inputs:
 %   ax          - Parent axis.
 %   sample_data - The data set.
-%   var         - The variable to plot.
+%   varname         - The variable to plot.
 %   color       - Not used here.
 %   xTickProp   - XTick and XTickLabel properties.
 %
@@ -41,23 +41,23 @@ narginchk(5, 5);
 
 if ~ishandle(ax),          error('ax must be a graphics handle'); end
 if ~isstruct(sample_data), error('sample_data must be a struct'); end
-if ~isnumeric(var),        error('var must be a numeric');        end
+if ~isnumeric(varname),        error('var must be a numeric');        end
 
-[h, labels] = polarPcolor(ax, sample_data, var);
+[h, labels] = polarPcolor(ax, sample_data, varname);
 
 end
 
-function [h, labels] = polarPcolor(ax, sample_data, var)
+function [h, labels] = polarPcolor(ax, sample_data, varname)
 
 iTimeDim = getVar(sample_data.dimensions, 'TIME');
-freq = sample_data.variables{var}.dimensions(2);
-dir  = sample_data.variables{var}.dimensions(3);
+freq = sample_data.variables{varname}.dimensions(2);
+dir  = sample_data.variables{varname}.dimensions(3);
 
 timeData  = sample_data.dimensions{iTimeDim}.data;
 dirData   = sample_data.dimensions{dir}.data;
 freqData  = sample_data.dimensions{freq}.data;
 
-var = sample_data.variables{var};
+var = sample_data.variables{varname};
 
 visiBadCbh = findobj('Tag', 'visiBadCheckBox');
 isBadHidden = get(visiBadCbh, 'value');
@@ -73,14 +73,14 @@ if isBadHidden
     var.data(~iGood) = NaN;
 end
 
-varCheckbox = findobj('Tag', ['checkbox' sample_data.variables{var}.name]);
+varCheckbox = findobj('Tag', ['checkbox' var.name]);
 iTime = get(varCheckbox, 'userData');
 if isempty(iTime)
     % we choose an arbitrary time to plot
     iTime = 1;
 end
 
-myVar = sample_data.variables{var};
+myVar = var;
 
 nFreq = length(freqData);
 nDir = length(dirData);
@@ -196,7 +196,7 @@ uicontrol(mainPanel, ...
     'SliderStep',   [1/(length(timeData)-1) 10/100], ...
     'Units',        'normalized', ...
     'Position',     posUi2(mainPanel, 50, 4, 49, 2:3, 0), ...
-    'Callback',     {@changeITime,varCheckbox,ax,sample_data,var});
+    'Callback',     {@changeITime,varCheckbox,ax,sample_data,varname});
 uicontrol(mainPanel, ...
     'Style'     ,'text', ...
     'Units'     , 'normalized', ...
@@ -226,7 +226,7 @@ labels = {};
 
 end
 
-function changeITime(hObj,event,varCheckbox,ax, sample_data, var) %#ok<INUSL>
+function changeITime(hObj,event,varCheckbox,ax, sample_data, varname) %#ok<INUSL>
     
 iTime = round(get(hObj, 'Value'));
 set(varCheckbox, 'userData', iTime);
@@ -235,16 +235,16 @@ set(varCheckbox, 'userData', iTime);
 delete(ax);
 
 lenVar = length(sample_data.variables);
-ax = subplot(lenVar, 1, var, ...
+ax = subplot(lenVar, 1, varname, ...
     'Parent', findobj('Tag', 'mainPanel'), ...
     'XGrid',  'on', ...
     'Color',  'none', ...
     'YGrid',  'on', ...
     'Layer',  'top');
 
-polarPcolor(ax, sample_data, var);
+polarPcolor(ax, sample_data, varname);
 if sample_data.meta.level == 1
-    flagTimeSeriesTimeFrequencyDirection( ax, sample_data, var );
+    flagTimeSeriesTimeFrequencyDirection( ax, sample_data, varname );
 end
 
 end
