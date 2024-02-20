@@ -33,7 +33,7 @@ include_ppp = false([nSample, 1]); % included via ppp
 existed_ppp = false([nSample, 1]);
 include = false([nSample, 1]); % include via user select dialog
 
-offsetFile = ['Preprocessing' filesep 'timeOffsetPP.txt'];
+offsetFile = ['Preprocessing' filesep 'correctNightParPP.txt'];
 currentPProutine = mfilename;
 
 % read previous correctNightParPP values if any
@@ -59,7 +59,7 @@ for k = 1:nSample
         include(k) = false;
     end
     
-    if ~isnan(timezone_offsets(k))
+    if isnan(timezone_offsets(k))
         % given my confusion about local time zones depending on source
         % file, this method is often the best
         lon =  sam.geospatial_lon_max;
