@@ -1,5 +1,21 @@
 function deviceInfo = parse_inf_file( deviceInfo, inf_filename )
 % parse_inf_file parse WLR/RCM info file 
+%
+% Text file with some infomation required for processing that isn't
+% available in the instrument raw data file. In the format of key=value
+%
+% Currently supported keys are
+% instrument_model : instrument model 'RCM4', 'RCM5', 'RCM7', 'WLR5', 'WLR7'
+% start_time : time of first sample in format 'YYYY/MM/DDTHH:MM'
+% sample_interval : in seconds
+% revolutions_per_count : required for 'RCM4', 'RCM5'
+% guard_kit_fitted : 0==no, 1==yes, required for 'RCM4' (maybe 'RCM5'?)
+% temperature_range : for 'RCM7' what was the selected 
+%   temperature range, allowed valued 'TEMP_LOW', 'TEMP_HIGH', 'TEMP_WIDE'
+
+%
+% Author:       Simon Spagnol <s.spagnol@aims.gov.au>
+%
 
 %% open info file, get everything from it as lines
 %
@@ -7,7 +23,8 @@ function deviceInfo = parse_inf_file( deviceInfo, inf_filename )
 % instrument_model=WLR7 # model, uppercase
 % start_time=1990/05/03T13:00 # time of first sample in data file
 % sample_interval=3600.0 # sample interval in seconds
-%
+
+
 fid     = -1;
 all_lines = {};
 try
@@ -71,7 +88,7 @@ if ~isempty(ind)
     deviceInfo.guard_kit_fitted = str2double(strtrim(tkns{ind}{1}{1}));
 end
 
-% only for RCM4 and RCM7
+% only for RCM7
 pat = 'temperature_range=(\w+)';
 tkns = regexp(all_lines, pat, 'tokens');
 ind = find(~cellfun(@isempty, tkns));

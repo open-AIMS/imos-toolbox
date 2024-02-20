@@ -1,4 +1,9 @@
 function deviceInfo = read_new_style_cal( lines, deviceInfo )
+% read_new_style_cal Read new style from dat_proc fortran code collection.
+
+%
+% Author:       Simon Spagnol <s.spagnol@aims.gov.au>
+%
 
 % new style cal file examples below (note when read in all empty lines
 % are skipped). Fortran format for channel list is

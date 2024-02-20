@@ -12,6 +12,7 @@ function [data, xattrs] = readData(dat_filename, deviceInfo)
 %
 % Outputs:
 %   sample_data - Struct containing sample data.
+
 %
 % Author:       Simon Spagnol <s.spagnol@aims.gov.au>
 %

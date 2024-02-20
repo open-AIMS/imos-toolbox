@@ -1,5 +1,5 @@
-function sample_data = AanderaaWLRParse( filename, mode )
-%AanderaaWLRParse Parses either .raw data file (with associcated
+function sample_data = AanderaaParse( filename, mode )
+%AanderaaParse Parses either .raw data file (with associcated
 % metafiles of .cal (calibration coeffs) and .inf (basic time info etc)
 %
 % This function is able to read in a .csv data file produced by conversion

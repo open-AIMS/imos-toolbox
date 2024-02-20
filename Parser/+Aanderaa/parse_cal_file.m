@@ -2,6 +2,10 @@ function deviceInfo = parse_cal_file( deviceInfo, cal_filename )
 % parse_cal_file read contents of a calibration file and parse depending on
 % instrument type
 
+%
+% Author:       Simon Spagnol <s.spagnol@aims.gov.au>
+%
+
 %% open cal file, get everything from it as lines
 fid     = -1;
 all_lines = {};

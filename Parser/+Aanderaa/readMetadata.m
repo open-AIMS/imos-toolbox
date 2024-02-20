@@ -9,19 +9,20 @@ function deviceInfo = readMetadata( cal_filename, inf_filename )
 %
 % Outputs:
 %   deviceInfo  - struct containing fields
-%               'serial_number'
-%               'instrument_model' : text string, eg WLR7
-%               'start_time': time of first sample in
+%       'serial_number'
+%       'instrument_model' : text string, eg WLR7
+%       'start_time': time of first sample in
 %                   YYYY/MM/DDTHH:MM format
-%               'sample_interval': in seconds
-%               'coeff' : coefficients, matrix
-%               'coeff_order' : coefficient ordering
-% 'is_new_style_cal_file': is calibration file new type
-% 'cal_serial_number': calibration file serial number
-% 'cal_start_date': start date of calibration
-% 'cal_end_date': end date of calibration, old style
-% 'jflag': should be 2 for WLR with a TEMP sensor?, old style
-% 'nzero': ?, oldstyle
+%       'sample_interval': in seconds
+%       'coeff' : coefficients, matrix
+%       'is_new_style_cal_file': is calibration file new type
+%       'cal_serial_number': calibration file serial number
+%       'cal_start_date': start date of calibration
+%       'cal_end_date': end date of calibration, old style
+%       'jflag': should be 2 for WLR with a TEMP sensor?, old style
+%       'nzero': ?, oldstyle
+%
+
 %
 % Author:       Simon Spagnol <s.spagnol@aims.gov.au>
 %
