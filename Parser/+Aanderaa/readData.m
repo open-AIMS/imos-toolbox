@@ -73,15 +73,14 @@ switch deviceInfo.instrument_model
 end
 
 % data files are comparatively small nowadays, so just read entire file
+% have allowed user to add comments after a '#'
 fid     = -1;
 lines = {};
 try
     fid = fopen(dat_filename, 'rt');
     if fid == -1, error(['couldn''t open ' dat_filename 'for reading']); end
-    
     % read in the data
-    lines = textscan(fid, '%s', 'Delimiter', '\r\n', 'WhiteSpace', '', 'CommentStyle','***', 'MultipleDelimsAsOne', false);
-    %lines = textscan(fid, '%s', 'CommentStyle','#');
+    lines = textscan(fid, '%s', 'Delimiter', '\r\n', 'WhiteSpace', '', 'CommentStyle','#', 'MultipleDelimsAsOne', false);
     lines = lines{1};
     fclose(fid);
 catch e
@@ -89,8 +88,15 @@ catch e
     rethrow(e);
 end
 
+% some older files might have already been hand edited with some info
+% time information added between '***' markers, treet these as comments as
+% well
+lines =  textscan(strjoin(lines, '\n'), '%s', 'Delimiter', '\r\n', 'WhiteSpace', '', 'CommentStyle','***', 'MultipleDelimsAsOne', false);
+lines = lines{1};
+
 % common on tape reads to have possibly bad reads, if data contains
-% these only consider data up until that point
+% these only consider data up until that point. An example might be
+% '0424 0752 0527 0006 0000* 0424 0752 0517 0006 0000* 0424 0752 0527 0006 0000'
 tkns = regexp(lines, '\d+\*', 'match');
 ind = find(~cellfun(@isempty, tkns));
 if ~isempty(ind)
