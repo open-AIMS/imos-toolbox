@@ -185,7 +185,7 @@ if isfield(deviceInfo.coeff, vname)
         raw_data = idata(:, ind);
     end
     data.(vname) = coeff(1) + coeff(2)*raw_data + coeff(3)*power(raw_data, 2) + coeff(4)*power(raw_data, 3);
-    data.(vname) = data.(vname) * 0.68948; % convert psia to dbar
+    data.(vname) = data.(vname) * 0.6894757; % convert psia to dbar
     xattrs('PRES') = struct('units', 'dbar');
 end
 
