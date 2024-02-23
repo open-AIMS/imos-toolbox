@@ -58,7 +58,16 @@ ind = find(~cellfun(@isempty, tkns));
 if isempty(ind)
     error('Inf file must have start_time value.');
 else
-    deviceInfo.start_time = strtrim(tkns{ind}{1}{1});
+    start_time = '';
+    str = strtrim(tkns{ind}{1}{1});
+    if ~isempty(regexp(str, '\d{8}T\d{4}', 'match'))
+        start_time = datestr(datenum(str, 'yyyymmddTHHMM'), 'yyyy/mm/ddTHH:MM');
+    elseif ~isempty(regexp(str, '\d{4}\/\d{2}\/\d{2}T\d{2}:\d{2}', 'match'))
+        start_time = str;
+    else
+        error('parse_inf_file : unrecognized start_time format.');
+    end
+    deviceInfo.start_time = start_time;
 end
 
 pat = 'sample_interval=(\w+)';
