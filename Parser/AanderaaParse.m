@@ -80,8 +80,6 @@ end
 deviceInfo = Aanderaa.readMetadata(cal_filename, inf_filename);
 deviceInfo.toolbox_input_file = filename;
 
-deviceInfo = Aanderaa.parse_cal_file(deviceInfo, cal_filename);
-
 [data, xattrs] = Aanderaa.readData(filename, deviceInfo);
 
 sample_data = Aanderaa.construct_sample_data( deviceInfo, data, xattrs, mode );

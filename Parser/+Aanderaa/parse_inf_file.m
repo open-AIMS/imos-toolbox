@@ -52,6 +52,15 @@ else
     deviceInfo.instrument_model = strtrim(tkns{ind}{1}{1});
 end
 
+pat = 'serial_number=(\w+)';
+tkns = regexp(all_lines, pat, 'tokens');
+ind = find(~cellfun(@isempty, tkns));
+if isempty(ind)
+    error('Inf file must have instrument_model value.');
+else
+    deviceInfo.instrument_serial_number = strtrim(tkns{ind}{1}{1});
+end
+
 pat = 'start_time=(\S+)';
 tkns = regexp(all_lines, pat, 'tokens');
 ind = find(~cellfun(@isempty, tkns));
