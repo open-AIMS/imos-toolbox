@@ -77,7 +77,7 @@ if ~is_eng && ~exist(inf_filename, 'file')
 end
 
 % read in calibration coefficients and some basic instrument info
-deviceInfo = Aanderaa.readMetadata(cal_filename, inf_filename, '');
+deviceInfo = Aanderaa.readMetadata(cal_filename, inf_filename);
 deviceInfo.toolbox_input_file = filename;
 
 deviceInfo = Aanderaa.parse_cal_file(deviceInfo, cal_filename);
