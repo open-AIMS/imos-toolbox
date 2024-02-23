@@ -61,6 +61,12 @@ catch e
     rethrow(e);
 end
 
+hex_filename = regexprep(filename, '\.tid$', '.hex', 'ignorecase');
+header = struct();
+if exist(hex_filename, 'file')
+    header = SBE.parse_sbe26_hex_header(hex_filename);
+end
+        
 Y   = data{3};
 M   = data{1};
 D   = data{2};
@@ -85,6 +91,14 @@ sample_data.meta.instrument_model = 'SBE26';
 sample_data.meta.instrument_firmware = '';
 
 sample_data.meta.instrument_serial_no = '';
+
+if isfield(header, 'instrument_serial_number')
+    sample_data.meta.instrument_serial_no = header.instrument_serial_number;
+    sample_data.meta.instrument_firmware = header.instrument_firmware;
+    sample_data.meta.pressure_sensor_serial_number = header.pressure_sensor_serial_number;
+    sample_data.meta.pressure_sensor_serial_range = header.pressure_sensor_serial_range;
+    sample_data.meta.sample_duration = header.sample_duration;
+end
 
 sample_data.meta.instrument_sample_interval = median(diff(time*24*3600));
 
