@@ -144,7 +144,7 @@ end
 nsamples = numel(datalines);
 
 vname = 'TIME';
-data.(vname) = datenum(deviceInfo.start_time, 'YYYY/MM/DDThh:mm') + ((0:nsamples-1)*deviceInfo.sample_interval)/86400;
+data.(vname) = datenum(deviceInfo.start_time, 'yyyy/mm/ddHH:MM') + ((0:nsamples-1)*deviceInfo.sample_interval)/86400;
 data.(vname) = data.(vname)(:);
 xattrs('TIME') = struct('comment', 'TIME');
     

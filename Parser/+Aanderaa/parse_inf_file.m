@@ -6,7 +6,7 @@ function deviceInfo = parse_inf_file( deviceInfo, inf_filename )
 %
 % Currently supported keys are
 % instrument_model : instrument model 'RCM4', 'RCM5', 'RCM7', 'WLR5', 'WLR7'
-% start_time : time of first sample in format 'YYYY/MM/DDTHH:MM'
+% start_time : time of first sample in format 'yyyy/mm/ddTHH:MM' or 'yyyymmddTHHMM'
 % sample_interval : in seconds
 % revolutions_per_count : required for 'RCM4', 'RCM5'
 % guard_kit_fitted : 0==no, 1==yes, required for 'RCM4' (maybe 'RCM5'?)

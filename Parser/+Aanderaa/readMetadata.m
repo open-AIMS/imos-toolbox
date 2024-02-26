@@ -12,7 +12,7 @@ function deviceInfo = readMetadata( cal_filename, inf_filename )
 %       'serial_number'
 %       'instrument_model' : text string, eg WLR7
 %       'start_time': time of first sample in
-%                   YYYY/MM/DDTHH:MM format
+%       	'yyyy/mm/ddTHH:MM' or 'yyyymmddTHHMM' format
 %       'sample_interval': in seconds
 %       'coeff' : coefficients, matrix
 %       'is_new_style_cal_file': is calibration file new type
