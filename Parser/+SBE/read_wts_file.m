@@ -149,6 +149,9 @@ end
 
 % convert to matlab serial date
 data.TIME = datenum(2000, 1, 1) + data.TIME/86400;
+xattrs('TIME') = struct('seconds_to_middle_of_measurement', header.wave_burst_duration/2);
+comment_str = ['Time stamp corresponds to the start of the measurement, which lasts ' num2str(header.wave_burst_duration) ' seconds).'];
+xattrs('TIME') = struct('comment', comment_str);
 
 xattrs('integration_time') = struct('units', 'second');
 xattrs('water_depth') = struct('units', 'm');
