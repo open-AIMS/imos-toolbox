@@ -26,17 +26,17 @@ catch e
     rethrow(e);
 end
         
-Y   = rawdata{3};
-M   = rawdata{1};
-D   = rawdata{2};
-H   = rawdata{4};
-MN  = rawdata{5};
-S   = rawdata{6};
+iyear   = rawdata{3};
+imonth   = rawdata{1};
+iday   = rawdata{2};
+ihour   = rawdata{4};
+iminute  = rawdata{5};
+isecond   = rawdata{6};
 
 data = struct();
 xattrs = containers.Map('KeyType','char','ValueType','any');
 
-data.TIME        = datenum(Y, M, D, H, MN+2, S);
+data.TIME        = datenum(iyear, imonth, iday, ihour, iminute, isecond);
 if isfield(header, 'instrument_burst_duration')
     comment_str = ['Time stamp corresponds to the start of the measurement, which lasts ' num2str(header.instrument_burst_duration) ' seconds).'];
     xattrs('TIME') = struct('seconds_to_middle_of_measurement', header.instrument_burst_duration/2.0);
