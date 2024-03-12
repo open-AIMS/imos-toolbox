@@ -67,6 +67,11 @@ function sample_data = SBE19Parse( filename, mode )
   instHeader = parseInstrumentHeader(instHeaderLines, mode);
   procHeader = parseProcessedHeader( procHeaderLines);
   
+  % handle SBE9 serial numbers
+  if strcmp(instHeader.instrument_model, 'SBE9')
+     instHeader = SBE.SBE9_get_instrument_serial_numbers(instHeader, instHeaderLines, procHeaderLines);
+  end
+  
   % use the appropriate subfunction to read in the data
   % assume that anything with a suffix not equal to .hex
   % is a .cnv file
@@ -682,6 +687,7 @@ function header = parseProcessedHeader(headerLines)
       continue; 
     end
   end
+
 end
 
 function time = genTimestamps(instHeader, procHeader, data)
