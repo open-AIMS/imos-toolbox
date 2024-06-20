@@ -467,8 +467,7 @@ classdef OceanContourWaves
                 data_metadata = nc_flat(info.Groups(2).Groups, false);
                 
                 ncid = netcdf.open(filename);
-                %c = onCleanup(@(ncid)netcdf.close(ncid));
-                %c = onCleanup(@(ncid)onCleanup_close_netcdf(ncid));
+				c = onCleanup(@()netcdf_close_on_cleanup(ncid));
                 root_groups = netcdf.inqGrps(ncid);
                 data_group = root_groups(2);
                 
@@ -842,6 +841,14 @@ classdef OceanContourWaves
             
             if is_netcdf
                 netcdf.close(ncid);
+            end
+			
+			function netcdf_close_on_cleanup(ncid)
+                % if netcdf file is still open on an error close it
+                try
+                    netcdf.close(ncid);
+                catch
+                end
             end
         end
         

@@ -518,7 +518,7 @@ classdef OceanContour
                 data_metadata = nc_flat(info.Groups(2).Groups, false);
 
                 ncid = netcdf.open(filename);
-                c = onCleanup(@()netcdf.close(ncid));
+                c = onCleanup(@()netcdf_close_on_cleanup(ncid));
                 root_groups = netcdf.inqGrps(ncid);
                 data_group = root_groups(2);
 
@@ -812,6 +812,14 @@ classdef OceanContour
             
             if is_netcdf
                 netcdf.close(ncid);
+            end
+
+            function netcdf_close_on_cleanup(ncid)
+                % if netcdf file is still open on an error close it
+                try
+                    netcdf.close(ncid);
+                catch
+                end
             end
         end
 
