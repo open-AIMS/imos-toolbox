@@ -141,10 +141,16 @@ for k = 1:length(sample_data)
         interpFunction = griddedInterpolant([0 1], [0 0],'linear','none');
         mapped_beam_data = NaN(size(all_beam_vars),arrtype);
 
+        is_monotonic = arrayfun(@(i) all(diff(dvar(i, :)) > 0), 1:nSamples);
         for i = 1:nSamples
-            interpFunction.GridVectors = {dvar(i, :), Ndim};
-            interpFunction.Values = squeeze(all_beam_vars(i, :, :));
-            mapped_beam_data(i, :, :) = interpFunction(new_pos);
+            % if you have an event (eg cyclone knockdown of mooring) which
+            % produces extreme pitch values, mapped_beam_data stays
+            % as NaN for that sample
+            if is_monotonic(i)
+                interpFunction.GridVectors = {dvar(i, :), Ndim};
+                interpFunction.Values = squeeze(all_beam_vars(i, :, :));
+                mapped_beam_data(i, :, :) = interpFunction(new_pos);
+            end
         end
         %compat: follow previous hack/"RDI hack",
         %where first bin value is restore to the original bin value.
