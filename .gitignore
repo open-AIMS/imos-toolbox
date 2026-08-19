@@ -18,3 +18,10 @@ dist/*
 *.nc
 tmp/test_*
 setup_imostoolbox_*.m
+Geomag/sample_coords.txt
+/Geomag
+/Parser
+Parser/instruments.txt
+Parser/readECOraw.m
+Parser/SBE26ParseWcond.m
+toolboxProperties.txt

@@ -184,7 +184,7 @@ sample_data.dimensions = {};
 sample_data.variables  = {};
 
 sample_data.toolbox_input_file        = filename;
-sample_data.meta.instrument_make      = 'WET Labs';
+sample_data.meta.instrument_make      = 'WETLabs';
 sample_data.meta.instrument_model     = deviceInfo.instrument;
 sample_data.meta.instrument_serial_no = deviceInfo.serial;
 sample_data.meta.featureType          = mode;
